@@ -25,8 +25,8 @@
     --border2: #edf1f7;
     --shadow: rgba(26,51,88,0.08);
 
-    --ink: #111827;
-    --ink2: #1f2937;
+    --ink: #0d0d0d;
+    --ink2: #1a1a1a;
     --ink3: #6b7280;
   }
 
@@ -34,6 +34,7 @@
 
   body {
     font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 15px;
     background: var(--bg);
     color: var(--ink);
     height: 100vh;
@@ -151,7 +152,7 @@
     color: var(--ink);
   }
 
-  .panel-sub { font-size: 13px; color: var(--ink3); }
+  .panel-sub { font-size: 14px; color: var(--ink3); }
 
   /* ===== CARDS ===== */
   .card {
@@ -299,8 +300,8 @@
     background: none;
     border: none;
     font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 13px;
-    color: var(--ink2);
+    font-size: 15px;
+    color: var(--ink);
     resize: none;
     outline: none;
     line-height: 1.8;
@@ -341,7 +342,7 @@
   }
 
   .freeform-col-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-  .dot-todo { background: var(--ink3); }
+  .dot-todo { background: var(--red); }
   .dot-progress { background: var(--accent); }
   .dot-done { background: var(--accent3); }
 
@@ -358,7 +359,7 @@
     background: none;
     border: none;
     font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 13px;
+    font-size: 15px;
     color: var(--ink);
     outline: none;
     padding: 16px 18px;
@@ -551,8 +552,8 @@
     border: none;
     background: none;
     font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 14px;
-    color: var(--ink2);
+    font-size: 15px;
+    color: var(--ink);
     line-height: 1.8;
     resize: none;
     min-height: 200px;
@@ -740,7 +741,7 @@
     border: none;
     background: none;
     font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 13px;
+    font-size: 15px;
     color: var(--ink);
     line-height: 1.9;
     outline: none;
@@ -1946,28 +1947,17 @@ function updateDeadline(id, field, value) {
 
 const AUTO_PREFIXES = ['• ', '- ', '□ ', '✓ ', '✗ '];
 
-function getCurrentLineText(el) {
+function getCaretLineText() {
   const sel = window.getSelection();
-  if (!sel.rangeCount) return { line: '', prefix: null, numbered: false, num: 0 };
-  const range = sel.getRangeAt(0);
-  // Walk up to find the text node / block
-  let node = range.startContainer;
-  let offset = range.startOffset;
-  // Get text of current line up to cursor
-  let lineText = '';
-  if (node.nodeType === Node.TEXT_NODE) {
-    lineText = node.textContent.substring(0, offset);
-    // Also prepend text of same div-line before this node
-    let sib = node.previousSibling;
-    while (sib) {
-      if (sib.nodeName === 'BR') break;
-      lineText = (sib.textContent || '') + lineText;
-      sib = sib.previousSibling;
-    }
-  } else {
-    lineText = el.innerText.split('\n')[0] || '';
-  }
-  // Check numbered
+  if (!sel || !sel.rangeCount) return { line: '', prefix: null, numbered: false, num: 0 };
+  const range = sel.getRangeAt(0).cloneRange();
+  range.collapse(true);
+  // Expand range to start of line
+  range.setStart(range.startContainer, 0);
+  const textBeforeCursor = range.toString();
+  // Get just the last line (after last newline)
+  const lines = textBeforeCursor.split('\n');
+  const lineText = lines[lines.length - 1];
   const numMatch = lineText.match(/^(\d+)\.\s/);
   if (numMatch) return { line: lineText, prefix: null, numbered: true, num: parseInt(numMatch[1]) };
   for (const p of AUTO_PREFIXES) {
@@ -1978,26 +1968,23 @@ function getCurrentLineText(el) {
 
 function handleSmartEnter(e, el, saveCallback) {
   if (e.key !== 'Enter') return;
-  const info = getCurrentLineText(el);
+  const info = getCaretLineText();
   if (!info.prefix && !info.numbered) return;
-
   e.preventDefault();
+
   const contentAfterPrefix = info.numbered
     ? info.line.replace(/^\d+\.\s/, '')
-    : info.line.substring(info.prefix.length);
+    : info.line.substring((info.prefix || '').length);
 
   if (contentAfterPrefix.trim() === '') {
-    // Empty list line: remove prefix, stop list
-    document.execCommand('selectAll', false, null);
-    // Instead just delete back to start of line prefix
-    for (let i = 0; i < (info.prefix || (info.num + '. ').length).length || 0; i++) {
-      document.execCommand('delete', false, null);
-    }
-    // Simpler: just insert newline with no prefix
-    document.execCommand('insertHTML', false, '<br>');
+    // Empty prefixed line — stop the list, just go to new line
+    const prefixLen = info.numbered ? (info.num + '. ').length : info.prefix.length;
+    for (let i = 0; i < prefixLen; i++) document.execCommand('delete', false, null);
+    document.execCommand('insertParagraph', false, null);
   } else {
-    let nextPrefix = info.numbered ? (info.num + 1) + '. ' : info.prefix;
-    document.execCommand('insertHTML', false, '<br>' + nextPrefix);
+    const nextPrefix = info.numbered ? (info.num + 1) + '. ' : info.prefix;
+    document.execCommand('insertParagraph', false, null);
+    document.execCommand('insertText', false, nextPrefix);
   }
   if (saveCallback) saveCallback();
 }
