@@ -2163,28 +2163,65 @@ init();
 </script>
 
 <!-- Google Identity Services -->
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
 const CAL_CLIENT_ID = '676542278417-bb048oic0ejdjc13emrpu9i33qunnh9t.apps.googleusercontent.com';
+const CAL_REDIRECT_URI = 'https://mohanadalyousefy.github.io/Mo-studio/MoStudio.html';
 const CAL_SCOPE = 'https://www.googleapis.com/auth/calendar';
+
 let calAccessToken = null;
 let calCurrentDate = new Date();
 let calEvents = [];
-let calColors = ['#3b82f6','#10b981','#ef4444','#f59e0b','#8b5cf6','#ec4899'];
 
-// ===== AUTH =====
+// ===== AUTH via redirect =====
 function calSignIn() {
-  const client = google.accounts.oauth2.initTokenClient({
+  const state = Math.random().toString(36).substring(2);
+  localStorage.setItem('cal_oauth_state', state);
+  localStorage.setItem('cal_return_tab', 'calendar');
+
+  const params = new URLSearchParams({
     client_id: CAL_CLIENT_ID,
+    redirect_uri: CAL_REDIRECT_URI,
+    response_type: 'token',
     scope: CAL_SCOPE,
-    callback: (resp) => {
-      if (resp.error) { alert('Sign-in failed: ' + resp.error); return; }
-      calAccessToken = resp.access_token;
-      localStorage.setItem('cal_token', resp.access_token);
-      calOnSignedIn();
-    }
+    state: state,
+    include_granted_scopes: 'true'
   });
-  client.requestAccessToken();
+
+  window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
+}
+
+function calHandleRedirect() {
+  // Check if we're returning from OAuth
+  const hash = window.location.hash.substring(1);
+  if (!hash) return;
+  const params = new URLSearchParams(hash);
+  const token = params.get('access_token');
+  const state = params.get('state');
+  const savedState = localStorage.getItem('cal_oauth_state');
+
+  if (token && state && state === savedState) {
+    localStorage.removeItem('cal_oauth_state');
+    calAccessToken = token;
+    localStorage.setItem('cal_token', token);
+    // Clean URL
+    history.replaceState(null, '', window.location.pathname);
+    calOnSignedIn();
+    // Switch to calendar tab
+    switchTab('calendar');
+  }
+}
+
+function calTryRestore() {
+  const saved = localStorage.getItem('cal_token');
+  if (saved) {
+    calAccessToken = saved;
+    fetch('https://www.googleapis.com/calendar/v3/calendars/primary?fields=id', {
+      headers: { Authorization: 'Bearer ' + calAccessToken }
+    }).then(r => {
+      if (r.ok) calOnSignedIn();
+      else { localStorage.removeItem('cal_token'); calAccessToken = null; }
+    }).catch(() => { localStorage.removeItem('cal_token'); calAccessToken = null; });
+  }
 }
 
 function calSignOut() {
@@ -2195,8 +2232,8 @@ function calSignOut() {
   const v = document.getElementById('cal-view');
   v.style.display = 'none';
   document.getElementById('cal-signout-btn').style.display = 'none';
-  document.getElementById('cal-upcoming-dash').innerHTML = '<div style="color:var(--ink3);font-size:13px;">Connect calendar to see events.</div>';
   document.getElementById('cal-dash-card').style.display = 'none';
+  document.getElementById('cal-upcoming-dash').innerHTML = '<div style="color:var(--ink3);font-size:13px;">Connect calendar to see events.</div>';
 }
 
 function calOnSignedIn() {
@@ -2209,30 +2246,13 @@ function calOnSignedIn() {
   v.style.gap = '16px';
   document.getElementById('cal-signout-btn').style.display = 'inline';
   document.getElementById('cal-dash-card').style.display = 'block';
-  // Set today's date in new event form
   document.getElementById('cal-new-date').valueAsDate = new Date();
   calFetchEvents();
-}
-
-// Try restore token on load
-function calTryRestore() {
-  const saved = localStorage.getItem('cal_token');
-  if (saved) {
-    calAccessToken = saved;
-    // Verify it's still valid with a quick fetch
-    fetch('https://www.googleapis.com/calendar/v3/calendars/primary?fields=id', {
-      headers: { Authorization: 'Bearer ' + calAccessToken }
-    }).then(r => {
-      if (r.ok) calOnSignedIn();
-      else { localStorage.removeItem('cal_token'); calAccessToken = null; }
-    }).catch(() => { localStorage.removeItem('cal_token'); calAccessToken = null; });
-  }
 }
 
 // ===== FETCH EVENTS =====
 async function calFetchEvents() {
   if (!calAccessToken) return;
-  const now = new Date();
   const start = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth(), 1).toISOString();
   const end = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth() + 2, 0).toISOString();
   try {
@@ -2249,34 +2269,24 @@ async function calFetchEvents() {
     calRenderMonth();
     calRenderUpcoming();
     calRenderDashUpcoming();
-  } catch(e) {
-    console.error('Calendar error:', e);
-  }
+  } catch(e) { console.error('Calendar error:', e); }
 }
 
 // ===== RENDER MONTH =====
 function calRenderMonth() {
   const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  document.getElementById('cal-month-title').textContent =
-    months[calCurrentDate.getMonth()] + ' ' + calCurrentDate.getFullYear();
-
+  document.getElementById('cal-month-title').textContent = months[calCurrentDate.getMonth()] + ' ' + calCurrentDate.getFullYear();
   const firstDay = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth(), 1);
   const lastDay = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth() + 1, 0);
-  // Mon=0 offset
   let startOffset = firstDay.getDay() - 1;
   if (startOffset < 0) startOffset = 6;
-
   const today = new Date(); today.setHours(0,0,0,0);
   const grid = document.getElementById('cal-days');
   let html = '';
-
-  // Prev month fill
   for (let i = startOffset - 1; i >= 0; i--) {
     const d = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth(), -i);
     html += `<div class="cal-day other-month"><div class="cal-day-num">${d.getDate()}</div></div>`;
   }
-
-  // Current month
   for (let d = 1; d <= lastDay.getDate(); d++) {
     const date = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth(), d);
     const isToday = date.getTime() === today.getTime();
@@ -2286,91 +2296,58 @@ function calRenderMonth() {
     });
     const chips = dayEvents.slice(0,3).map((e,i) => {
       const colors = ['','green','red','orange'];
-      return `<div class="cal-event-chip ${colors[i % colors.length]}" title="${e.summary || 'Event'}">${e.summary || 'Event'}</div>`;
+      return `<div class="cal-event-chip ${colors[i%colors.length]}" title="${e.summary||'Event'}">${e.summary||'Event'}</div>`;
     }).join('');
     const more = dayEvents.length > 3 ? `<div style="font-size:10px;color:var(--ink3);">+${dayEvents.length-3} more</div>` : '';
-    html += `<div class="cal-day${isToday?' today':''}">
-      <div class="cal-day-num">${d}</div>
-      ${chips}${more}
-    </div>`;
+    html += `<div class="cal-day${isToday?' today':''}"><div class="cal-day-num">${d}</div>${chips}${more}</div>`;
   }
-
-  // Next month fill
   const totalCells = Math.ceil((startOffset + lastDay.getDate()) / 7) * 7;
   const remaining = totalCells - startOffset - lastDay.getDate();
   for (let d = 1; d <= remaining; d++) {
     html += `<div class="cal-day other-month"><div class="cal-day-num">${d}</div></div>`;
   }
-
   grid.innerHTML = html;
 }
 
-// ===== RENDER UPCOMING SIDEBAR =====
+// ===== RENDER UPCOMING =====
 function calRenderUpcoming() {
   const el = document.getElementById('cal-upcoming-list');
   if (!el) return;
   const now = new Date();
-  const upcoming = calEvents
-    .filter(e => new Date(e.start.dateTime || e.start.date) >= now)
-    .sort((a,b) => new Date(a.start.dateTime||a.start.date) - new Date(b.start.dateTime||b.start.date))
-    .slice(0, 8);
-
+  const upcoming = calEvents.filter(e => new Date(e.start.dateTime||e.start.date) >= now)
+    .sort((a,b) => new Date(a.start.dateTime||a.start.date)-new Date(b.start.dateTime||b.start.date))
+    .slice(0,8);
   if (upcoming.length === 0) { el.innerHTML = '<div class="empty">No upcoming events.</div>'; return; }
-
   el.innerHTML = upcoming.map(e => {
-    const start = new Date(e.start.dateTime || e.start.date);
+    const start = new Date(e.start.dateTime||e.start.date);
     const isAllDay = !e.start.dateTime;
-    const dateStr = start.toLocaleDateString('en-GB', {weekday:'short', day:'numeric', month:'short'});
-    const timeStr = isAllDay ? 'All day' : start.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
-    return `<div class="cal-event-item">
-      <div class="cal-event-dot"></div>
-      <div class="cal-event-info">
-        <div class="cal-event-title">${e.summary || 'Untitled'}</div>
-        <div class="cal-event-time">${dateStr} · ${timeStr}</div>
-      </div>
-    </div>`;
+    const dateStr = start.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+    const timeStr = isAllDay ? 'All day' : start.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    return `<div class="cal-event-item"><div class="cal-event-dot"></div><div class="cal-event-info"><div class="cal-event-title">${e.summary||'Untitled'}</div><div class="cal-event-time">${dateStr} · ${timeStr}</div></div></div>`;
   }).join('');
 }
 
-// ===== RENDER DASHBOARD UPCOMING =====
 function calRenderDashUpcoming() {
   const el = document.getElementById('cal-upcoming-dash');
   if (!el) return;
   const now = new Date();
-  const upcoming = calEvents
-    .filter(e => new Date(e.start.dateTime || e.start.date) >= now)
-    .sort((a,b) => new Date(a.start.dateTime||a.start.date) - new Date(b.start.dateTime||b.start.date))
-    .slice(0, 4);
-
+  const upcoming = calEvents.filter(e => new Date(e.start.dateTime||e.start.date) >= now)
+    .sort((a,b) => new Date(a.start.dateTime||a.start.date)-new Date(b.start.dateTime||b.start.date))
+    .slice(0,4);
   if (upcoming.length === 0) { el.innerHTML = '<div style="color:var(--ink3);font-size:13px;">No upcoming events.</div>'; return; }
-
   el.innerHTML = upcoming.map(e => {
-    const start = new Date(e.start.dateTime || e.start.date);
+    const start = new Date(e.start.dateTime||e.start.date);
     const isAllDay = !e.start.dateTime;
-    const dateStr = start.toLocaleDateString('en-GB', {weekday:'short', day:'numeric', month:'short'});
-    const timeStr = isAllDay ? 'All day' : start.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
-    return `<div class="dash-cal-event">
-      <div class="dash-cal-event-title">${e.summary || 'Untitled'}</div>
-      <div class="dash-cal-event-time">${dateStr}<br>${timeStr}</div>
-    </div>`;
+    const dateStr = start.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+    const timeStr = isAllDay ? 'All day' : start.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    return `<div class="dash-cal-event"><div class="dash-cal-event-title">${e.summary||'Untitled'}</div><div class="dash-cal-event-time">${dateStr}<br>${timeStr}</div></div>`;
   }).join('');
 }
 
-// ===== NAVIGATION =====
-function calPrevMonth() {
-  calCurrentDate = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth() - 1, 1);
-  calFetchEvents();
-}
-
-function calNextMonth() {
-  calCurrentDate = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth() + 1, 1);
-  calFetchEvents();
-}
-
-function calToday() {
-  calCurrentDate = new Date();
-  calFetchEvents();
-}
+// ===== NAV =====
+function calPrevMonth() { calCurrentDate = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth()-1, 1); calFetchEvents(); }
+function calNextMonth() { calCurrentDate = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth()+1, 1); calFetchEvents(); }
+function calToday() { calCurrentDate = new Date(); calFetchEvents(); }
 
 // ===== ADD EVENT =====
 async function calAddEvent() {
@@ -2381,33 +2358,29 @@ async function calAddEvent() {
   const end = document.getElementById('cal-new-end').value;
   const desc = document.getElementById('cal-new-desc').value.trim();
   if (!title || !date) { alert('Please enter a title and date.'); return; }
-
   const event = {
-    summary: title,
-    description: desc,
+    summary: title, description: desc,
     start: { dateTime: `${date}T${start}:00`, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone },
     end:   { dateTime: `${date}T${end}:00`,   timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }
   };
-
   try {
     const resp = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
       method: 'POST',
       headers: { Authorization: 'Bearer ' + calAccessToken, 'Content-Type': 'application/json' },
       body: JSON.stringify(event)
     });
-    if (!resp.ok) throw new Error('Failed to add event');
+    if (!resp.ok) throw new Error('Failed');
     document.getElementById('cal-new-title').value = '';
     document.getElementById('cal-new-desc').value = '';
     calFetchEvents();
-    alert('Event added to Google Calendar!');
-  } catch(e) {
-    alert('Could not add event. Please try again.');
-  }
+    alert('Event added!');
+  } catch(e) { alert('Could not add event. Please try again.'); }
 }
 
-// Try restore token after GSI loads
+// Init
 window.addEventListener('load', () => {
-  setTimeout(calTryRestore, 800);
+  calHandleRedirect();
+  setTimeout(calTryRestore, 300);
 });
 </script>
 
