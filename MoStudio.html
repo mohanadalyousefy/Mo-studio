@@ -1193,6 +1193,72 @@
 
   .cal-sign-out:hover { color: var(--red); }
 
+
+  .cal-week-grid {
+    display: grid;
+    grid-template-columns: 50px repeat(7, 1fr);
+    flex: 1;
+    overflow-y: auto;
+    border-top: 1px solid var(--border);
+  }
+
+  .cal-week-time {
+    font-size: 10px;
+    color: var(--ink3);
+    padding: 2px 6px;
+    text-align: right;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border2);
+    height: 48px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+  }
+
+  .cal-week-cell {
+    border-right: 1px solid var(--border2);
+    border-bottom: 1px solid var(--border2);
+    height: 48px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+
+  .cal-week-cell:hover { background: var(--surface2); }
+  .cal-week-cell.today-col { background: #eff6ff; }
+
+  .cal-week-event {
+    position: absolute;
+    left: 2px; right: 2px;
+    background: var(--accent);
+    color: white;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 4px;
+    border-radius: 3px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    z-index: 1;
+    cursor: pointer;
+  }
+
+  .cal-week-day-header {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink3);
+    padding: 6px 4px;
+    border-right: 1px solid var(--border2);
+    border-bottom: 1px solid var(--border);
+    letter-spacing: 0.04em;
+  }
+
+  .cal-week-day-header.today { color: var(--accent); background: #eff6ff; }
+  .cal-week-day-header.selected { background: var(--navy); color: white; border-radius: 6px; }
+
+  .cal-weekdays { padding: 0 16px; }
+
   select { appearance: none; cursor: pointer; }
 
   /* Task inline formatting toolbar */
@@ -1523,21 +1589,25 @@ NEXT MEETING
           <!-- Main calendar -->
           <div class="cal-main">
             <div class="cal-header">
-              <button class="cal-nav-btn" onclick="calPrevMonth()">‹</button>
+              <button class="cal-nav-btn" onclick="calPrev()">‹</button>
               <div class="cal-month-title" id="cal-month-title"></div>
               <button class="cal-nav-btn" onclick="calToday()">Today</button>
-              <button class="cal-nav-btn" onclick="calNextMonth()">›</button>
+              <button class="cal-nav-btn" onclick="calNext()">›</button>
+              <div style="display:flex;gap:4px;margin-left:8px;">
+                <button class="cal-nav-btn" id="btn-month-view" onclick="calSetView('month')" style="padding:0 10px;font-size:11px;font-weight:600;background:var(--navy);color:white;border-color:var(--navy);">Month</button>
+                <button class="cal-nav-btn" id="btn-week-view" onclick="calSetView('week')" style="padding:0 10px;font-size:11px;font-weight:600;">Week</button>
+              </div>
+            </div>
+            <div class="cal-weekdays" id="cal-weekdays-header" style="padding:0 16px;">
+              <div class="cal-weekday">Mon</div>
+              <div class="cal-weekday">Tue</div>
+              <div class="cal-weekday">Wed</div>
+              <div class="cal-weekday">Thu</div>
+              <div class="cal-weekday">Fri</div>
+              <div class="cal-weekday">Sat</div>
+              <div class="cal-weekday">Sun</div>
             </div>
             <div class="cal-body">
-              <div class="cal-weekdays">
-                <div class="cal-weekday">Mon</div>
-                <div class="cal-weekday">Tue</div>
-                <div class="cal-weekday">Wed</div>
-                <div class="cal-weekday">Thu</div>
-                <div class="cal-weekday">Fri</div>
-                <div class="cal-weekday">Sat</div>
-                <div class="cal-weekday">Sun</div>
-              </div>
               <div class="cal-days" id="cal-days"></div>
             </div>
           </div>
@@ -2191,22 +2261,25 @@ function calSignIn() {
 }
 
 function calHandleRedirect() {
-  // Check if we're returning from OAuth
   const hash = window.location.hash.substring(1);
-  if (!hash) return;
+  if (!hash || !hash.includes('access_token')) return;
   const params = new URLSearchParams(hash);
   const token = params.get('access_token');
   const state = params.get('state');
   const savedState = localStorage.getItem('cal_oauth_state');
-
   if (token && state && state === savedState) {
     localStorage.removeItem('cal_oauth_state');
     calAccessToken = token;
     localStorage.setItem('cal_token', token);
-    // Clean URL
-    history.replaceState(null, '', window.location.pathname);
+    history.replaceState(null, '', window.location.pathname + window.location.search);
     calOnSignedIn();
-    // Switch to calendar tab
+    switchTab('calendar');
+  } else if (token) {
+    // Token present but state mismatch — still use it (user may have multiple tabs)
+    calAccessToken = token;
+    localStorage.setItem('cal_token', token);
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+    calOnSignedIn();
     switchTab('calendar');
   }
 }
@@ -2266,7 +2339,7 @@ async function calFetchEvents() {
     }
     const data = await resp.json();
     calEvents = data.items || [];
-    calRenderMonth();
+    if (calView === "week") calRenderWeek(); else calRenderMonth();
     calRenderUpcoming();
     calRenderDashUpcoming();
   } catch(e) { console.error('Calendar error:', e); }
@@ -2299,7 +2372,8 @@ function calRenderMonth() {
       return `<div class="cal-event-chip ${colors[i%colors.length]}" title="${e.summary||'Event'}">${e.summary||'Event'}</div>`;
     }).join('');
     const more = dayEvents.length > 3 ? `<div style="font-size:10px;color:var(--ink3);">+${dayEvents.length-3} more</div>` : '';
-    html += `<div class="cal-day${isToday?' today':''}"><div class="cal-day-num">${d}</div>${chips}${more}</div>`;
+    const isSel = calSelectedDay && calSelectedDay.d===d && calSelectedDay.m===calCurrentDate.getMonth() && calSelectedDay.y===calCurrentDate.getFullYear();
+    html += `<div class="cal-day${isToday?' today':''}${isSel?' selected':''}" onclick="calSelectDay(${d},${calCurrentDate.getMonth()},${calCurrentDate.getFullYear()})"><div class="cal-day-num">${d}</div>${chips}${more}</div>`;
   }
   const totalCells = Math.ceil((startOffset + lastDay.getDate()) / 7) * 7;
   const remaining = totalCells - startOffset - lastDay.getDate();
@@ -2345,9 +2419,107 @@ function calRenderDashUpcoming() {
 }
 
 // ===== NAV =====
-function calPrevMonth() { calCurrentDate = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth()-1, 1); calFetchEvents(); }
-function calNextMonth() { calCurrentDate = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth()+1, 1); calFetchEvents(); }
-function calToday() { calCurrentDate = new Date(); calFetchEvents(); }
+let calView = 'month'; // 'month' or 'week'
+let calSelectedDay = null;
+
+function calSetView(v) {
+  calView = v;
+  document.getElementById('btn-month-view').style.background = v === 'month' ? 'var(--navy)' : '';
+  document.getElementById('btn-month-view').style.color = v === 'month' ? 'white' : '';
+  document.getElementById('btn-month-view').style.borderColor = v === 'month' ? 'var(--navy)' : '';
+  document.getElementById('btn-week-view').style.background = v === 'week' ? 'var(--navy)' : '';
+  document.getElementById('btn-week-view').style.color = v === 'week' ? 'white' : '';
+  document.getElementById('btn-week-view').style.borderColor = v === 'week' ? 'var(--navy)' : '';
+  // Show/hide weekdays header (month view uses it, week view has its own)
+  const wh = document.getElementById('cal-weekdays-header');
+  if (wh) wh.style.display = v === 'month' ? '' : 'none';
+  if (v === 'month') calRenderMonth();
+  else calRenderWeek();
+}
+
+function calPrev() {
+  if (calView === 'month') calCurrentDate = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth()-1, 1);
+  else calCurrentDate = new Date(calCurrentDate.getTime() - 7*24*60*60*1000);
+  calFetchEvents();
+}
+
+function calNext() {
+  if (calView === 'month') calCurrentDate = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth()+1, 1);
+  else calCurrentDate = new Date(calCurrentDate.getTime() + 7*24*60*60*1000);
+  calFetchEvents();
+}
+
+function calToday() {
+  calCurrentDate = new Date();
+  calFetchEvents();
+}
+
+function calSelectDay(d, m, y) {
+  calSelectedDay = { d, m, y };
+  if (calView === 'month') calRenderMonth();
+  else calRenderWeek();
+  // Set new event date
+  const dateInput = document.getElementById('cal-new-date');
+  if (dateInput) {
+    const pad = n => String(n).padStart(2,'0');
+    dateInput.value = `${y}-${pad(m+1)}-${pad(d)}`;
+  }
+}
+
+function calRenderWeek() {
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  // Find Monday of current week
+  const d = new Date(calCurrentDate);
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  const monday = new Date(d);
+  monday.setDate(d.getDate() + diff);
+  monday.setHours(0,0,0,0);
+
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+
+  document.getElementById('cal-month-title').textContent =
+    monday.toLocaleDateString('en-GB',{day:'numeric',month:'short'}) + ' – ' +
+    sunday.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const hours = Array.from({length:24},(_,i)=>i);
+  const days = Array.from({length:7},(_,i)=>{ const d2=new Date(monday); d2.setDate(monday.getDate()+i); return d2; });
+
+  let html = '<div class="cal-week-grid">';
+  // Corner
+  html += '<div class="cal-week-time" style="border-bottom:1px solid var(--border);"></div>';
+  // Day headers
+  days.forEach(d2 => {
+    const isToday = d2.getTime() === today.getTime();
+    const isSel = calSelectedDay && d2.getDate()===calSelectedDay.d && d2.getMonth()===calSelectedDay.m && d2.getFullYear()===calSelectedDay.y;
+    const dayName = d2.toLocaleDateString('en-GB',{weekday:'short'});
+    const dayNum = d2.getDate();
+    html += `<div class="cal-week-day-header${isToday?' today':''}${isSel?' selected':''}" onclick="calSelectDay(${d2.getDate()},${d2.getMonth()},${d2.getFullYear()})">${dayName} ${dayNum}</div>`;
+  });
+
+  // Time rows
+  hours.forEach(h => {
+    const timeLabel = h === 0 ? '12 AM' : h < 12 ? h+' AM' : h === 12 ? '12 PM' : (h-12)+' PM';
+    html += `<div class="cal-week-time">${timeLabel}</div>`;
+    days.forEach(d2 => {
+      const isToday = d2.getTime() === today.getTime();
+      // Find events for this day and hour
+      const cellEvents = calEvents.filter(e => {
+        if (!e.start.dateTime) return false;
+        const eStart = new Date(e.start.dateTime);
+        return eStart.getDate()===d2.getDate() && eStart.getMonth()===d2.getMonth() &&
+               eStart.getFullYear()===d2.getFullYear() && eStart.getHours()===h;
+      });
+      const evHtml = cellEvents.map(e => `<div class="cal-week-event" title="${e.summary||''}">${e.summary||'Event'}</div>`).join('');
+      html += `<div class="cal-week-cell${isToday?' today-col':''}" onclick="calSelectDay(${d2.getDate()},${d2.getMonth()},${d2.getFullYear()})">${evHtml}</div>`;
+    });
+  });
+
+  html += '</div>';
+  document.getElementById('cal-days').innerHTML = html;
+}
 
 // ===== ADD EVENT =====
 async function calAddEvent() {
