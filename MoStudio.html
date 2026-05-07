@@ -1,0 +1,2703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mo Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1a3358;
+    --navy2: #1e3d68;
+    --navy-light: #2a5298;
+    --accent: #3b82f6;
+    --accent2: #60a5fa;
+    --accent3: #10b981;
+    --warn: #f59e0b;
+    --red: #ef4444;
+
+    /* Light working area */
+    --bg: #f8f9fc;
+    --surface: #ffffff;
+    --surface2: #f1f4f9;
+    --surface3: #e8edf5;
+    --border: #e2e8f0;
+    --border2: #edf1f7;
+    --shadow: rgba(26,51,88,0.08);
+
+    --ink: #0d0d0d;
+    --ink2: #1a1a1a;
+    --ink3: #6b7280;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 15px;
+    background: var(--bg);
+    color: var(--ink);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ===== TOP BAR (dark navy) ===== */
+  .topbar {
+    display: flex;
+    align-items: center;
+    padding: 0 0 0 20px;
+    background: var(--navy);
+    height: 54px;
+    flex-shrink: 0;
+    gap: 0;
+  }
+
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    margin-right: 36px;
+  }
+
+  .topbar-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: top center;
+    border: 2px solid var(--accent2);
+    flex-shrink: 0;
+  }
+
+  .topbar-logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+  }
+
+  .topbar-logo span { color: var(--accent2); }
+
+  .nav-tabs { display: flex; height: 100%; }
+
+  .nav-tab {
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    height: 100%;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.55);
+    cursor: pointer;
+    border: none;
+    background: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.15s, border-color 0.15s;
+    letter-spacing: 0.01em;
+  }
+
+  .nav-tab:hover { color: rgba(255,255,255,0.85); }
+  .nav-tab.active { color: #ffffff; border-bottom-color: var(--accent2); }
+
+  .topbar-date {
+    margin-left: auto;
+    font-size: 12px;
+    color: rgba(255,255,255,0.45);
+    padding: 0 22px;
+  }
+
+  /* ===== MAIN ===== */
+  .main {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    background: var(--bg);
+  }
+
+  .panel {
+    display: none;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0; left: 0;
+  }
+
+  .panel.active { display: flex; }
+
+  /* ===== SHARED PANEL STYLES ===== */
+  .panel-inner {
+    padding: 28px 32px;
+    gap: 18px;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+  }
+
+  .panel-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .panel-sub { font-size: 14px; color: var(--ink3); }
+
+  /* ===== CARDS ===== */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 4px var(--shadow);
+  }
+
+  .card-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-label::after { content:''; flex:1; height:1px; background: var(--border); }
+
+  /* ===== DASHBOARD ===== */
+  #dashboard { flex-direction: column; height: 100%; }
+
+  .dash-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 290px;
+    gap: 16px;
+    transition: grid-template-columns 0.3s ease;
+  }
+
+  .dash-grid.has-calendar {
+    grid-template-columns: 1fr 1fr 200px 240px;
+  }
+
+  /* Quote card */
+  .quote-card {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+    border-radius: 12px;
+    padding: 22px 24px;
+    margin-bottom: 0;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(26,51,88,0.2);
+  }
+
+  .quote-card::before {
+    content: '\201C';
+    position: absolute;
+    top: -10px; left: 14px;
+    font-size: 80px;
+    color: rgba(255,255,255,0.08);
+    font-family: Georgia, serif;
+    line-height: 1;
+  }
+
+  .quote-text {
+    font-size: 15px;
+    font-weight: 500;
+    color: #ffffff;
+    line-height: 1.65;
+    font-style: italic;
+    margin-bottom: 10px;
+    position: relative;
+  }
+
+  .quote-author {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent2);
+    letter-spacing: 0.05em;
+  }
+
+  .quote-timer {
+    position: absolute;
+    bottom: 14px; right: 16px;
+    font-size: 10px;
+    color: rgba(255,255,255,0.3);
+    font-family: monospace;
+  }
+
+  /* Stats */
+  .stats-row { display: flex; gap: 10px; margin-bottom: 16px; }
+
+  .stat-box {
+    flex: 1;
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+    border: 1px solid var(--border);
+  }
+
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    display: block;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-label { font-size: 11px; color: var(--ink3); font-weight: 500; }
+  .stat-box.red .stat-num { color: var(--red); }
+  .stat-box.blue .stat-num { color: var(--accent); }
+  .stat-box.green .stat-num { color: var(--accent3); }
+
+  .preview-text {
+    font-size: 13px;
+    color: var(--ink2);
+    line-height: 1.8;
+    white-space: pre-wrap;
+    max-height: 110px;
+    overflow: hidden;
+  }
+
+  /* Deadlines mini */
+  .deadline-mini { display: flex; flex-direction: column; gap: 8px; }
+
+  .dl-mini {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border-left: 3px solid var(--border);
+    background: var(--surface2);
+    font-size: 13px;
+  }
+
+  .dl-mini.urgent { border-color: var(--red); }
+  .dl-mini.soon   { border-color: var(--warn); }
+  .dl-mini.ok     { border-color: var(--accent3); }
+  .dl-mini-name { flex: 1; color: var(--ink); font-weight: 500; }
+  .dl-mini-date { font-size: 11px; color: var(--ink3); }
+
+  /* Quick notes */
+  .quick-note { grid-column: 3; grid-row: 1/4; display: flex; flex-direction: column; }
+
+  .quick-note textarea {
+    flex: 1;
+    background: none;
+    border: none;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 15px;
+    color: var(--ink);
+    resize: none;
+    outline: none;
+    line-height: 1.8;
+    min-height: 180px;
+  }
+
+  /* ===== TASKS (free-form) ===== */
+  #tasks { flex-direction: column; }
+
+  .tasks-freeform-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    min-height: 320px;
+  }
+
+  .freeform-col {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 1px 4px var(--shadow);
+  }
+
+  .freeform-col-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px 12px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    background: var(--surface2);
+    border-radius: 12px 12px 0 0;
+  }
+
+  .freeform-col-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .dot-todo { background: var(--red); }
+  .dot-progress { background: var(--accent); }
+  .dot-done { background: var(--accent3); }
+
+  .freeform-col-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .freeform-col [contenteditable] {
+    flex: 1;
+    width: 100%;
+    background: none;
+    border: none;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 15px;
+    color: var(--ink);
+    outline: none;
+    padding: 16px 18px;
+    line-height: 1.9;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    min-height: 260px;
+  }
+
+  .freeform-col [contenteditable]:empty::before {
+    content: attr(data-placeholder);
+    color: var(--ink3);
+    pointer-events: none;
+    display: block;
+  }
+
+  /* ===== DEADLINES ===== */
+  #deadlines { flex-direction: column; }
+
+  .deadline-form {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    flex-shrink: 0;
+    box-shadow: 0 1px 4px var(--shadow);
+  }
+
+  .deadlines-table {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 1px 4px var(--shadow);
+    min-height: 0;
+  }
+
+  .dl-table-head {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 120px;
+    padding: 10px 20px;
+    background: var(--surface2);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .dl-rows { overflow-y: auto; flex: 1; }
+
+  .dl-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 120px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border2);
+    align-items: center;
+    font-size: 13px;
+    transition: background 0.1s;
+  }
+
+  .dl-row:hover { background: var(--surface2); }
+  .dl-row:last-child { border-bottom: none; }
+  .dl-name { font-weight: 500; color: var(--ink); }
+  .dl-cat, .dl-assigned { font-size: 12px; color: var(--ink3); }
+  .dl-date-cell { font-size: 12px; color: var(--ink2); }
+
+  .dl-status {
+    display: inline-flex;
+    align-items: center;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+  }
+
+  .status-overdue  { background: #fef2f2; color: var(--red); }
+  .status-today    { background: #fffbeb; color: var(--warn); }
+  .status-upcoming { background: #eff6ff; color: var(--accent); }
+  .status-ok       { background: #f0fdf4; color: var(--accent3); }
+  .status-done     { background: var(--surface2); color: var(--ink3); }
+
+  /* ===== EMAIL ===== */
+  #email { flex-direction: column; }
+
+  .email-composer {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+    box-shadow: 0 1px 4px var(--shadow);
+    min-height: 0;
+  }
+
+  .email-fields { border-bottom: 1px solid var(--border); }
+
+  .email-field {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--border2);
+    padding: 0 20px;
+  }
+
+  .email-field:last-child { border-bottom: none; }
+
+  .email-field-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    width: 70px;
+    flex-shrink: 0;
+  }
+
+  .email-field input {
+    flex: 1;
+    border: none;
+    border-radius: 0;
+    padding: 11px 0;
+    background: none;
+    font-size: 13px;
+    color: var(--ink);
+    outline: none;
+  }
+
+  .email-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--border2);
+    background: var(--surface2);
+  }
+
+  .fmt-btn {
+    width: 30px; height: 30px;
+    border: none;
+    background: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--ink3);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.12s;
+    font-family: Georgia, serif;
+    font-weight: bold;
+  }
+
+  .fmt-btn:hover { background: var(--border); color: var(--ink); }
+
+  .ai-assist-btn {
+    margin-left: auto;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 14px;
+    border: 1px solid var(--navy-light);
+    border-radius: 20px;
+    background: none;
+    cursor: pointer;
+    color: var(--navy-light);
+    display: flex; align-items: center; gap: 6px;
+    transition: all 0.15s;
+  }
+
+  .ai-assist-btn:hover { background: var(--navy); color: white; border-color: var(--navy); }
+
+  .email-body {
+    flex: 1;
+    padding: 20px 24px;
+    overflow-y: auto;
+  }
+
+  .email-body textarea {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: none;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 15px;
+    color: var(--ink);
+    line-height: 1.8;
+    resize: none;
+    min-height: 200px;
+    outline: none;
+  }
+
+  .email-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-top: 1px solid var(--border2);
+    flex-shrink: 0;
+    background: var(--surface2);
+  }
+
+  .email-templates { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .tpl-btn {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: white;
+    cursor: pointer;
+    color: var(--ink2);
+    transition: all 0.12s;
+  }
+
+  .tpl-btn:hover { border-color: var(--accent); color: var(--accent); background: #eff6ff; }
+
+  /* ===== MINUTES ===== */
+  #minutes { flex-direction: column; }
+
+  .minutes-layout {
+    display: grid;
+    grid-template-columns: 210px 1fr;
+    gap: 16px;
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .minutes-sidebar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow-y: auto;
+    box-shadow: 0 1px 4px var(--shadow);
+  }
+
+  .minutes-sidebar-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    padding: 4px 8px;
+    margin-top: 4px;
+  }
+
+  .minutes-item {
+    padding: 9px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.1s;
+    border: 1px solid transparent;
+  }
+
+  .minutes-item:hover { background: var(--surface2); }
+  .minutes-item.active { background: var(--navy); border-color: var(--navy); }
+
+  .minutes-item-title {
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--ink);
+  }
+
+  .minutes-item.active .minutes-item-title { color: white; }
+
+  .minutes-item-date { font-size: 11px; color: var(--ink3); margin-top: 3px; }
+  .minutes-item.active .minutes-item-date { color: rgba(255,255,255,0.6); }
+
+  .minutes-editor {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 1px 4px var(--shadow);
+  }
+
+  .minutes-editor-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border2);
+    background: var(--surface2);
+    flex-shrink: 0;
+  }
+
+  .minutes-editor-header input {
+    flex: 1;
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    border: none;
+    background: none;
+    color: var(--ink);
+    padding: 0;
+    outline: none;
+  }
+
+  .minutes-meta {
+    display: flex;
+    gap: 16px;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--border2);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    background: white;
+  }
+
+  .minutes-meta-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--ink3);
+  }
+
+  /* Minutes formatting toolbar */
+  .minutes-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    padding: 7px 16px;
+    border-bottom: 1px solid var(--border2);
+    background: var(--surface2);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+
+  .min-fmt-btn {
+    padding: 4px 9px;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--ink2);
+    background: none;
+    transition: all 0.12s;
+    font-weight: 600;
+    display: flex; align-items: center; gap: 4px;
+  }
+
+  .min-fmt-btn:hover { background: var(--surface3); border-color: var(--border); color: var(--ink); }
+
+  .min-fmt-sep {
+    width: 1px;
+    height: 18px;
+    background: var(--border);
+    margin: 0 3px;
+  }
+
+  .minutes-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+  }
+
+  .minutes-body [contenteditable] {
+    width: 100%;
+    min-height: 300px;
+    border: none;
+    background: none;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 15px;
+    color: var(--ink);
+    line-height: 1.9;
+    outline: none;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  .minutes-body [contenteditable]:empty::before {
+    content: attr(data-placeholder);
+    color: var(--ink3);
+    pointer-events: none;
+    display: block;
+  }
+
+  .minutes-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-top: 1px solid var(--border2);
+    flex-shrink: 0;
+    background: var(--surface2);
+  }
+
+  .saved-badge {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent3);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .saved-badge.show { opacity: 1; }
+
+  /* ===== INPUTS global ===== */
+  input[type="text"], input[type="date"], select {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  input[type="text"]:focus, input[type="date"]:focus, select:focus { border-color: var(--accent); }
+  input::placeholder { color: var(--ink3); }
+
+  .minutes-meta-field input {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 12px;
+    color: var(--ink);
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 9px;
+    outline: none;
+  }
+
+  /* ===== BUTTONS ===== */
+  .btn {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn-primary { background: var(--navy); color: white; }
+  .btn-primary:hover { background: var(--navy-light); }
+  .btn-ghost { background: var(--surface2); color: var(--ink2); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--surface3); color: var(--ink); }
+  .btn-danger { background: #fef2f2; color: var(--red); border: 1px solid transparent; }
+  .btn-danger:hover { background: var(--red); color: white; }
+
+  /* ===== AI PANEL ===== */
+  .ai-panel {
+    display: none;
+    position: fixed;
+    top: 54px; right: 0;
+    width: 340px;
+    height: calc(100vh - 54px);
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    box-shadow: -4px 0 24px var(--shadow);
+    flex-direction: column;
+    z-index: 50;
+    animation: slideIn 0.2s ease;
+  }
+
+  .ai-panel.open { display: flex; }
+
+  @keyframes slideIn {
+    from { transform: translateX(20px); opacity: 0; }
+    to   { transform: translateX(0); opacity: 1; }
+  }
+
+  .ai-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--navy);
+  }
+
+  .ai-panel-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: white;
+  }
+
+  .ai-panel-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: var(--bg);
+  }
+
+  .ai-msg {
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.65;
+    animation: fadeUp 0.2s ease;
+  }
+
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(6px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  .ai-msg.user { background: var(--navy); color: white; align-self: flex-end; max-width: 85%; }
+  .ai-msg.ai   { background: var(--surface); color: var(--ink2); align-self: flex-start; max-width: 92%; border: 1px solid var(--border); }
+  .ai-msg.ai .ai-label { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 5px; display: block; }
+  .ai-msg.loading { color: var(--ink3); font-style: italic; }
+
+  .ai-panel-input {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    background: var(--surface);
+  }
+
+  .ai-panel-input input { flex: 1; }
+
+  /* Scrollbars */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--ink3); }
+
+  .empty { text-align: center; padding: 40px 20px; color: var(--ink3); font-size: 13px; line-height: 1.8; }
+
+
+  /* Inline editable deadline cells */
+  .dl-editable {
+    border-radius: 4px;
+    padding: 2px 4px;
+    margin: -2px -4px;
+    outline: none;
+    transition: background 0.12s;
+    cursor: text;
+    min-width: 20px;
+    display: inline-block;
+  }
+
+  .dl-editable:hover { background: var(--surface2); }
+  .dl-editable:focus { background: #eff6ff; box-shadow: 0 0 0 2px var(--accent); }
+
+  .dl-date-input {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 12px;
+    color: var(--ink2);
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 2px 4px;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.12s, background 0.12s;
+    width: 130px;
+  }
+
+  .dl-date-input:hover { background: var(--surface2); border-color: var(--border); }
+  .dl-date-input:focus { background: #eff6ff; border-color: var(--accent); }
+
+
+  /* ===== CALENDAR ===== */
+  #calendar { flex-direction: column; }
+
+  .cal-auth-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 40px;
+    text-align: center;
+    max-width: 440px;
+    margin: 60px auto;
+    box-shadow: 0 1px 4px var(--shadow);
+  }
+
+  .cal-auth-icon { font-size: 48px; margin-bottom: 16px; }
+  .cal-auth-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+  .cal-auth-sub { font-size: 13px; color: var(--ink3); margin-bottom: 24px; line-height: 1.6; }
+
+  .cal-grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 16px;
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .cal-main {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 1px 4px var(--shadow);
+  }
+
+  .cal-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+    flex-shrink: 0;
+  }
+
+  .cal-nav-btn {
+    width: 30px; height: 30px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--ink2);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.12s;
+  }
+
+  .cal-nav-btn:hover { background: var(--navy); color: white; border-color: var(--navy); }
+
+  .cal-month-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--ink);
+    flex: 1;
+  }
+
+  .cal-body { flex: 1; overflow-y: auto; padding: 16px; }
+
+  .cal-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    margin-bottom: 8px;
+  }
+
+  .cal-weekday {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    padding: 4px 0;
+  }
+
+  .cal-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+  }
+
+  .cal-day {
+    min-height: 80px;
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 6px;
+    cursor: pointer;
+    transition: background 0.1s;
+    position: relative;
+  }
+
+  .cal-day:hover { background: var(--surface2); }
+  .cal-day.other-month { opacity: 0.35; }
+  .cal-day.today { border-color: var(--accent); background: #eff6ff; }
+  .cal-day.selected { background: var(--navy); border-color: var(--navy); }
+  .cal-day.selected .cal-day-num { color: white; }
+
+  .cal-day-num {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink2);
+    margin-bottom: 4px;
+  }
+
+  .cal-day.today .cal-day-num { color: var(--accent); }
+
+  .cal-event-chip {
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 5px;
+    border-radius: 3px;
+    background: var(--accent);
+    color: white;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+  }
+
+  .cal-event-chip.green { background: var(--accent3); }
+  .cal-event-chip.red { background: var(--red); }
+  .cal-event-chip.orange { background: var(--warn); }
+
+  /* Sidebar */
+  .cal-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overflow-y: auto;
+  }
+
+  .cal-upcoming {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px var(--shadow);
+  }
+
+  .cal-upcoming-header {
+    padding: 14px 18px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .cal-upcoming-header::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  .cal-event-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border2);
+    align-items: flex-start;
+    transition: background 0.1s;
+  }
+
+  .cal-event-item:hover { background: var(--surface2); }
+  .cal-event-item:last-child { border-bottom: none; }
+
+  .cal-event-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+
+  .cal-event-info { flex: 1; }
+  .cal-event-title { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 2px; }
+  .cal-event-time { font-size: 11px; color: var(--ink3); }
+
+  .cal-new-event {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 1px 4px var(--shadow);
+  }
+
+  .cal-new-event-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .cal-new-event-title::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  .cal-input {
+    width: 100%;
+    margin-bottom: 8px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .cal-input:focus { border-color: var(--accent); }
+
+  /* Dashboard upcoming events */
+  .dash-cal-event {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 7px 10px;
+    border-radius: 7px;
+    background: var(--surface2);
+    border-left: 3px solid var(--accent);
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+
+  .dash-cal-event-title { font-weight: 600; color: var(--ink); font-size: 12px; line-height: 1.3; }
+  .dash-cal-event-time { font-size: 11px; color: var(--ink3); }
+
+  .cal-sign-out {
+    font-size: 11px;
+    color: var(--ink3);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+    margin-left: auto;
+  }
+
+  .cal-sign-out:hover { color: var(--red); }
+
+
+  /* Week view - Google Calendar style */
+  .cal-week-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .cal-week-header-row {
+    display: grid;
+    grid-template-columns: 52px repeat(7, 1fr);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    background: var(--surface2);
+  }
+
+  .cal-week-corner { border-right: 1px solid var(--border); }
+
+  .cal-week-day-header {
+    text-align: center;
+    padding: 8px 4px;
+    border-right: 1px solid var(--border2);
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+
+  .cal-week-day-header:hover { background: var(--surface3); }
+
+  .cal-week-day-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink3);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+
+  .cal-week-day-num {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ink2);
+    line-height: 1;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin: 0 auto;
+  }
+
+  .cal-week-day-header.today .cal-week-day-name { color: var(--accent); }
+  .cal-week-day-header.today .cal-week-day-num { background: var(--accent); color: white; }
+  .cal-week-day-header.selected .cal-week-day-num { background: var(--navy); color: white; }
+
+  .cal-week-scroll {
+    flex: 1;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  .cal-week-grid {
+    display: grid;
+    grid-template-columns: 52px repeat(7, 1fr);
+    position: relative;
+  }
+
+  .cal-week-time {
+    font-size: 10px;
+    color: var(--ink3);
+    padding: 0 6px 0 0;
+    text-align: right;
+    border-right: 1px solid var(--border);
+    height: 48px;
+    display: flex;
+    align-items: flex-start;
+    padding-top: 2px;
+    justify-content: flex-end;
+    position: relative;
+    top: -6px;
+  }
+
+  .cal-week-cell {
+    border-right: 1px solid var(--border2);
+    border-bottom: 1px solid var(--border2);
+    height: 48px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+
+  .cal-week-cell:hover { background: #f0f4ff; }
+  .cal-week-cell.today-col { background: #f5f9ff; }
+  .cal-week-cell.today-col:hover { background: #e8f0ff; }
+
+  .cal-week-event {
+    position: absolute;
+    left: 2px; right: 2px;
+    background: var(--accent);
+    color: white;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 6px;
+    border-radius: 4px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    z-index: 2;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+
+  .cal-weekdays { padding: 0 16px; }
+
+  select { appearance: none; cursor: pointer; }
+
+  /* Task inline formatting toolbar */
+  .task-fmt-bar {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-wrap: wrap;
+  }
+
+  .tfmt {
+    padding: 3px 8px;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--ink2);
+    background: none;
+    transition: all 0.12s;
+    font-weight: 600;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+
+  .tfmt:hover { background: var(--surface3); border-color: var(--border); color: var(--ink); }
+
+  .tfmt-sep {
+    width: 1px;
+    height: 16px;
+    background: var(--border);
+    margin: 0 2px;
+    flex-shrink: 0;
+  }
+
+  .tasks-freeform-grid { min-height: 260px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <img class="topbar-avatar" src="data:image/png;base64,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" alt="Mo">
+    <div class="topbar-logo">Mo <span>Studio</span></div>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchTab('dashboard',event)">Dashboard</button>
+    <button class="nav-tab" onclick="switchTab('deadlines',event)">Deadlines</button>
+    <button class="nav-tab" onclick="switchTab('email',event)">Email</button>
+    <button class="nav-tab" onclick="switchTab('minutes',event)">Minutes</button>
+    <button class="nav-tab" onclick="switchTab('calendar',event)">Calendar</button>
+  </div>
+  <div class="topbar-date" id="topbar-date"></div>
+</div>
+
+<div class="main">
+
+  <!-- DASHBOARD -->
+  <div id="dashboard" class="panel">
+    <div class="panel-inner">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title" id="dash-greeting">Good morning, Mo.</div>
+          <div class="panel-sub" id="dash-date"></div>
+        </div>
+      </div>
+
+      <!-- Motivational Quote -->
+      <div class="quote-card">
+        <div class="quote-text" id="quote-text">Loading...</div>
+        <div class="quote-author" id="quote-author"></div>
+        <div class="quote-timer" id="quote-timer"></div>
+      </div>
+
+      <!-- Overview row -->
+      <div class="dash-grid">
+        <!-- Task stats -->
+        <div class="card">
+          <div class="card-label">Task Overview</div>
+          <div class="stats-row">
+            <div class="stat-box red"><span class="stat-num" id="stat-urgent">0</span><span class="stat-label">To Do</span></div>
+            <div class="stat-box blue"><span class="stat-num" id="stat-open">0</span><span class="stat-label">In Progress</span></div>
+            <div class="stat-box green"><span class="stat-num" id="stat-done">0</span><span class="stat-label">Done</span></div>
+          </div>
+          <div class="card-label">Quick Notes Preview</div>
+          <div class="preview-text" id="dash-tasks-preview">No notes yet.</div>
+        </div>
+
+        <!-- Deadlines -->
+        <div class="card">
+          <div class="card-label">Upcoming Deadlines</div>
+          <div class="deadline-mini" id="dash-deadlines"></div>
+        </div>
+
+        <!-- Calendar events (small) -->
+        <div class="card" id="cal-dash-card" style="display:none;">
+          <div class="card-label">Today's Events</div>
+          <div id="cal-upcoming-dash" style="font-size:12px;"><div style="color:var(--ink3);font-size:12px;">Connect calendar to see events.</div></div>
+        </div>
+
+        <!-- Quick notes -->
+        <div class="card quick-note" id="dash-notes-card">
+          <div class="card-label">Quick Notes</div>
+          <textarea placeholder="Jot something down..." id="quick-notes" oninput="saveQuickNotes()"></textarea>
+        </div>
+      </div>
+
+
+
+      <!-- Tasks board inline -->
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div style="display:flex;align-items:center;gap:10px;padding:14px 18px 12px;border-bottom:1px solid var(--border);background:var(--surface2);">
+          <span style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);">Tasks</span>
+          <!-- Formatting toolbar inline -->
+          <div class="task-fmt-bar">
+            <button class="tfmt" onclick="taskFmt('bold')" title="Bold"><b>B</b></button>
+            <button class="tfmt" onclick="taskFmt('italic')" title="Italic"><i>I</i></button>
+            <button class="tfmt" onclick="taskFmt('underline')" title="Underline" style="text-decoration:underline;">U</button>
+            <span class="tfmt-sep"></span>
+            <button class="tfmt" onclick="taskH(1)" title="Heading 1">H1</button>
+            <button class="tfmt" onclick="taskH(2)" title="Heading 2">H2</button>
+            <span class="tfmt-sep"></span>
+            <button class="tfmt" onclick="taskInsert('• ')" title="Bullet">• List</button>
+            <button class="tfmt" onclick="taskNumbered()" title="Numbered list">1. List</button>
+            <span class="tfmt-sep"></span>
+            <button class="tfmt" onclick="taskInsert('□ ')" title="Action item">□ Action</button>
+            <button class="tfmt" onclick="taskInsert('✓ ')" title="Done item">✓ Done</button>
+            <span class="tfmt-sep"></span>
+            <button class="tfmt" onclick="taskInsert('\n---\n')" title="Divider">—</button>
+          </div>
+          <span style="font-size:11px;color:var(--ink3);margin-left:auto;">Select a column, then click a format button</span>
+        </div>
+        <div class="tasks-freeform-grid" style="border-radius:0;">
+          <div class="freeform-col" style="border-radius:0;border:none;border-right:1px solid var(--border);">
+            <div class="freeform-col-header" style="border-radius:0;">
+              <div class="freeform-col-dot dot-todo"></div>
+              <div class="freeform-col-title">To Do</div>
+            </div>
+            <div id="col-todo" contenteditable="true" data-placeholder="• Review consultation notes
+• Draft framework section
+• Follow up with WHO contacts
+
+Write anything here..." oninput="saveTasks()" onfocus="setActiveTaskCol('col-todo')"></div>
+          </div>
+          <div class="freeform-col" style="border-radius:0;border:none;border-right:1px solid var(--border);">
+            <div class="freeform-col-header" style="border-radius:0;">
+              <div class="freeform-col-dot dot-progress"></div>
+              <div class="freeform-col-title">In Progress</div>
+            </div>
+            <div id="col-inprogress" contenteditable="true" data-placeholder="• Working on ToR 3 framework
+• Meeting minutes draft
+
+Write anything here..." oninput="saveTasks()" onfocus="setActiveTaskCol('col-inprogress')"></div>
+          </div>
+          <div class="freeform-col" style="border-radius:0;border:none;">
+            <div class="freeform-col-header" style="border-radius:0;">
+              <div class="freeform-col-dot dot-done"></div>
+              <div class="freeform-col-title">Done</div>
+            </div>
+            <div id="col-done" contenteditable="true" data-placeholder="✓ WHO Lyon forum
+✓ Expert consultation prep
+
+Write anything here..." oninput="saveTasks()" onfocus="setActiveTaskCol('col-done')"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DEADLINES -->
+  <div id="deadlines" class="panel">
+    <div class="panel-inner">
+      <div class="panel-header">
+        <div class="panel-title">Deadlines</div>
+      </div>
+      <form class="deadline-form" onsubmit="addDeadline(event)">
+        <input type="text" id="dl-name" placeholder="Deadline name..." required style="flex:2;min-width:160px;">
+        <input type="date" id="dl-date" required>
+        <input type="text" id="dl-cat" placeholder="Category" style="flex:1;min-width:120px;">
+        <input type="text" id="dl-assigned" placeholder="Assigned to" style="flex:1;min-width:110px;">
+        <select id="dl-status">
+          <option value="upcoming">Upcoming</option>
+          <option value="ok">On Track</option>
+          <option value="done">Done</option>
+        </select>
+        <button type="submit" class="btn btn-primary">Add</button>
+      </form>
+      <div class="deadlines-table">
+        <div class="dl-table-head">
+          <span>Name</span><span>Category</span><span>Assigned</span><span>Date</span><span>Status</span>
+        </div>
+        <div class="dl-rows" id="dl-rows"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMAIL -->
+  <div id="email" class="panel">
+    <div class="panel-inner" style="height:100%;overflow:hidden;">
+      <div class="panel-header">
+        <div class="panel-title">Email</div>
+        <div class="panel-sub">Draft your message — use AI Assist for tone, translation, or rewrites</div>
+      </div>
+      <div class="email-composer">
+        <div class="email-fields">
+          <div class="email-field">
+            <span class="email-field-label">To</span>
+            <input type="text" id="email-to" placeholder="recipient@example.com" oninput="saveEmail()">
+          </div>
+          <div class="email-field">
+            <span class="email-field-label">CC</span>
+            <input type="text" id="email-cc" placeholder="" oninput="saveEmail()">
+          </div>
+          <div class="email-field">
+            <span class="email-field-label">Subject</span>
+            <input type="text" id="email-subject" placeholder="Subject line..." oninput="saveEmail()">
+          </div>
+        </div>
+        <div class="email-toolbar">
+          <button class="fmt-btn" onclick="emailWrap('**','**')" title="Bold"><b>B</b></button>
+          <button class="fmt-btn" onclick="emailWrap('_','_')" title="Italic"><i>I</i></button>
+          <button class="fmt-btn" onclick="emailBullet()" title="Bullet">•</button>
+          <button class="fmt-btn" onclick="clearEmail()" title="Clear" style="font-family:monospace;margin-left:4px;">✕</button>
+          <button class="ai-assist-btn" onclick="toggleAI()">✦ AI Assist</button>
+        </div>
+        <div class="email-body">
+          <textarea id="email-body" placeholder="Write your email here..." oninput="saveEmail()"></textarea>
+        </div>
+        <div class="email-footer">
+          <div class="email-templates">
+            <button class="tpl-btn" onclick="loadTemplate('followup')">Follow-up</button>
+            <button class="tpl-btn" onclick="loadTemplate('meeting')">Meeting request</button>
+            <button class="tpl-btn" onclick="loadTemplate('thankyou')">Thank you</button>
+            <button class="tpl-btn" onclick="loadTemplate('submittal')">Submittal</button>
+          </div>
+          <button class="btn btn-primary" onclick="copyEmail()">Copy to Clipboard</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MINUTES -->
+  <div id="minutes" class="panel">
+    <div class="panel-inner" style="height:100%;overflow:hidden;">
+      <div class="panel-header">
+        <div class="panel-title">Meeting Minutes</div>
+        <button class="btn btn-ghost" onclick="newMinutes()" style="margin-left:auto;">+ New Document</button>
+      </div>
+      <div class="minutes-layout">
+        <div class="minutes-sidebar">
+          <div class="minutes-sidebar-label">Documents</div>
+          <div id="minutes-list"></div>
+        </div>
+        <div class="minutes-editor">
+          <div class="minutes-editor-header">
+            <input type="text" id="min-title" placeholder="Meeting title..." oninput="autoSaveMinutes()">
+            <button class="ai-assist-btn" onclick="toggleAI()">✦ AI Assist</button>
+          </div>
+          <div class="minutes-meta">
+            <div class="minutes-meta-field">📅 <input type="date" id="min-date" oninput="autoSaveMinutes()"></div>
+            <div class="minutes-meta-field">📍 <input type="text" id="min-location" placeholder="Location / link" style="width:140px;" oninput="autoSaveMinutes()"></div>
+            <div class="minutes-meta-field">👥 <input type="text" id="min-attendees" placeholder="Attendees" style="width:180px;" oninput="autoSaveMinutes()"></div>
+          </div>
+          <!-- Formatting toolbar -->
+          <div class="minutes-toolbar">
+            <button class="min-fmt-btn" onclick="minFmt('bold')" title="Bold"><b>B</b></button>
+            <button class="min-fmt-btn" onclick="minFmt('italic')" title="Italic"><i>I</i></button>
+            <button class="min-fmt-btn" onclick="minFmt('underline')" title="Underline" style="text-decoration:underline;">U</button>
+            <div class="min-fmt-sep"></div>
+            <button class="min-fmt-btn" onclick="minH(1)" title="Heading 1">H1</button>
+            <button class="min-fmt-btn" onclick="minH(2)" title="Heading 2">H2</button>
+            <div class="min-fmt-sep"></div>
+            <button class="min-fmt-btn" onclick="minInsert('• ', '')" title="Bullet">• List</button>
+            <button class="min-fmt-btn" onclick="minNumbered()" title="Numbered">1. List</button>
+            <div class="min-fmt-sep"></div>
+            <button class="min-fmt-btn" onclick="minInsert('□ ', '')" title="Action item">□ Action</button>
+            <button class="min-fmt-btn" onclick="minInsert('✓ ', '')" title="Done item">✓ Done</button>
+            <div class="min-fmt-sep"></div>
+            <button class="min-fmt-btn" onclick="minInsert('\n---\n', '')" title="Divider">—</button>
+          </div>
+          <div class="minutes-body">
+            <div id="min-body" contenteditable="true" data-placeholder="AGENDA
+1. 
+2. 
+
+DISCUSSION
+
+
+ACTION ITEMS
+□ 
+□ 
+
+NEXT MEETING
+" oninput="autoSaveMinutes()"></div>
+          </div>
+          <div class="minutes-footer">
+            <span class="saved-badge" id="saved-badge">✓ Saved</span>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-ghost" onclick="copyMinutes()">Copy</button>
+              <button class="btn btn-danger" onclick="deleteMinutes()">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+  <!-- CALENDAR -->
+  <div id="calendar" class="panel">
+    <div class="panel-inner" style="height:100%;overflow:hidden;">
+      <div class="panel-header">
+        <div class="panel-title">Calendar</div>
+        <button id="cal-signout-btn" class="cal-sign-out" onclick="calSignOut()" style="display:none;">Sign out</button>
+      </div>
+
+      <!-- Auth box (shown when not signed in) -->
+      <div id="cal-auth-box" class="cal-auth-box">
+        <div class="cal-auth-icon">📅</div>
+        <div class="cal-auth-title">Connect Google Calendar</div>
+        <div class="cal-auth-sub">Sign in with your Google account to view and manage your calendar events directly in Mo Studio.</div>
+        <button class="btn btn-primary" style="font-size:14px;padding:10px 28px;" onclick="calSignIn()">Sign in with Google</button>
+      </div>
+
+      <!-- Calendar view (shown when signed in) -->
+      <div id="cal-view" style="display:none;flex:1;overflow:hidden;flex-direction:column;gap:16px;">
+        <div class="cal-grid">
+          <!-- Main calendar -->
+          <div class="cal-main">
+            <div class="cal-header">
+              <button class="cal-nav-btn" onclick="calPrev()">‹</button>
+              <div class="cal-month-title" id="cal-month-title"></div>
+              <button class="cal-nav-btn" onclick="calToday()">Today</button>
+              <button class="cal-nav-btn" onclick="calNext()">›</button>
+              <div style="display:flex;gap:4px;margin-left:8px;">
+                <button class="cal-nav-btn" id="btn-month-view" onclick="calSetView('month')" style="padding:0 10px;font-size:11px;font-weight:600;background:var(--navy);color:white;border-color:var(--navy);">Month</button>
+                <button class="cal-nav-btn" id="btn-week-view" onclick="calSetView('week')" style="padding:0 10px;font-size:11px;font-weight:600;">Week</button>
+              </div>
+            </div>
+            <div class="cal-weekdays" id="cal-weekdays-header" style="padding:0 16px;">
+              <div class="cal-weekday">Mon</div>
+              <div class="cal-weekday">Tue</div>
+              <div class="cal-weekday">Wed</div>
+              <div class="cal-weekday">Thu</div>
+              <div class="cal-weekday">Fri</div>
+              <div class="cal-weekday">Sat</div>
+              <div class="cal-weekday">Sun</div>
+            </div>
+            <div class="cal-body">
+              <div class="cal-days" id="cal-days"></div>
+            </div>
+          </div>
+
+          <!-- Sidebar -->
+          <div class="cal-sidebar">
+            <!-- Upcoming events -->
+            <div class="cal-upcoming">
+              <div class="cal-upcoming-header">Upcoming Events</div>
+              <div id="cal-upcoming-list"><div class="empty">Loading...</div></div>
+            </div>
+
+            <!-- Add event -->
+            <div class="cal-new-event">
+              <div class="cal-new-event-title">Add Event</div>
+              <input class="cal-input" id="cal-new-title" placeholder="Event title..." type="text">
+              <input class="cal-input" id="cal-new-date" type="date">
+              <input class="cal-input" id="cal-new-start" type="time" value="09:00">
+              <input class="cal-input" id="cal-new-end" type="time" value="10:00">
+              <input class="cal-input" id="cal-new-desc" placeholder="Description (optional)" type="text">
+              <button class="btn btn-primary" style="width:100%;margin-top:4px;" onclick="calAddEvent()">Add to Google Calendar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- AI PANEL -->
+<div class="ai-panel" id="ai-panel">
+  <div class="ai-panel-header">
+    <div class="ai-panel-title">✦ AI Assistant</div>
+    <button onclick="toggleAI()" style="background:none;border:none;color:rgba(255,255,255,0.6);cursor:pointer;font-size:16px;">✕</button>
+  </div>
+  <div class="ai-panel-messages" id="ai-messages">
+    <div class="ai-msg ai">
+      <span class="ai-label">Assistant</span>
+      Hello Mo! I can help you draft emails, refine tone, summarize meeting notes, create action item lists, or improve any writing. What would you like help with?
+    </div>
+  </div>
+  <div class="ai-panel-input">
+    <input type="text" id="ai-input" placeholder="Ask me anything..." onkeydown="if(event.key==='Enter')sendAI()">
+    <button class="btn btn-primary" onclick="sendAI()">Send</button>
+  </div>
+</div>
+
+<script>
+// ===== QUOTES =====
+const quotes = [
+  // On work and progress
+  { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
+  { text: "It does not matter how slowly you go as long as you do not stop.", author: "Confucius" },
+  { text: "Quality is not an act, it is a habit.", author: "Aristotle" },
+  { text: "The best way to predict the future is to create it.", author: "Peter Drucker" },
+  { text: "Don't watch the clock; do what it does. Keep going.", author: "Sam Levenson" },
+  { text: "Hard work beats talent when talent doesn't work hard.", author: "Tim Notke" },
+  { text: "Small deeds done are better than great deeds planned.", author: "Peter Marshall" },
+  { text: "Start where you are. Use what you have. Do what you can.", author: "Arthur Ashe" },
+  { text: "Focus on being productive instead of busy.", author: "Tim Ferriss" },
+  { text: "Either you run the day or the day runs you.", author: "Jim Rohn" },
+  { text: "The key is not to prioritize what's on your schedule, but to schedule your priorities.", author: "Stephen Covey" },
+  { text: "Done is better than perfect.", author: "Sheryl Sandberg" },
+  { text: "You don't have to be great to start, but you have to start to be great.", author: "Zig Ziglar" },
+  { text: "Discipline is the bridge between goals and accomplishment.", author: "Jim Rohn" },
+  // On science and research
+  { text: "Research is to see what everybody else has seen, and to think what nobody else has thought.", author: "Albert Szent-Györgyi" },
+  { text: "Science knows no country, because knowledge belongs to humanity.", author: "Louis Pasteur" },
+  { text: "Nothing in life is to be feared, it is only to be understood.", author: "Marie Curie" },
+  { text: "The important thing is to not stop questioning. Curiosity has its own reason for existing.", author: "Albert Einstein" },
+  { text: "In science the credit goes to the man who convinces the world, not to the man to whom the idea first occurs.", author: "Francis Galton" },
+  { text: "An investment in knowledge pays the best interest.", author: "Benjamin Franklin" },
+  { text: "The more I learn, the more I realize how much I don't know.", author: "Albert Einstein" },
+  { text: "Somewhere, something incredible is waiting to be known.", author: "Carl Sagan" },
+  { text: "The goal of science is to build better mousetraps. The goal of nature is to build better mice.", author: "Unknown" },
+  { text: "Without data, you're just another person with an opinion.", author: "W. Edwards Deming" },
+  { text: "Research is creating new knowledge.", author: "Neil Armstrong" },
+  // On health and medicine
+  { text: "The greatest wealth is health.", author: "Virgil" },
+  { text: "To keep the body in good health is a duty — otherwise we shall not be able to keep our mind strong and clear.", author: "Buddha" },
+  { text: "The art of medicine consists of amusing the patient while nature cures the disease.", author: "Voltaire" },
+  { text: "Wherever the art of medicine is loved, there is also a love of humanity.", author: "Hippocrates" },
+  { text: "A healthy outside starts from the inside.", author: "Robert Urich" },
+  { text: "Prevention is better than cure.", author: "Desiderius Erasmus" },
+  // On purpose and impact
+  { text: "The good you do today will be forgotten tomorrow. Do good anyway.", author: "Mother Teresa" },
+  { text: "Act as if what you do makes a difference. It does.", author: "William James" },
+  { text: "The purpose of life is not to be happy. It is to be useful, to be honorable, to be compassionate.", author: "Ralph Waldo Emerson" },
+  { text: "We make a living by what we get, but we make a life by what we give.", author: "Winston Churchill" },
+  { text: "In the middle of every difficulty lies opportunity.", author: "Albert Einstein" },
+  { text: "If you want to go fast, go alone. If you want to go far, go together.", author: "African Proverb" },
+  { text: "A single act of kindness throws out roots in all directions, and the roots spring up and make new trees.", author: "Amelia Earhart" },
+  { text: "Be the change you wish to see in the world.", author: "Mahatma Gandhi" },
+  // On mindset and resilience
+  { text: "What we think, we become.", author: "Buddha" },
+  { text: "The mind is everything. What you think you become.", author: "Buddha" },
+  { text: "You are never too old to set another goal or to dream a new dream.", author: "C.S. Lewis" },
+  { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
+  { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" },
+  { text: "It always seems impossible until it's done.", author: "Nelson Mandela" },
+  { text: "The only limit to our realization of tomorrow is our doubts of today.", author: "Franklin D. Roosevelt" },
+  { text: "Challenges are what make life interesting. Overcoming them is what makes life meaningful.", author: "Joshua Marine" },
+  { text: "Resilience is knowing that you are the only one that has the power and responsibility to pick yourself up.", author: "Mary Holloway" },
+  { text: "Fall seven times, stand up eight.", author: "Japanese Proverb" },
+  { text: "The human capacity for burden is like bamboo — far more flexible than you'd ever believe at first glance.", author: "Jodi Picoult" },
+  // On learning and wisdom
+  { text: "The journey of a thousand miles begins with one step.", author: "Lao Tzu" },
+  { text: "The future belongs to those who believe in the beauty of their dreams.", author: "Eleanor Roosevelt" },
+  { text: "Keep your face always toward the sunshine, and shadows will fall behind you.", author: "Walt Whitman" },
+  { text: "Education is the most powerful weapon which you can use to change the world.", author: "Nelson Mandela" },
+  { text: "Live as if you were to die tomorrow. Learn as if you were to live forever.", author: "Mahatma Gandhi" },
+  { text: "The more that you read, the more things you will know. The more that you learn, the more places you'll go.", author: "Dr. Seuss" },
+  { text: "Tell me and I forget. Teach me and I remember. Involve me and I learn.", author: "Benjamin Franklin" },
+  { text: "Wisdom is not a product of schooling but of the lifelong attempt to acquire it.", author: "Albert Einstein" },
+  // On creativity and innovation
+  { text: "Innovation distinguishes between a leader and a follower.", author: "Steve Jobs" },
+  { text: "Creativity is intelligence having fun.", author: "Albert Einstein" },
+  { text: "The best ideas come as jokes. Make your thinking as funny as possible.", author: "David Ogilvy" },
+  { text: "Every child is an artist. The problem is staying an artist when you grow up.", author: "Pablo Picasso" },
+  { text: "You can't use up creativity. The more you use, the more you have.", author: "Maya Angelou" },
+  // Arabic and Islamic wisdom
+  { text: "Seek knowledge, even unto China.", author: "Prophet Muhammad (PBUH)" },
+  { text: "The ink of the scholar is holier than the blood of the martyr.", author: "Islamic Proverb" },
+  { text: "He who knows himself knows his Lord.", author: "Ali ibn Abi Talib" },
+  { text: "Knowledge is light and ignorance is darkness.", author: "Arabic Proverb" },
+  { text: "A person's true wealth is the good they do in the world.", author: "Prophet Muhammad (PBUH)" },
+  { text: "Patience is the key to relief.", author: "Arabic Proverb" },
+  { text: "Do not be a slave to others when God has created you free.", author: "Ali ibn Abi Talib" },
+  // On collaboration and humanity
+  { text: "Alone we can do so little; together we can do so much.", author: "Helen Keller" },
+  { text: "The strength of the team is each individual member. The strength of each member is the team.", author: "Phil Jackson" },
+  { text: "No man is an island, entire of itself; every man is a piece of the continent.", author: "John Donne" },
+  { text: "We rise by lifting others.", author: "Robert Ingersoll" },
+  { text: "In diversity there is beauty and there is strength.", author: "Maya Angelou" },
+  { text: "The highest form of wisdom is kindness.", author: "The Talmud" }
+];
+
+let quoteIndex = 0;
+let quoteSeconds = 3600;
+let quoteInterval, timerInterval;
+
+function showQuote(idx) {
+  const q = quotes[idx % quotes.length];
+  const textEl = document.getElementById('quote-text');
+  const authorEl = document.getElementById('quote-author');
+  if (!textEl) return;
+  textEl.style.opacity = '0';
+  setTimeout(() => {
+    textEl.textContent = q.text;
+    authorEl.textContent = '— ' + q.author;
+    textEl.style.opacity = '1';
+    textEl.style.transition = 'opacity 0.6s ease';
+  }, 300);
+}
+
+function updateTimer() {
+  const el = document.getElementById('quote-timer');
+  if (!el) return;
+  const m = Math.floor(quoteSeconds / 60);
+  const s = quoteSeconds % 60;
+  el.textContent = `Next in ${m}:${s.toString().padStart(2,'0')}`;
+  if (quoteSeconds > 0) quoteSeconds--;
+  else {
+    quoteSeconds = 3600;
+    quoteIndex = (quoteIndex + 1) % quotes.length;
+    showQuote(quoteIndex);
+  }
+}
+
+function initQuotes() {
+  // Pick a random starting quote, then advance hourly
+  const h = new Date().getHours();
+  const day = new Date().getDate();
+  quoteIndex = (h * 7 + day * 13) % quotes.length;
+  quoteSeconds = 3600 - (new Date().getMinutes() * 60 + new Date().getSeconds());
+  showQuote(quoteIndex);
+  clearInterval(timerInterval);
+  timerInterval = setInterval(updateTimer, 1000);
+}
+
+// ===== STATE =====
+let deadlines = JSON.parse(localStorage.getItem('mstudio_deadlines') || '[]');
+let minutesDocs = JSON.parse(localStorage.getItem('mstudio_minutes') || '[]');
+let currentMinutesId = null;
+let saveTimer = null;
+let aiContext = 'general';
+
+function init() {
+  const now = new Date();
+  const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
+  const dateStr = now.toLocaleDateString('en-GB', opts);
+  document.getElementById('topbar-date').textContent = dateStr;
+  document.getElementById('dash-date').textContent = dateStr;
+  const h = now.getHours();
+  document.getElementById('dash-greeting').textContent = (h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening') + ', Mo.';
+  document.getElementById('dl-date').valueAsDate = now;
+  document.getElementById('min-date').valueAsDate = now;
+  document.getElementById('quick-notes').value = localStorage.getItem('mstudio_quicknotes') || '';
+  loadEmail();
+  document.getElementById('col-todo').innerHTML = localStorage.getItem('mstudio_task_todo') || '';
+  document.getElementById('col-inprogress').innerHTML = localStorage.getItem('mstudio_task_progress') || '';
+  document.getElementById('col-done').innerHTML = localStorage.getItem('mstudio_task_done') || '';
+  initQuotes();
+  renderDeadlines(); renderDashboard();
+  if (minutesDocs.length === 0) newMinutes(true);
+  else { currentMinutesId = minutesDocs[0].id; renderMinutesList(); loadMinutesDoc(currentMinutesId); }
+
+  // Attach smart editor behavior to all task columns and minutes body
+  ['col-todo','col-inprogress','col-done'].forEach(id => {
+    const ta = document.getElementById(id);
+    if (ta) attachEditorBehavior(ta, saveTasks);
+  });
+  const minBody = document.getElementById('min-body');
+  if (minBody) attachEditorBehavior(minBody, autoSaveMinutes);
+}
+
+function saveQuickNotes() {
+  localStorage.setItem('mstudio_quicknotes', document.getElementById('quick-notes').value);
+  renderDashboard();
+}
+
+function saveTasks() {
+  localStorage.setItem('mstudio_task_todo', document.getElementById('col-todo').innerHTML);
+  localStorage.setItem('mstudio_task_progress', document.getElementById('col-inprogress').innerHTML);
+  localStorage.setItem('mstudio_task_done', document.getElementById('col-done').innerHTML);
+  renderDashboard();
+}
+
+// TABS
+function switchTab(tab, event) {
+  if (event) event.preventDefault();
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  const panel = document.getElementById(tab);
+  if (!panel) return;
+  panel.classList.add('active');
+  ['dashboard','deadlines','email','minutes','calendar'].forEach((t,i) => {
+    if (t === tab) document.querySelectorAll('.nav-tab')[i].classList.add('active');
+  });
+  aiContext = tab === 'email' ? 'email' : tab === 'minutes' ? 'minutes' : 'general';
+  if (tab !== 'calendar') renderDashboard();
+}
+
+// DASHBOARD
+function renderDashboard() {
+  const getTextCount = id => { const el = document.getElementById(id); return el ? (el.innerText || '').split('\n').filter(l => l.trim()).length : 0; };
+  const todo = getTextCount('col-todo');
+  const prog = getTextCount('col-inprogress');
+  const done = getTextCount('col-done');
+  document.getElementById('stat-urgent').textContent = todo;
+  document.getElementById('stat-open').textContent = prog;
+  document.getElementById('stat-done').textContent = done;
+  const preview = document.getElementById('dash-tasks-preview');
+  if (preview) { const n = localStorage.getItem('mstudio_quicknotes') || ''; preview.textContent = n.slice(0,200) || 'No notes yet.'; }
+  const dd = document.getElementById('dash-deadlines');
+  if (!dd) return;
+  const upcoming = [...deadlines].filter(d => d.status !== 'done').sort((a,b) => new Date(a.date)-new Date(b.date)).slice(0,5);
+  if (upcoming.length === 0) { dd.innerHTML = '<div class="empty">No deadlines added yet.</div>'; return; }
+  dd.innerHTML = upcoming.map(d => {
+    const s = getDLStatus(d);
+    const cls = s.cls === 'status-overdue' ? 'urgent' : s.cls === 'status-today' ? 'soon' : 'ok';
+    const fmt = new Date(d.date+'T00:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'short'});
+    return `<div class="dl-mini ${cls}"><span class="dl-mini-name">${d.name}</span><span class="dl-mini-date">${fmt} · <span class="dl-status ${s.cls}">${s.label}</span></span></div>`;
+  }).join('');
+}
+
+// DEADLINES
+function addDeadline(e) {
+  e.preventDefault();
+  const name = document.getElementById('dl-name').value.trim();
+  const date = document.getElementById('dl-date').value;
+  if (!name || !date) return;
+  deadlines.unshift({ id: Date.now(), name, date, cat: document.getElementById('dl-cat').value.trim(), assigned: document.getElementById('dl-assigned').value.trim(), status: document.getElementById('dl-status').value });
+  saveDeadlines();
+  document.getElementById('dl-name').value = '';
+  document.getElementById('dl-cat').value = '';
+  document.getElementById('dl-assigned').value = '';
+  renderDeadlines(); renderDashboard();
+}
+
+function deleteDeadline(id) { deadlines = deadlines.filter(x => x.id !== id); saveDeadlines(); renderDeadlines(); renderDashboard(); }
+
+function toggleDeadlineDone(id) {
+  const d = deadlines.find(x => x.id === id);
+  if (d) { d.status = d.status === 'done' ? 'upcoming' : 'done'; saveDeadlines(); renderDeadlines(); renderDashboard(); }
+}
+
+function saveDeadlines() { localStorage.setItem('mstudio_deadlines', JSON.stringify(deadlines)); }
+
+function getDLStatus(d) {
+  if (d.status === 'done') return { cls:'status-done', label:'Done' };
+  const now = new Date(); now.setHours(0,0,0,0);
+  const dt = new Date(d.date+'T00:00:00');
+  const diff = Math.round((dt - now) / 86400000);
+  if (diff < 0) return { cls:'status-overdue', label:'Overdue' };
+  if (diff === 0) return { cls:'status-today', label:'Today' };
+  if (diff <= 3) return { cls:'status-upcoming', label:`In ${diff}d` };
+  return { cls:'status-ok', label:`In ${diff}d` };
+}
+
+function renderDeadlines() {
+  const el = document.getElementById('dl-rows');
+  if (!el) return;
+  if (deadlines.length === 0) { el.innerHTML = '<div class="empty">No deadlines yet. Add one above.</div>'; return; }
+  const sorted = [...deadlines].sort((a,b) => new Date(a.date)-new Date(b.date));
+  el.innerHTML = sorted.map(d => {
+    const s = getDLStatus(d);
+    return `<div class="dl-row">
+      <span class="dl-editable dl-name" contenteditable="true" spellcheck="true"
+        onblur="updateDeadline(${d.id},'name',this.textContent.trim())"
+        onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"
+      >${d.name}</span>
+      <span class="dl-editable dl-cat" contenteditable="true" spellcheck="true"
+        onblur="updateDeadline(${d.id},'cat',this.textContent.trim())"
+        onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"
+      >${d.cat||''}</span>
+      <span class="dl-editable dl-assigned" contenteditable="true" spellcheck="true"
+        onblur="updateDeadline(${d.id},'assigned',this.textContent.trim())"
+        onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"
+      >${d.assigned||''}</span>
+      <input class="dl-date-input" type="date" value="${d.date}"
+        onchange="updateDeadline(${d.id},'date',this.value)"
+      >
+      <span style="display:flex;align-items:center;gap:6px;">
+        <span class="dl-status ${s.cls}">${s.label}</span>
+        <button class="btn btn-ghost" style="padding:2px 8px;font-size:10px;" onclick="toggleDeadlineDone(${d.id})">${d.status==='done'?'\u21A9':'\u2713'}</button>
+        <button class="btn btn-danger" style="padding:2px 8px;font-size:10px;" onclick="deleteDeadline(${d.id})">&#x2715;</button>
+      </span>
+    </div>`;
+  }).join('');
+}
+
+function updateDeadline(id, field, value) {
+  const d = deadlines.find(x => x.id === id);
+  if (!d || d[field] === value) return;
+  d[field] = value;
+  saveDeadlines();
+  renderDeadlines();
+  renderDashboard();
+}
+
+// ===== SMART EDITOR ENGINE =====
+// Works with contenteditable divs
+
+const AUTO_PREFIXES = ['• ', '- ', '□ ', '✓ ', '✗ '];
+
+function getCaretLineText() {
+  const sel = window.getSelection();
+  if (!sel || !sel.rangeCount) return { line: '', prefix: null, numbered: false, num: 0 };
+  const range = sel.getRangeAt(0).cloneRange();
+  range.collapse(true);
+  // Expand range to start of line
+  range.setStart(range.startContainer, 0);
+  const textBeforeCursor = range.toString();
+  // Get just the last line (after last newline)
+  const lines = textBeforeCursor.split('\n');
+  const lineText = lines[lines.length - 1];
+  const numMatch = lineText.match(/^(\d+)\.\s/);
+  if (numMatch) return { line: lineText, prefix: null, numbered: true, num: parseInt(numMatch[1]) };
+  for (const p of AUTO_PREFIXES) {
+    if (lineText.startsWith(p)) return { line: lineText, prefix: p, numbered: false, num: 0 };
+  }
+  return { line: lineText, prefix: null, numbered: false, num: 0 };
+}
+
+function handleSmartEnter(e, el, saveCallback) {
+  if (e.key !== 'Enter') return;
+  const info = getCaretLineText();
+  if (!info.prefix && !info.numbered) return;
+  e.preventDefault();
+
+  const contentAfterPrefix = info.numbered
+    ? info.line.replace(/^\d+\.\s/, '')
+    : info.line.substring((info.prefix || '').length);
+
+  if (contentAfterPrefix.trim() === '') {
+    // Empty prefixed line — stop the list, just go to new line
+    const prefixLen = info.numbered ? (info.num + '. ').length : info.prefix.length;
+    for (let i = 0; i < prefixLen; i++) document.execCommand('delete', false, null);
+    document.execCommand('insertParagraph', false, null);
+  } else {
+    const nextPrefix = info.numbered ? (info.num + 1) + '. ' : info.prefix;
+    document.execCommand('insertParagraph', false, null);
+    document.execCommand('insertText', false, nextPrefix);
+  }
+  if (saveCallback) saveCallback();
+}
+
+function handleShortcuts(e, el, saveCallback) {
+  const ctrl = e.ctrlKey || e.metaKey;
+  if (!ctrl) return;
+  if (e.key === 'b' || e.key === 'B') { e.preventDefault(); document.execCommand('bold', false, null); }
+  else if (e.key === 'i' || e.key === 'I') { e.preventDefault(); document.execCommand('italic', false, null); }
+  else if (e.key === 'u' || e.key === 'U') { e.preventDefault(); document.execCommand('underline', false, null); }
+  else return;
+  if (saveCallback) saveCallback();
+}
+
+function attachEditorBehavior(el, saveCallback) {
+  el.addEventListener('keydown', e => {
+    handleSmartEnter(e, el, saveCallback);
+    handleShortcuts(e, el, saveCallback);
+  });
+}
+
+// TASK FORMATTING
+let activeTaskCol = 'col-todo';
+let taskNumberedCounter = 1;
+
+function setActiveTaskCol(id) { activeTaskCol = id; }
+
+function taskFmt(type) {
+  const el = document.getElementById(activeTaskCol);
+  if (!el) return;
+  el.focus();
+  if (type === 'bold') document.execCommand('bold', false, null);
+  else if (type === 'italic') document.execCommand('italic', false, null);
+  else if (type === 'underline') document.execCommand('underline', false, null);
+  saveTasks();
+}
+
+function taskInsert(prefix) {
+  const el = document.getElementById(activeTaskCol);
+  if (!el) return;
+  el.focus();
+  if (prefix === '\n---\n') {
+    document.execCommand('insertHTML', false, '<br>─────────────────<br>');
+  } else {
+    // Insert prefix at beginning of current line
+    const sel = window.getSelection();
+    if (sel.rangeCount) {
+      const range = sel.getRangeAt(0);
+      range.collapse(true);
+      // Move to start of line
+      const textNode = document.createTextNode(prefix);
+      range.insertNode(textNode);
+      range.setStartAfter(textNode);
+      range.setEndAfter(textNode);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    } else {
+      document.execCommand('insertText', false, prefix);
+    }
+  }
+  saveTasks();
+}
+
+function taskNumbered() {
+  const el = document.getElementById(activeTaskCol);
+  if (!el) return;
+  el.focus();
+  document.execCommand('insertText', false, taskNumberedCounter + '. ');
+  taskNumberedCounter++;
+  saveTasks();
+}
+
+function minH(level) {
+  const el = document.getElementById('min-body');
+  if (!el) return;
+  el.focus();
+  if (level === 1) {
+    document.execCommand('fontSize', false, '5');
+    document.execCommand('bold', false, null);
+  } else {
+    document.execCommand('fontSize', false, '4');
+    document.execCommand('bold', false, null);
+  }
+  autoSaveMinutes();
+}
+
+function taskH(level) {
+  const el = document.getElementById(activeTaskCol);
+  if (!el) return;
+  el.focus();
+  if (level === 1) {
+    document.execCommand('fontSize', false, '5');
+    document.execCommand('bold', false, null);
+  } else {
+    document.execCommand('fontSize', false, '4');
+    document.execCommand('bold', false, null);
+  }
+  saveTasks();
+}
+
+// EMAIL
+const templates = {
+  followup: { to:'', subject:'Following up on our last conversation', body:'Dear [Name],\n\nI hope this message finds you well. I am writing to follow up on our previous conversation regarding [topic].\n\nCould you kindly let me know the current status or any updates you may have?\n\nThank you for your time and I look forward to hearing from you.\n\nBest regards,\nMo' },
+  meeting:  { to:'', subject:'Meeting Request: [Topic]', body:'Dear [Name],\n\nI hope you are doing well. I would like to schedule a meeting to discuss [topic].\n\nWould any of the following times work for you?\n- [Date 1, Time]\n- [Date 2, Time]\n- [Date 3, Time]\n\nPlease let me know which option suits you best.\n\nKind regards,\nMo' },
+  thankyou: { to:'', subject:'Thank you', body:'Dear [Name],\n\nI wanted to take a moment to thank you for [reason]. Your support has been greatly appreciated.\n\nWith warm regards,\nMo' },
+  submittal:{ to:'', subject:'Submission: [Document Title]', body:'Dear [Name],\n\nPlease find attached the [document name] as discussed.\n\nSummary:\n- \n- \n\nShould you have any questions, please do not hesitate to contact me.\n\nBest regards,\nMo' }
+};
+
+function saveEmail() {
+  localStorage.setItem('mstudio_email_to', document.getElementById('email-to').value);
+  localStorage.setItem('mstudio_email_cc', document.getElementById('email-cc').value);
+  localStorage.setItem('mstudio_email_subject', document.getElementById('email-subject').value);
+  localStorage.setItem('mstudio_email_body', document.getElementById('email-body').value);
+}
+
+function loadEmail() {
+  const to = localStorage.getItem('mstudio_email_to');
+  const cc = localStorage.getItem('mstudio_email_cc');
+  const subject = localStorage.getItem('mstudio_email_subject');
+  const body = localStorage.getItem('mstudio_email_body');
+  if (to) document.getElementById('email-to').value = to;
+  if (cc) document.getElementById('email-cc').value = cc;
+  if (subject) document.getElementById('email-subject').value = subject;
+  if (body) document.getElementById('email-body').value = body;
+}
+
+function loadTemplate(t) { const tpl = templates[t]; document.getElementById('email-to').value = tpl.to; document.getElementById('email-subject').value = tpl.subject; document.getElementById('email-body').value = tpl.body; }
+
+function emailWrap(before, after) {
+  const ta = document.getElementById('email-body');
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  ta.value = ta.value.substring(0,s) + before + ta.value.substring(s,e) + after + ta.value.substring(e);
+  ta.focus();
+}
+
+function emailBullet() {
+  const ta = document.getElementById('email-body');
+  const s = ta.selectionStart;
+  ta.value = ta.value.substring(0,s) + '\n• ' + ta.value.substring(s);
+  ta.selectionStart = ta.selectionEnd = s + 3;
+  ta.focus();
+}
+
+function clearEmail() { ['email-to','email-cc','email-subject','email-body'].forEach(id => document.getElementById(id).value = ''); ['mstudio_email_to','mstudio_email_cc','mstudio_email_subject','mstudio_email_body'].forEach(k => localStorage.removeItem(k)); }
+
+function copyEmail() {
+  const full = `To: ${document.getElementById('email-to').value}\nSubject: ${document.getElementById('email-subject').value}\n\n${document.getElementById('email-body').value}`;
+  navigator.clipboard.writeText(full).then(() => alert('Email copied to clipboard!'));
+}
+
+// MINUTES FORMATTING
+function minFmt(type) {
+  const el = document.getElementById('min-body');
+  if (!el) return;
+  el.focus();
+  if (type === 'bold') document.execCommand('bold', false, null);
+  else if (type === 'italic') document.execCommand('italic', false, null);
+  else if (type === 'underline') document.execCommand('underline', false, null);
+  autoSaveMinutes();
+}
+
+function minInsert(prefix, suffix) {
+  const el = document.getElementById('min-body');
+  if (!el) return;
+  el.focus();
+  if (prefix === '\n---\n') {
+    document.execCommand('insertHTML', false, '<br>─────────────────<br>');
+  } else {
+    document.execCommand('insertText', false, prefix);
+  }
+  autoSaveMinutes();
+}
+
+let numberedCounter = 1;
+function minNumbered() {
+  const el = document.getElementById('min-body');
+  if (!el) return;
+  el.focus();
+  document.execCommand('insertText', false, numberedCounter + '. ');
+  numberedCounter++;
+  autoSaveMinutes();
+}
+
+// MINUTES DOCS
+function newMinutes(silent) {
+  numberedCounter = 1; taskNumberedCounter = 1;
+  const id = Date.now();
+  const doc = { id, title:'New Meeting', date: new Date().toISOString().slice(0,10), location:'', attendees:'', body:'AGENDA\n1. \n2. \n\nDISCUSSION\n\n\nACTION ITEMS\n□ \n□ \n\nNEXT MEETING\n' };
+  minutesDocs.unshift(doc);
+  saveMinutesDocs();
+  currentMinutesId = id;
+  renderMinutesList();
+  loadMinutesDoc(id);
+}
+
+function renderMinutesList() {
+  const el = document.getElementById('minutes-list');
+  if (!el) return;
+  if (minutesDocs.length === 0) { el.innerHTML = '<div class="empty">No documents</div>'; return; }
+  el.innerHTML = minutesDocs.map(d => `
+    <div class="minutes-item ${d.id === currentMinutesId ? 'active' : ''}" onclick="selectMinutes(${d.id})">
+      <div class="minutes-item-title">${d.title || 'Untitled'}</div>
+      <div class="minutes-item-date">${d.date || ''}</div>
+    </div>`).join('');
+}
+
+function selectMinutes(id) { autoSaveMinutes(); currentMinutesId = id; loadMinutesDoc(id); renderMinutesList(); }
+
+function loadMinutesDoc(id) {
+  const d = minutesDocs.find(x => x.id === id);
+  if (!d) return;
+  document.getElementById('min-title').value = d.title || '';
+  document.getElementById('min-date').value = d.date || '';
+  document.getElementById('min-location').value = d.location || '';
+  document.getElementById('min-attendees').value = d.attendees || '';
+  document.getElementById('min-body').innerHTML = d.body || '';
+  numberedCounter = 1;
+}
+
+function autoSaveMinutes() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    const d = minutesDocs.find(x => x.id === currentMinutesId);
+    if (!d) return;
+    d.title = document.getElementById('min-title').value;
+    d.date = document.getElementById('min-date').value;
+    d.location = document.getElementById('min-location').value;
+    d.attendees = document.getElementById('min-attendees').value;
+    d.body = document.getElementById('min-body').innerHTML;
+    saveMinutesDocs(); renderMinutesList();
+    const badge = document.getElementById('saved-badge');
+    badge.classList.add('show');
+    setTimeout(() => badge.classList.remove('show'), 2000);
+  }, 600);
+}
+
+function deleteMinutes() {
+  if (!currentMinutesId || !confirm('Delete this document?')) return;
+  minutesDocs = minutesDocs.filter(x => x.id !== currentMinutesId);
+  saveMinutesDocs();
+  if (minutesDocs.length > 0) { currentMinutesId = minutesDocs[0].id; renderMinutesList(); loadMinutesDoc(currentMinutesId); }
+  else { currentMinutesId = null; renderMinutesList(); newMinutes(true); }
+}
+
+function copyMinutes() {
+  const d = minutesDocs.find(x => x.id === currentMinutesId);
+  if (!d) return;
+  navigator.clipboard.writeText(`${d.title}\nDate: ${d.date} | Location: ${d.location} | Attendees: ${d.attendees}\n\n${d.body}`).then(() => alert('Minutes copied!'));
+}
+
+function saveMinutesDocs() { localStorage.setItem('mstudio_minutes', JSON.stringify(minutesDocs)); }
+
+// AI
+function toggleAI() {
+  const panel = document.getElementById('ai-panel');
+  panel.classList.toggle('open');
+  if (panel.classList.contains('open')) document.getElementById('ai-input').focus();
+}
+
+async function sendAI() {
+  const input = document.getElementById('ai-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  let ctx = '';
+  if (aiContext === 'email') {
+    const body = document.getElementById('email-body').value;
+    const subj = document.getElementById('email-subject').value;
+    if (body || subj) ctx = `\n\n[Current email — Subject: "${subj}" Body: "${body.slice(0,400)}"]`;
+  } else if (aiContext === 'minutes') {
+    const body = document.getElementById('min-body').innerText || '';
+    const title = document.getElementById('min-title').value;
+    if (body || title) ctx = `\n\n[Current minutes — Title: "${title}" Content: "${body.slice(0,400)}"]`;
+  }
+  appendAIMsg('user', msg);
+  const loading = appendAIMsg('ai', 'Thinking...', true);
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: 'You are a concise professional writing assistant for Mo, a researcher at the WHO Collaborating Centre for Health Literacy at TU Munich. Help with emails, meeting minutes, professional writing, research summaries, and action items. Keep responses practical and well-structured. Do not use em dashes.',
+        messages: [{ role: 'user', content: msg + ctx }]
+      })
+    });
+    const data = await resp.json();
+    const text = data.content?.map(b => b.text || '').join('') || 'Sorry, no response received.';
+    loading.remove();
+    appendAIMsg('ai', text);
+  } catch(e) {
+    loading.remove();
+    appendAIMsg('ai', 'Could not reach the assistant. Please try again.');
+  }
+}
+
+function appendAIMsg(role, text, isLoading) {
+  const msgs = document.getElementById('ai-messages');
+  const div = document.createElement('div');
+  div.className = `ai-msg ${role}${isLoading ? ' loading' : ''}`;
+  if (role === 'ai') { div.innerHTML = `<span class="ai-label">Assistant</span>${text.replace(/\n/g,'<br>')}`; }
+  else { div.textContent = text; }
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+init();
+</script>
+
+<!-- Google Identity Services -->
+<script>
+const CAL_CLIENT_ID = '676542278417-bb048oic0ejdjc13emrpu9i33qunnh9t.apps.googleusercontent.com';
+const CAL_REDIRECT_URI = 'https://mohanadalyousefy.github.io/Mo-studio/MoStudio.html';
+const CAL_SCOPE = 'https://www.googleapis.com/auth/calendar';
+
+let calAccessToken = null;
+let calCurrentDate = new Date();
+let calEvents = [];
+
+// ===== AUTH via redirect =====
+function calSignIn() {
+  const state = Math.random().toString(36).substring(2);
+  localStorage.setItem('cal_oauth_state', state);
+  localStorage.setItem('cal_return_tab', 'calendar');
+
+  const params = new URLSearchParams({
+    client_id: CAL_CLIENT_ID,
+    redirect_uri: CAL_REDIRECT_URI,
+    response_type: 'token',
+    scope: CAL_SCOPE,
+    state: state,
+    include_granted_scopes: 'true'
+  });
+
+  window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
+}
+
+function calHandleRedirect() {
+  const hash = window.location.hash.substring(1);
+  if (!hash || !hash.includes('access_token')) return;
+  const params = new URLSearchParams(hash);
+  const token = params.get('access_token');
+  if (!token) return;
+  localStorage.removeItem('cal_oauth_state');
+  calAccessToken = token;
+  localStorage.setItem('cal_token', token);
+  // Remove hash completely and permanently before doing anything else
+  history.replaceState(null, document.title, window.location.pathname + window.location.search);
+  // Small delay to ensure hash is gone before any rendering
+  setTimeout(() => {
+    calOnSignedIn();
+    switchTab('calendar');
+  }, 50);
+}
+
+function calTryRestore() {
+  const saved = localStorage.getItem('cal_token');
+  if (saved) {
+    calAccessToken = saved;
+    fetch('https://www.googleapis.com/calendar/v3/calendars/primary?fields=id', {
+      headers: { Authorization: 'Bearer ' + calAccessToken }
+    }).then(r => {
+      if (r.ok) calOnSignedIn();
+      else { localStorage.removeItem('cal_token'); calAccessToken = null; }
+    }).catch(() => { localStorage.removeItem('cal_token'); calAccessToken = null; });
+  }
+}
+
+function calSignOut() {
+  calAccessToken = null;
+  localStorage.removeItem('cal_token');
+  calEvents = [];
+  document.getElementById('cal-auth-box').style.display = 'block';
+  const v = document.getElementById('cal-view');
+  v.style.display = 'none';
+  document.getElementById('cal-signout-btn').style.display = 'none';
+  document.getElementById('cal-dash-card').style.display = 'none';
+  document.getElementById('cal-upcoming-dash').innerHTML = '<div style="color:var(--ink3);font-size:13px;">Connect calendar to see events.</div>';
+}
+
+function calOnSignedIn() {
+  document.getElementById('cal-auth-box').style.display = 'none';
+  const v = document.getElementById('cal-view');
+  v.style.cssText = 'display:flex;flex:1;overflow:hidden;flex-direction:column;gap:16px;';
+  document.getElementById('cal-signout-btn').style.display = 'inline';
+  const calDash = document.getElementById('cal-dash-card');
+  if (calDash) calDash.style.display = 'flex';
+  const grid = document.querySelector('.dash-grid');
+  if (grid) grid.classList.add('has-calendar');
+  const dateInput = document.getElementById('cal-new-date');
+  if (dateInput) dateInput.valueAsDate = new Date();
+  calFetchEvents();
+}
+
+// ===== FETCH EVENTS =====
+async function calFetchEvents() {
+  if (!calAccessToken) return;
+  const start = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth(), 1).toISOString();
+  const end = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth() + 2, 0).toISOString();
+  try {
+    const resp = await fetch(
+      `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${encodeURIComponent(start)}&timeMax=${encodeURIComponent(end)}&singleEvents=true&orderBy=startTime&maxResults=100`,
+      { headers: { Authorization: 'Bearer ' + calAccessToken } }
+    );
+    if (!resp.ok) {
+      if (resp.status === 401) { calSignOut(); return; }
+      throw new Error('Calendar fetch failed');
+    }
+    const data = await resp.json();
+    calEvents = data.items || [];
+    if (calView === "week") calRenderWeek(); else calRenderMonth();
+    calRenderUpcoming();
+    calRenderDashUpcoming();
+  } catch(e) { console.error('Calendar error:', e); }
+}
+
+// ===== RENDER MONTH =====
+function calRenderMonth() {
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('cal-month-title').textContent = months[calCurrentDate.getMonth()] + ' ' + calCurrentDate.getFullYear();
+  const firstDay = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth(), 1);
+  const lastDay = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth() + 1, 0);
+  let startOffset = firstDay.getDay() - 1;
+  if (startOffset < 0) startOffset = 6;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const grid = document.getElementById('cal-days');
+  let html = '';
+  for (let i = startOffset - 1; i >= 0; i--) {
+    const d = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth(), -i);
+    html += `<div class="cal-day other-month"><div class="cal-day-num">${d.getDate()}</div></div>`;
+  }
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    const date = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth(), d);
+    const isToday = date.getTime() === today.getTime();
+    const dayEvents = calEvents.filter(e => {
+      const eDate = new Date((e.start.dateTime || e.start.date));
+      return eDate.getDate() === d && eDate.getMonth() === calCurrentDate.getMonth() && eDate.getFullYear() === calCurrentDate.getFullYear();
+    });
+    const chips = dayEvents.slice(0,3).map((e,i) => {
+      const colors = ['','green','red','orange'];
+      return `<div class="cal-event-chip ${colors[i%colors.length]}" title="${e.summary||'Event'}">${e.summary||'Event'}</div>`;
+    }).join('');
+    const more = dayEvents.length > 3 ? `<div style="font-size:10px;color:var(--ink3);">+${dayEvents.length-3} more</div>` : '';
+    const isSel = calSelectedDay && calSelectedDay.d===d && calSelectedDay.m===calCurrentDate.getMonth() && calSelectedDay.y===calCurrentDate.getFullYear();
+    html += `<div class="cal-day${isToday?' today':''}${isSel?' selected':''}" onclick="calSelectDay(${d},${calCurrentDate.getMonth()},${calCurrentDate.getFullYear()})"><div class="cal-day-num">${d}</div>${chips}${more}</div>`;
+  }
+  const totalCells = Math.ceil((startOffset + lastDay.getDate()) / 7) * 7;
+  const remaining = totalCells - startOffset - lastDay.getDate();
+  for (let d = 1; d <= remaining; d++) {
+    html += `<div class="cal-day other-month"><div class="cal-day-num">${d}</div></div>`;
+  }
+  grid.innerHTML = html;
+}
+
+// ===== RENDER UPCOMING =====
+function calRenderUpcoming() {
+  const el = document.getElementById('cal-upcoming-list');
+  if (!el) return;
+  const now = new Date();
+  const upcoming = calEvents.filter(e => new Date(e.start.dateTime||e.start.date) >= now)
+    .sort((a,b) => new Date(a.start.dateTime||a.start.date)-new Date(b.start.dateTime||b.start.date))
+    .slice(0,8);
+  if (upcoming.length === 0) { el.innerHTML = '<div class="empty">No upcoming events.</div>'; return; }
+  el.innerHTML = upcoming.map(e => {
+    const start = new Date(e.start.dateTime||e.start.date);
+    const isAllDay = !e.start.dateTime;
+    const dateStr = start.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+    const timeStr = isAllDay ? 'All day' : start.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    return `<div class="cal-event-item"><div class="cal-event-dot"></div><div class="cal-event-info"><div class="cal-event-title">${e.summary||'Untitled'}</div><div class="cal-event-time">${dateStr} · ${timeStr}</div></div></div>`;
+  }).join('');
+}
+
+function calRenderDashUpcoming() {
+  const el = document.getElementById('cal-upcoming-dash');
+  if (!el) return;
+  const now = new Date();
+  const in2days = new Date(now); in2days.setDate(now.getDate() + 2);
+  const upcoming = calEvents
+    .filter(e => {
+      const s = new Date(e.start.dateTime||e.start.date);
+      return s >= now && s <= in2days;
+    })
+    .sort((a,b) => new Date(a.start.dateTime||a.start.date)-new Date(b.start.dateTime||b.start.date))
+    .slice(0,6);
+  if (upcoming.length === 0) {
+    // Fall back to next 3 events if nothing in 2 days
+    const next = calEvents.filter(e => new Date(e.start.dateTime||e.start.date) >= now)
+      .sort((a,b) => new Date(a.start.dateTime||a.start.date)-new Date(b.start.dateTime||b.start.date))
+      .slice(0,3);
+    if (next.length === 0) { el.innerHTML = '<div style="color:var(--ink3);font-size:12px;padding:4px;">No upcoming events.</div>'; return; }
+    el.innerHTML = next.map(e => {
+      const start = new Date(e.start.dateTime||e.start.date);
+      const isAllDay = !e.start.dateTime;
+      const dateStr = start.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+      const timeStr = isAllDay ? 'All day' : start.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+      return `<div class="dash-cal-event"><div class="dash-cal-event-title">${e.summary||'Untitled'}</div><div class="dash-cal-event-time">${dateStr} · ${timeStr}</div></div>`;
+    }).join('');
+    return;
+  }
+  el.innerHTML = upcoming.map(e => {
+    const start = new Date(e.start.dateTime||e.start.date);
+    const isAllDay = !e.start.dateTime;
+    const dateStr = start.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+    const timeStr = isAllDay ? 'All day' : start.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    return `<div class="dash-cal-event"><div class="dash-cal-event-title">${e.summary||'Untitled'}</div><div class="dash-cal-event-time">${dateStr} · ${timeStr}</div></div>`;
+  }).join('');
+}
+
+// ===== NAV =====
+let calView = 'month'; // 'month' or 'week'
+let calSelectedDay = null;
+
+function calSetView(v) {
+  calView = v;
+  document.getElementById('btn-month-view').style.background = v === 'month' ? 'var(--navy)' : '';
+  document.getElementById('btn-month-view').style.color = v === 'month' ? 'white' : '';
+  document.getElementById('btn-month-view').style.borderColor = v === 'month' ? 'var(--navy)' : '';
+  document.getElementById('btn-week-view').style.background = v === 'week' ? 'var(--navy)' : '';
+  document.getElementById('btn-week-view').style.color = v === 'week' ? 'white' : '';
+  document.getElementById('btn-week-view').style.borderColor = v === 'week' ? 'var(--navy)' : '';
+  // Show/hide weekdays header (month view uses it, week view has its own)
+  const wh = document.getElementById('cal-weekdays-header');
+  if (wh) wh.style.display = v === 'month' ? '' : 'none';
+  if (v === 'month') calRenderMonth();
+  else calRenderWeek();
+}
+
+function calPrev() {
+  if (calView === 'month') calCurrentDate = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth()-1, 1);
+  else calCurrentDate = new Date(calCurrentDate.getTime() - 7*24*60*60*1000);
+  calFetchEvents();
+}
+
+function calNext() {
+  if (calView === 'month') calCurrentDate = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth()+1, 1);
+  else calCurrentDate = new Date(calCurrentDate.getTime() + 7*24*60*60*1000);
+  calFetchEvents();
+}
+
+function calToday() {
+  calCurrentDate = new Date();
+  calFetchEvents();
+}
+
+function calSelectDay(d, m, y) {
+  calSelectedDay = { d, m, y };
+  if (calView === 'month') calRenderMonth();
+  else calRenderWeek();
+  // Set new event date
+  const dateInput = document.getElementById('cal-new-date');
+  if (dateInput) {
+    const pad = n => String(n).padStart(2,'0');
+    dateInput.value = `${y}-${pad(m+1)}-${pad(d)}`;
+  }
+}
+
+function calRenderWeek() {
+  const d = new Date(calCurrentDate);
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  const monday = new Date(d);
+  monday.setDate(d.getDate() + diff);
+  monday.setHours(0,0,0,0);
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+
+  document.getElementById('cal-month-title').textContent =
+    monday.toLocaleDateString('en-GB',{day:'numeric',month:'short'}) + ' – ' +
+    sunday.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const hours = Array.from({length:24},(_,i)=>i);
+  const days = Array.from({length:7},(_,i)=>{ const d2=new Date(monday); d2.setDate(monday.getDate()+i); return d2; });
+
+  // Build header row
+  let headerHtml = '<div class="cal-week-header-row"><div class="cal-week-corner"></div>';
+  days.forEach(d2 => {
+    const isToday = d2.getTime() === today.getTime();
+    const isSel = calSelectedDay && d2.getDate()===calSelectedDay.d && d2.getMonth()===calSelectedDay.m && d2.getFullYear()===calSelectedDay.y;
+    const dayName = d2.toLocaleDateString('en-GB',{weekday:'short'}).toUpperCase();
+    const dayNum = d2.getDate();
+    headerHtml += `<div class="cal-week-day-header${isToday?' today':''}${isSel?' selected':''}" onclick="calSelectDay(${d2.getDate()},${d2.getMonth()},${d2.getFullYear()})">
+      <div class="cal-week-day-name">${dayName}</div>
+      <div class="cal-week-day-num">${dayNum}</div>
+    </div>`;
+  });
+  headerHtml += '</div>';
+
+  // Build time grid
+  let gridHtml = '<div class="cal-week-scroll"><div class="cal-week-grid">';
+  hours.forEach(h => {
+    const timeLabel = h === 0 ? '' : h < 12 ? h+' AM' : h === 12 ? '12 PM' : (h-12)+' PM';
+    gridHtml += `<div class="cal-week-time">${timeLabel}</div>`;
+    days.forEach(d2 => {
+      const isToday = d2.getTime() === today.getTime();
+      const cellEvents = calEvents.filter(e => {
+        if (!e.start.dateTime) return false;
+        const eStart = new Date(e.start.dateTime);
+        return eStart.getDate()===d2.getDate() && eStart.getMonth()===d2.getMonth() &&
+               eStart.getFullYear()===d2.getFullYear() && eStart.getHours()===h;
+      });
+      const evHtml = cellEvents.map(e => {
+        const eStart = new Date(e.start.dateTime);
+        const eEnd = new Date(e.end.dateTime);
+        const dur = Math.max(1, Math.round((eEnd - eStart) / 60000));
+        const height = Math.max(20, Math.round(dur * 48/60));
+        return `<div class="cal-week-event" style="height:${height}px;" title="${e.summary||''}">${e.summary||'Event'}</div>`;
+      }).join('');
+      gridHtml += `<div class="cal-week-cell${isToday?' today-col':''}" onclick="calSelectDay(${d2.getDate()},${d2.getMonth()},${d2.getFullYear()})">${evHtml}</div>`;
+    });
+  });
+  gridHtml += '</div></div>';
+
+  document.getElementById('cal-days').innerHTML = '<div class="cal-week-wrapper">' + headerHtml + gridHtml + '</div>';
+}
+
+// ===== ADD EVENT =====
+async function calAddEvent() {
+  if (!calAccessToken) { alert('Please sign in first.'); return; }
+  const title = document.getElementById('cal-new-title').value.trim();
+  const date = document.getElementById('cal-new-date').value;
+  const start = document.getElementById('cal-new-start').value;
+  const end = document.getElementById('cal-new-end').value;
+  const desc = document.getElementById('cal-new-desc').value.trim();
+  if (!title || !date) { alert('Please enter a title and date.'); return; }
+  const event = {
+    summary: title, description: desc,
+    start: { dateTime: `${date}T${start}:00`, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone },
+    end:   { dateTime: `${date}T${end}:00`,   timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }
+  };
+  try {
+    const resp = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + calAccessToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify(event)
+    });
+    if (!resp.ok) throw new Error('Failed');
+    document.getElementById('cal-new-title').value = '';
+    document.getElementById('cal-new-desc').value = '';
+    calFetchEvents();
+    alert('Event added!');
+  } catch(e) { alert('Could not add event. Please try again.'); }
+}
+
+// Init
+window.addEventListener('load', () => {
+  calHandleRedirect();
+  setTimeout(calTryRestore, 300);
+});
+</script>
+
+</body>
+</html>
