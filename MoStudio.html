@@ -315,9 +315,7 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
-    flex: 1;
-    overflow: hidden;
-    min-height: 0;
+    min-height: 320px;
   }
 
   .freeform-col {
@@ -326,7 +324,6 @@
     border-radius: 12px;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
     box-shadow: 0 1px 4px var(--shadow);
   }
 
@@ -364,10 +361,9 @@
     outline: none;
     padding: 16px 18px;
     line-height: 1.9;
-    overflow-y: auto;
     white-space: pre-wrap;
     word-wrap: break-word;
-    min-height: 220px;
+    min-height: 260px;
   }
 
   .freeform-col [contenteditable]:empty::before {
@@ -1714,30 +1710,91 @@ NEXT MEETING
 <script>
 // ===== QUOTES =====
 const quotes = [
+  // On work and progress
   { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
-  { text: "Your work is going to fill a large part of your life, and the only way to be truly satisfied is to do what you believe is great work.", author: "Steve Jobs" },
   { text: "It does not matter how slowly you go as long as you do not stop.", author: "Confucius" },
   { text: "Quality is not an act, it is a habit.", author: "Aristotle" },
   { text: "The best way to predict the future is to create it.", author: "Peter Drucker" },
-  { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" },
-  { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
-  { text: "Hard work beats talent when talent doesn't work hard.", author: "Tim Notke" },
-  { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
   { text: "Don't watch the clock; do what it does. Keep going.", author: "Sam Levenson" },
-  { text: "Research is to see what everybody else has seen, and to think what nobody else has thought.", author: "Albert Szent-Györgyi" },
-  { text: "The goal of education is not to increase the amount of knowledge but to create the possibilities for a child to invent and discover.", author: "Jean Piaget" },
-  { text: "Science knows no country, because knowledge belongs to humanity.", author: "Louis Pasteur" },
-  { text: "The good you do today will be forgotten tomorrow. Do good anyway.", author: "Mother Teresa" },
-  { text: "In the middle of every difficulty lies opportunity.", author: "Albert Einstein" },
+  { text: "Hard work beats talent when talent doesn't work hard.", author: "Tim Notke" },
   { text: "Small deeds done are better than great deeds planned.", author: "Peter Marshall" },
-  { text: "What we think, we become.", author: "Buddha" },
-  { text: "The journey of a thousand miles begins with one step.", author: "Lao Tzu" },
-  { text: "Innovation distinguishes between a leader and a follower.", author: "Steve Jobs" },
+  { text: "Start where you are. Use what you have. Do what you can.", author: "Arthur Ashe" },
+  { text: "Focus on being productive instead of busy.", author: "Tim Ferriss" },
+  { text: "Either you run the day or the day runs you.", author: "Jim Rohn" },
+  { text: "The key is not to prioritize what's on your schedule, but to schedule your priorities.", author: "Stephen Covey" },
+  { text: "Done is better than perfect.", author: "Sheryl Sandberg" },
+  { text: "You don't have to be great to start, but you have to start to be great.", author: "Zig Ziglar" },
+  { text: "Discipline is the bridge between goals and accomplishment.", author: "Jim Rohn" },
+  // On science and research
+  { text: "Research is to see what everybody else has seen, and to think what nobody else has thought.", author: "Albert Szent-Györgyi" },
+  { text: "Science knows no country, because knowledge belongs to humanity.", author: "Louis Pasteur" },
   { text: "Nothing in life is to be feared, it is only to be understood.", author: "Marie Curie" },
+  { text: "The important thing is to not stop questioning. Curiosity has its own reason for existing.", author: "Albert Einstein" },
+  { text: "In science the credit goes to the man who convinces the world, not to the man to whom the idea first occurs.", author: "Francis Galton" },
+  { text: "An investment in knowledge pays the best interest.", author: "Benjamin Franklin" },
+  { text: "The more I learn, the more I realize how much I don't know.", author: "Albert Einstein" },
+  { text: "Somewhere, something incredible is waiting to be known.", author: "Carl Sagan" },
+  { text: "The goal of science is to build better mousetraps. The goal of nature is to build better mice.", author: "Unknown" },
+  { text: "Without data, you're just another person with an opinion.", author: "W. Edwards Deming" },
+  { text: "Research is creating new knowledge.", author: "Neil Armstrong" },
+  // On health and medicine
+  { text: "The greatest wealth is health.", author: "Virgil" },
+  { text: "To keep the body in good health is a duty — otherwise we shall not be able to keep our mind strong and clear.", author: "Buddha" },
+  { text: "The art of medicine consists of amusing the patient while nature cures the disease.", author: "Voltaire" },
+  { text: "Wherever the art of medicine is loved, there is also a love of humanity.", author: "Hippocrates" },
+  { text: "A healthy outside starts from the inside.", author: "Robert Urich" },
+  { text: "Prevention is better than cure.", author: "Desiderius Erasmus" },
+  // On purpose and impact
+  { text: "The good you do today will be forgotten tomorrow. Do good anyway.", author: "Mother Teresa" },
   { text: "Act as if what you do makes a difference. It does.", author: "William James" },
-  { text: "Keep your face always toward the sunshine, and shadows will fall behind you.", author: "Walt Whitman" },
+  { text: "The purpose of life is not to be happy. It is to be useful, to be honorable, to be compassionate.", author: "Ralph Waldo Emerson" },
+  { text: "We make a living by what we get, but we make a life by what we give.", author: "Winston Churchill" },
+  { text: "In the middle of every difficulty lies opportunity.", author: "Albert Einstein" },
+  { text: "If you want to go fast, go alone. If you want to go far, go together.", author: "African Proverb" },
+  { text: "A single act of kindness throws out roots in all directions, and the roots spring up and make new trees.", author: "Amelia Earhart" },
+  { text: "Be the change you wish to see in the world.", author: "Mahatma Gandhi" },
+  // On mindset and resilience
+  { text: "What we think, we become.", author: "Buddha" },
+  { text: "The mind is everything. What you think you become.", author: "Buddha" },
   { text: "You are never too old to set another goal or to dream a new dream.", author: "C.S. Lewis" },
-  { text: "The future belongs to those who believe in the beauty of their dreams.", author: "Eleanor Roosevelt" }
+  { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
+  { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" },
+  { text: "It always seems impossible until it's done.", author: "Nelson Mandela" },
+  { text: "The only limit to our realization of tomorrow is our doubts of today.", author: "Franklin D. Roosevelt" },
+  { text: "Challenges are what make life interesting. Overcoming them is what makes life meaningful.", author: "Joshua Marine" },
+  { text: "Resilience is knowing that you are the only one that has the power and responsibility to pick yourself up.", author: "Mary Holloway" },
+  { text: "Fall seven times, stand up eight.", author: "Japanese Proverb" },
+  { text: "The human capacity for burden is like bamboo — far more flexible than you'd ever believe at first glance.", author: "Jodi Picoult" },
+  // On learning and wisdom
+  { text: "The journey of a thousand miles begins with one step.", author: "Lao Tzu" },
+  { text: "The future belongs to those who believe in the beauty of their dreams.", author: "Eleanor Roosevelt" },
+  { text: "Keep your face always toward the sunshine, and shadows will fall behind you.", author: "Walt Whitman" },
+  { text: "Education is the most powerful weapon which you can use to change the world.", author: "Nelson Mandela" },
+  { text: "Live as if you were to die tomorrow. Learn as if you were to live forever.", author: "Mahatma Gandhi" },
+  { text: "The more that you read, the more things you will know. The more that you learn, the more places you'll go.", author: "Dr. Seuss" },
+  { text: "Tell me and I forget. Teach me and I remember. Involve me and I learn.", author: "Benjamin Franklin" },
+  { text: "Wisdom is not a product of schooling but of the lifelong attempt to acquire it.", author: "Albert Einstein" },
+  // On creativity and innovation
+  { text: "Innovation distinguishes between a leader and a follower.", author: "Steve Jobs" },
+  { text: "Creativity is intelligence having fun.", author: "Albert Einstein" },
+  { text: "The best ideas come as jokes. Make your thinking as funny as possible.", author: "David Ogilvy" },
+  { text: "Every child is an artist. The problem is staying an artist when you grow up.", author: "Pablo Picasso" },
+  { text: "You can't use up creativity. The more you use, the more you have.", author: "Maya Angelou" },
+  // Arabic and Islamic wisdom
+  { text: "Seek knowledge, even unto China.", author: "Prophet Muhammad (PBUH)" },
+  { text: "The ink of the scholar is holier than the blood of the martyr.", author: "Islamic Proverb" },
+  { text: "He who knows himself knows his Lord.", author: "Ali ibn Abi Talib" },
+  { text: "Knowledge is light and ignorance is darkness.", author: "Arabic Proverb" },
+  { text: "A person's true wealth is the good they do in the world.", author: "Prophet Muhammad (PBUH)" },
+  { text: "Patience is the key to relief.", author: "Arabic Proverb" },
+  { text: "Do not be a slave to others when God has created you free.", author: "Ali ibn Abi Talib" },
+  // On collaboration and humanity
+  { text: "Alone we can do so little; together we can do so much.", author: "Helen Keller" },
+  { text: "The strength of the team is each individual member. The strength of each member is the team.", author: "Phil Jackson" },
+  { text: "No man is an island, entire of itself; every man is a piece of the continent.", author: "John Donne" },
+  { text: "We rise by lifting others.", author: "Robert Ingersoll" },
+  { text: "In diversity there is beauty and there is strength.", author: "Maya Angelou" },
+  { text: "The highest form of wisdom is kindness.", author: "The Talmud" }
 ];
 
 let quoteIndex = 0;
@@ -1773,9 +1830,10 @@ function updateTimer() {
 }
 
 function initQuotes() {
-  // Pick quote based on hour of day
+  // Pick a random starting quote, then advance hourly
   const h = new Date().getHours();
-  quoteIndex = h % quotes.length;
+  const day = new Date().getDate();
+  quoteIndex = (h * 7 + day * 13) % quotes.length;
   quoteSeconds = 3600 - (new Date().getMinutes() * 60 + new Date().getSeconds());
   showQuote(quoteIndex);
   clearInterval(timerInterval);
