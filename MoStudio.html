@@ -1373,7 +1373,10 @@
     <button onclick="exportData()" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:600;padding:5px 12px;border:1px solid rgba(255,255,255,0.25);border-radius:6px;background:none;color:rgba(255,255,255,0.7);cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'">⬇ Backup</button>
     <label style="font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:600;padding:5px 12px;border:1px solid rgba(255,255,255,0.25);border-radius:6px;background:none;color:rgba(255,255,255,0.7);cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'">⬆ Restore<input type="file" accept=".json" onchange="importData(event)" style="display:none;"></label>
   </div>
-  <div id="drive-sync-status" style="font-size:11px;color:rgba(255,255,255,0.5);transition:opacity 1s;opacity:0;margin-right:8px;"></div>
+  <div id="drive-sync-badge" style="display:flex;align-items:center;gap:6px;font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:600;padding:4px 11px;border-radius:20px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.45);margin-right:4px;transition:all 0.4s;">
+    <span id="drive-sync-dot" style="width:7px;height:7px;border-radius:50%;background:#666;flex-shrink:0;transition:background 0.4s;"></span>
+    <span id="drive-sync-label">Drive: not connected</span>
+  </div>
   <div class="topbar-date" id="topbar-date"></div>
 </div>
 
@@ -1922,8 +1925,8 @@ async function driveSaveData() {
       headers: { Authorization: 'Bearer ' + calAccessToken, 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
-    showSyncStatus('✓ Saved to Drive');
-  } catch(e) { console.error('Drive save error:', e); }
+    updateDriveBadge('saved');
+  } catch(e) { console.error('Drive save error:', e); updateDriveBadge('error'); }
 }
 
 async function driveLoadData() {
@@ -1996,7 +1999,7 @@ async function driveLoadData() {
     }
 
     renderDashboard();
-    showSyncStatus('✓ Loaded from Drive (' + (data.saved ? data.saved.slice(0,10) : '') + ')');
+    updateDriveBadge('connected');
     return true;
   } catch(e) { console.error('Drive load error:', e); return false; }
 }
@@ -2005,15 +2008,43 @@ async function driveLoadData() {
 function scheduleDriveSync() {
   if (!calAccessToken) return;
   clearTimeout(driveSyncTimer);
+  updateDriveBadge('saving');
   driveSyncTimer = setTimeout(driveSaveData, 3000);
 }
 
+function updateDriveBadge(state) {
+  // states: 'connected', 'saving', 'saved', 'error', 'disconnected'
+  const badge = document.getElementById('drive-sync-badge');
+  const dot = document.getElementById('drive-sync-dot');
+  const label = document.getElementById('drive-sync-label');
+  if (!badge || !dot || !label) return;
+
+  const states = {
+    connected:    { color: '#34d399', text: 'Drive: connected',  bg: 'rgba(52,211,153,0.12)', border: 'rgba(52,211,153,0.3)', textColor: '#34d399' },
+    saving:       { color: '#fbbf24', text: 'Drive: saving...',  bg: 'rgba(251,191,36,0.12)',  border: 'rgba(251,191,36,0.3)',  textColor: '#fbbf24' },
+    saved:        { color: '#34d399', text: 'Drive: saved ✓',    bg: 'rgba(52,211,153,0.12)', border: 'rgba(52,211,153,0.3)', textColor: '#34d399' },
+    error:        { color: '#f87171', text: 'Drive: sync error', bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.3)', textColor: '#f87171' },
+    disconnected: { color: '#666',    text: 'Drive: not connected', bg: 'rgba(255,255,255,0.05)', border: 'rgba(255,255,255,0.1)', textColor: 'rgba(255,255,255,0.4)' }
+  };
+
+  const s = states[state] || states.disconnected;
+  dot.style.background = s.color;
+  label.textContent = s.text;
+  label.style.color = s.textColor;
+  badge.style.background = s.bg;
+  badge.style.borderColor = s.border;
+
+  // After "saved", go back to "connected" after 2s
+  if (state === 'saved') {
+    setTimeout(() => updateDriveBadge('connected'), 2500);
+  }
+}
+
 function showSyncStatus(msg) {
-  const el = document.getElementById('drive-sync-status');
-  if (!el) return;
-  el.textContent = msg;
-  el.style.opacity = '1';
-  setTimeout(() => { el.style.opacity = '0'; }, 3000);
+  // Legacy — map to badge
+  if (msg.includes('Saved')) updateDriveBadge('saved');
+  else if (msg.includes('Loaded')) updateDriveBadge('connected');
+  else if (msg.includes('error')) updateDriveBadge('error');
 }
 
 // ===== BACKUP & RESTORE =====
@@ -2729,6 +2760,7 @@ function calOnSignedIn() {
   const dateInput = document.getElementById('cal-new-date');
   if (dateInput) dateInput.valueAsDate = new Date();
   calFetchEvents();
+  updateDriveBadge('connected');
   // Load data from Drive after sign-in
   setTimeout(driveLoadData, 1000);
 }
