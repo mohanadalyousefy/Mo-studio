@@ -1369,6 +1369,11 @@
     <button class="nav-tab" onclick="switchTab('minutes',event)">Minutes</button>
     <button class="nav-tab" onclick="switchTab('calendar',event)">Calendar</button>
   </div>
+  <div style="display:flex;align-items:center;gap:8px;margin-right:16px;">
+    <button onclick="exportData()" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:600;padding:5px 12px;border:1px solid rgba(255,255,255,0.25);border-radius:6px;background:none;color:rgba(255,255,255,0.7);cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'">⬇ Backup</button>
+    <label style="font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:600;padding:5px 12px;border:1px solid rgba(255,255,255,0.25);border-radius:6px;background:none;color:rgba(255,255,255,0.7);cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'">⬆ Restore<input type="file" accept=".json" onchange="importData(event)" style="display:none;"></label>
+  </div>
+  <div id="drive-sync-status" style="font-size:11px;color:rgba(255,255,255,0.5);transition:opacity 1s;opacity:0;margin-right:8px;"></div>
   <div class="topbar-date" id="topbar-date"></div>
 </div>
 
@@ -1855,6 +1860,274 @@ let currentMinutesId = null;
 let saveTimer = null;
 let aiContext = 'general';
 
+
+
+// ===== GOOGLE DRIVE SYNC =====
+// Uses Drive appdata scope — files are private and hidden from Drive UI
+const DRIVE_FILE_NAME = 'mostudio_data.json';
+let driveFileId = null;
+let driveSyncTimer = null;
+
+async function driveFindOrCreateFile() {
+  if (!calAccessToken) return null;
+  try {
+    // Search for existing file
+    const searchResp = await fetch(
+      "https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name='" + DRIVE_FILE_NAME + "'&fields=files(id,name)",
+      { headers: { Authorization: 'Bearer ' + calAccessToken } }
+    );
+    if (!searchResp.ok) return null;
+    const searchData = await searchResp.json();
+    if (searchData.files && searchData.files.length > 0) {
+      driveFileId = searchData.files[0].id;
+      return driveFileId;
+    }
+    // Create new file
+    const meta = { name: DRIVE_FILE_NAME, parents: ['appDataFolder'] };
+    const createResp = await fetch('https://www.googleapis.com/drive/v3/files?fields=id', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + calAccessToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify(meta)
+    });
+    if (!createResp.ok) return null;
+    const createData = await createResp.json();
+    driveFileId = createData.id;
+    return driveFileId;
+  } catch(e) { console.error('Drive find/create error:', e); return null; }
+}
+
+async function driveSaveData() {
+  if (!calAccessToken) return;
+  const fileId = driveFileId || await driveFindOrCreateFile();
+  if (!fileId) return;
+
+  const data = {
+    version: 2,
+    saved: new Date().toISOString(),
+    tasks_todo: localStorage.getItem('mstudio_task_todo') || '',
+    tasks_inprogress: localStorage.getItem('mstudio_task_progress') || '',
+    tasks_done: localStorage.getItem('mstudio_task_done') || '',
+    deadlines: localStorage.getItem('mstudio_deadlines') || '[]',
+    minutes: localStorage.getItem('mstudio_minutes') || '[]',
+    quicknotes: localStorage.getItem('mstudio_quicknotes') || '',
+    email_to: localStorage.getItem('mstudio_email_to') || '',
+    email_cc: localStorage.getItem('mstudio_email_cc') || '',
+    email_subject: localStorage.getItem('mstudio_email_subject') || '',
+    email_body: localStorage.getItem('mstudio_email_body') || ''
+  };
+
+  try {
+    await fetch('https://www.googleapis.com/upload/drive/v3/files/' + fileId + '?uploadType=media', {
+      method: 'PATCH',
+      headers: { Authorization: 'Bearer ' + calAccessToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    showSyncStatus('✓ Saved to Drive');
+  } catch(e) { console.error('Drive save error:', e); }
+}
+
+async function driveLoadData() {
+  if (!calAccessToken) return false;
+  const fileId = driveFileId || await driveFindOrCreateFile();
+  if (!fileId) return false;
+
+  try {
+    const resp = await fetch('https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media', {
+      headers: { Authorization: 'Bearer ' + calAccessToken }
+    });
+    if (!resp.ok) return false;
+    const data = await resp.json();
+    if (!data.version) return false;
+
+    // Restore all data
+    if (data.tasks_todo !== undefined) {
+      localStorage.setItem('mstudio_task_todo', data.tasks_todo);
+      const el = document.getElementById('col-todo');
+      if (el) el.innerHTML = data.tasks_todo;
+    }
+    if (data.tasks_inprogress !== undefined) {
+      localStorage.setItem('mstudio_task_progress', data.tasks_inprogress);
+      const el = document.getElementById('col-inprogress');
+      if (el) el.innerHTML = data.tasks_inprogress;
+    }
+    if (data.tasks_done !== undefined) {
+      localStorage.setItem('mstudio_task_done', data.tasks_done);
+      const el = document.getElementById('col-done');
+      if (el) el.innerHTML = data.tasks_done;
+    }
+    if (data.deadlines) {
+      localStorage.setItem('mstudio_deadlines', data.deadlines);
+      deadlines = JSON.parse(data.deadlines);
+      renderDeadlines();
+    }
+    if (data.minutes) {
+      localStorage.setItem('mstudio_minutes', data.minutes);
+      minutesDocs = JSON.parse(data.minutes);
+      renderMinutesList();
+      if (minutesDocs.length > 0 && !currentMinutesId) {
+        currentMinutesId = minutesDocs[0].id;
+        loadMinutesDoc(currentMinutesId);
+      }
+    }
+    if (data.quicknotes !== undefined) {
+      localStorage.setItem('mstudio_quicknotes', data.quicknotes);
+      const el = document.getElementById('quick-notes');
+      if (el) el.value = data.quicknotes;
+    }
+    if (data.email_to !== undefined) {
+      localStorage.setItem('mstudio_email_to', data.email_to);
+      const el = document.getElementById('email-to');
+      if (el) el.value = data.email_to;
+    }
+    if (data.email_cc !== undefined) {
+      localStorage.setItem('mstudio_email_cc', data.email_cc);
+      const el = document.getElementById('email-cc');
+      if (el) el.value = data.email_cc;
+    }
+    if (data.email_subject !== undefined) {
+      localStorage.setItem('mstudio_email_subject', data.email_subject);
+      const el = document.getElementById('email-subject');
+      if (el) el.value = data.email_subject;
+    }
+    if (data.email_body !== undefined) {
+      localStorage.setItem('mstudio_email_body', data.email_body);
+      const el = document.getElementById('email-body');
+      if (el) el.value = data.email_body;
+    }
+
+    renderDashboard();
+    showSyncStatus('✓ Loaded from Drive (' + (data.saved ? data.saved.slice(0,10) : '') + ')');
+    return true;
+  } catch(e) { console.error('Drive load error:', e); return false; }
+}
+
+// Debounced auto-save — saves 3 seconds after last change
+function scheduleDriveSync() {
+  if (!calAccessToken) return;
+  clearTimeout(driveSyncTimer);
+  driveSyncTimer = setTimeout(driveSaveData, 3000);
+}
+
+function showSyncStatus(msg) {
+  const el = document.getElementById('drive-sync-status');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.opacity = '1';
+  setTimeout(() => { el.style.opacity = '0'; }, 3000);
+}
+
+// ===== BACKUP & RESTORE =====
+function exportData() {
+  // Collect all data
+  const data = {
+    version: 1,
+    exported: new Date().toISOString(),
+    tasks_todo: document.getElementById('col-todo') ? document.getElementById('col-todo').innerHTML : '',
+    tasks_inprogress: document.getElementById('col-inprogress') ? document.getElementById('col-inprogress').innerHTML : '',
+    tasks_done: document.getElementById('col-done') ? document.getElementById('col-done').innerHTML : '',
+    deadlines: localStorage.getItem('mstudio_deadlines') || '[]',
+    minutes: localStorage.getItem('mstudio_minutes') || '[]',
+    quicknotes: localStorage.getItem('mstudio_quicknotes') || '',
+    email_to: localStorage.getItem('mstudio_email_to') || '',
+    email_cc: localStorage.getItem('mstudio_email_cc') || '',
+    email_subject: localStorage.getItem('mstudio_email_subject') || '',
+    email_body: localStorage.getItem('mstudio_email_body') || ''
+  };
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const date = new Date().toISOString().slice(0, 10);
+  a.href = url;
+  a.download = `MoStudio_backup_${date}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.version) { alert('Invalid backup file.'); return; }
+
+      // Restore tasks
+      if (data.tasks_todo !== undefined) {
+        localStorage.setItem('mstudio_task_todo', data.tasks_todo);
+        const el = document.getElementById('col-todo');
+        if (el) el.innerHTML = data.tasks_todo;
+      }
+      if (data.tasks_inprogress !== undefined) {
+        localStorage.setItem('mstudio_task_progress', data.tasks_inprogress);
+        const el = document.getElementById('col-inprogress');
+        if (el) el.innerHTML = data.tasks_inprogress;
+      }
+      if (data.tasks_done !== undefined) {
+        localStorage.setItem('mstudio_task_done', data.tasks_done);
+        const el = document.getElementById('col-done');
+        if (el) el.innerHTML = data.tasks_done;
+      }
+
+      // Restore deadlines
+      if (data.deadlines) {
+        localStorage.setItem('mstudio_deadlines', data.deadlines);
+        deadlines = JSON.parse(data.deadlines);
+        renderDeadlines();
+      }
+
+      // Restore minutes
+      if (data.minutes) {
+        localStorage.setItem('mstudio_minutes', data.minutes);
+        minutesDocs = JSON.parse(data.minutes);
+        renderMinutesList();
+        if (minutesDocs.length > 0) {
+          currentMinutesId = minutesDocs[0].id;
+          loadMinutesDoc(currentMinutesId);
+        }
+      }
+
+      // Restore quick notes
+      if (data.quicknotes !== undefined) {
+        localStorage.setItem('mstudio_quicknotes', data.quicknotes);
+        const el = document.getElementById('quick-notes');
+        if (el) el.value = data.quicknotes;
+      }
+
+      // Restore email
+      if (data.email_to !== undefined) {
+        localStorage.setItem('mstudio_email_to', data.email_to);
+        const el = document.getElementById('email-to');
+        if (el) el.value = data.email_to;
+      }
+      if (data.email_cc !== undefined) {
+        localStorage.setItem('mstudio_email_cc', data.email_cc);
+        const el = document.getElementById('email-cc');
+        if (el) el.value = data.email_cc;
+      }
+      if (data.email_subject !== undefined) {
+        localStorage.setItem('mstudio_email_subject', data.email_subject);
+        const el = document.getElementById('email-subject');
+        if (el) el.value = data.email_subject;
+      }
+      if (data.email_body !== undefined) {
+        localStorage.setItem('mstudio_email_body', data.email_body);
+        const el = document.getElementById('email-body');
+        if (el) el.value = data.email_body;
+      }
+
+      renderDashboard();
+      alert('✓ Data restored successfully from ' + (data.exported ? data.exported.slice(0,10) : 'backup') + '!');
+    } catch(err) {
+      alert('Could not read backup file. Make sure it is a valid MoStudio backup.');
+    }
+  };
+  reader.readAsText(file);
+  // Reset file input so same file can be imported again
+  event.target.value = '';
+}
+
 function init() {
   const now = new Date();
   const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
@@ -1887,13 +2160,18 @@ function init() {
 function saveQuickNotes() {
   localStorage.setItem('mstudio_quicknotes', document.getElementById('quick-notes').value);
   renderDashboard();
+  scheduleDriveSync();
 }
 
 function saveTasks() {
-  localStorage.setItem('mstudio_task_todo', document.getElementById('col-todo').innerHTML);
-  localStorage.setItem('mstudio_task_progress', document.getElementById('col-inprogress').innerHTML);
-  localStorage.setItem('mstudio_task_done', document.getElementById('col-done').innerHTML);
+  const todo = document.getElementById('col-todo');
+  const prog = document.getElementById('col-inprogress');
+  const done = document.getElementById('col-done');
+  if (todo) localStorage.setItem('mstudio_task_todo', todo.innerHTML);
+  if (prog) localStorage.setItem('mstudio_task_progress', prog.innerHTML);
+  if (done) localStorage.setItem('mstudio_task_done', done.innerHTML);
   renderDashboard();
+  scheduleDriveSync();
 }
 
 // TABS
@@ -1955,7 +2233,7 @@ function toggleDeadlineDone(id) {
   if (d) { d.status = d.status === 'done' ? 'upcoming' : 'done'; saveDeadlines(); renderDeadlines(); renderDashboard(); }
 }
 
-function saveDeadlines() { localStorage.setItem('mstudio_deadlines', JSON.stringify(deadlines)); }
+function saveDeadlines() { localStorage.setItem('mstudio_deadlines', JSON.stringify(deadlines)); scheduleDriveSync(); }
 
 function getDLStatus(d) {
   if (d.status === 'done') return { cls:'status-done', label:'Done' };
@@ -2161,6 +2439,7 @@ const templates = {
 };
 
 function saveEmail() {
+  scheduleDriveSync();
   localStorage.setItem('mstudio_email_to', document.getElementById('email-to').value);
   localStorage.setItem('mstudio_email_cc', document.getElementById('email-cc').value);
   localStorage.setItem('mstudio_email_subject', document.getElementById('email-subject').value);
@@ -2302,7 +2581,7 @@ function copyMinutes() {
   navigator.clipboard.writeText(`${d.title}\nDate: ${d.date} | Location: ${d.location} | Attendees: ${d.attendees}\n\n${d.body}`).then(() => alert('Minutes copied!'));
 }
 
-function saveMinutesDocs() { localStorage.setItem('mstudio_minutes', JSON.stringify(minutesDocs)); }
+function saveMinutesDocs() { localStorage.setItem('mstudio_minutes', JSON.stringify(minutesDocs)); scheduleDriveSync(); }
 
 // AI
 function toggleAI() {
@@ -2367,7 +2646,7 @@ init();
 <script>
 const CAL_CLIENT_ID = '676542278417-bb048oic0ejdjc13emrpu9i33qunnh9t.apps.googleusercontent.com';
 const CAL_REDIRECT_URI = 'https://mohanadalyousefy.github.io/Mo-studio/MoStudio.html';
-const CAL_SCOPE = 'https://www.googleapis.com/auth/calendar';
+const CAL_SCOPE = 'https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/drive.appdata';
 
 let calAccessToken = null;
 let calCurrentDate = new Date();
@@ -2450,6 +2729,8 @@ function calOnSignedIn() {
   const dateInput = document.getElementById('cal-new-date');
   if (dateInput) dateInput.valueAsDate = new Date();
   calFetchEvents();
+  // Load data from Drive after sign-in
+  setTimeout(driveLoadData, 1000);
 }
 
 // ===== FETCH EVENTS =====
