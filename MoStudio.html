@@ -129,6 +129,7 @@
   }
 
   .panel.active { display: flex; }
+  .panel:not(.active) { pointer-events: none; }
 
   /* Non-dashboard panels manage their own internal scroll */
   #tasks.panel, #deadlines.panel, #email.panel, #minutes.panel, #calendar.panel {
@@ -741,7 +742,8 @@
 
   .minutes-body [contenteditable] {
     width: 100%;
-    min-height: 300px;
+    min-height: 100%;
+    height: auto;
     border: none;
     background: none;
     font-family: 'Plus Jakarta Sans', sans-serif;
@@ -1318,6 +1320,104 @@
 
   .cal-weekdays { padding: 0 16px; }
 
+
+  /* Checklist task items */
+  .task-check-list { padding: 12px 16px 0; display: flex; flex-direction: column; gap: 6px; }
+
+  .task-check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    font-size: 14px;
+    color: var(--ink);
+    transition: background 0.1s;
+    cursor: default;
+  }
+
+  .task-check-item:hover { background: var(--border2); }
+
+  .task-check-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-top: 2px;
+    accent-color: var(--accent3);
+  }
+
+  .task-check-item.done-item {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+  }
+
+  .task-check-item.done-item .task-check-text {
+    text-decoration: line-through;
+    color: var(--ink3);
+  }
+
+  .task-check-text { flex: 1; line-height: 1.5; }
+
+  .task-check-del {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--ink3);
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.12s;
+    padding: 0 2px;
+  }
+
+  .task-check-item:hover .task-check-del { opacity: 1; }
+  .task-check-del:hover { color: var(--red); }
+
+  .task-add-row {
+    display: flex;
+    gap: 8px;
+    padding: 10px 16px 12px;
+    border-top: 1px solid var(--border2);
+    margin-top: 4px;
+  }
+
+  .task-add-input {
+    flex: 1;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 6px 10px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .task-add-input:focus { border-color: var(--accent); }
+  .task-add-input::placeholder { color: var(--ink3); }
+
+  .task-add-btn {
+    font-size: 18px;
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 7px;
+    background: var(--accent);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+
+  .task-add-btn:hover { background: var(--navy); }
+
   select { appearance: none; cursor: pointer; }
 
   /* Task inline formatting toolbar */
@@ -1458,36 +1558,41 @@
           <span style="font-size:11px;color:var(--ink3);margin-left:auto;">Select a column, then click a format button</span>
         </div>
         <div class="tasks-freeform-grid" style="border-radius:0;">
+          <!-- TO DO -->
           <div class="freeform-col" style="border-radius:0;border:none;border-right:1px solid var(--border);">
             <div class="freeform-col-header" style="border-radius:0;">
               <div class="freeform-col-dot dot-todo"></div>
               <div class="freeform-col-title">To Do</div>
             </div>
-            <div id="col-todo" contenteditable="true" data-placeholder="• Review consultation notes
-• Draft framework section
-• Follow up with WHO contacts
-
-Write anything here..." oninput="saveTasks()" onfocus="setActiveTaskCol('col-todo')"></div>
+            <div class="task-check-list" id="list-todo"></div>
+            <div class="task-add-row">
+              <input class="task-add-input" id="add-todo" placeholder="Add a task..." onkeydown="if(event.key==='Enter')addCheckTask('todo')">
+              <button class="task-add-btn" onclick="addCheckTask('todo')">+</button>
+            </div>
           </div>
+          <!-- IN PROGRESS -->
           <div class="freeform-col" style="border-radius:0;border:none;border-right:1px solid var(--border);">
             <div class="freeform-col-header" style="border-radius:0;">
               <div class="freeform-col-dot dot-progress"></div>
               <div class="freeform-col-title">In Progress</div>
             </div>
-            <div id="col-inprogress" contenteditable="true" data-placeholder="• Working on ToR 3 framework
-• Meeting minutes draft
-
-Write anything here..." oninput="saveTasks()" onfocus="setActiveTaskCol('col-inprogress')"></div>
+            <div class="task-check-list" id="list-inprogress"></div>
+            <div class="task-add-row">
+              <input class="task-add-input" id="add-inprogress" placeholder="Add a task..." onkeydown="if(event.key==='Enter')addCheckTask('inprogress')">
+              <button class="task-add-btn" onclick="addCheckTask('inprogress')">+</button>
+            </div>
           </div>
+          <!-- DONE -->
           <div class="freeform-col" style="border-radius:0;border:none;">
             <div class="freeform-col-header" style="border-radius:0;">
               <div class="freeform-col-dot dot-done"></div>
               <div class="freeform-col-title">Done</div>
             </div>
-            <div id="col-done" contenteditable="true" data-placeholder="✓ WHO Lyon forum
-✓ Expert consultation prep
-
-Write anything here..." oninput="saveTasks()" onfocus="setActiveTaskCol('col-done')"></div>
+            <div class="task-check-list" id="list-done"></div>
+            <div class="task-add-row">
+              <input class="task-add-input" id="add-done" placeholder="Add a task..." onkeydown="if(event.key==='Enter')addCheckTask('done')">
+              <button class="task-add-btn" onclick="addCheckTask('done')">+</button>
+            </div>
           </div>
         </div>
       </div>
@@ -1907,9 +2012,7 @@ async function driveSaveData() {
   const data = {
     version: 2,
     saved: new Date().toISOString(),
-    tasks_todo: localStorage.getItem('mstudio_task_todo') || '',
-    tasks_inprogress: localStorage.getItem('mstudio_task_progress') || '',
-    tasks_done: localStorage.getItem('mstudio_task_done') || '',
+    tasks_json: localStorage.getItem('mstudio_tasks') || '{}',
     deadlines: localStorage.getItem('mstudio_deadlines') || '[]',
     minutes: localStorage.getItem('mstudio_minutes') || '[]',
     quicknotes: localStorage.getItem('mstudio_quicknotes') || '',
@@ -1943,20 +2046,10 @@ async function driveLoadData() {
     if (!data.version) return false;
 
     // Restore all data
-    if (data.tasks_todo !== undefined) {
-      localStorage.setItem('mstudio_task_todo', data.tasks_todo);
-      const el = document.getElementById('col-todo');
-      if (el) el.innerHTML = data.tasks_todo;
-    }
-    if (data.tasks_inprogress !== undefined) {
-      localStorage.setItem('mstudio_task_progress', data.tasks_inprogress);
-      const el = document.getElementById('col-inprogress');
-      if (el) el.innerHTML = data.tasks_inprogress;
-    }
-    if (data.tasks_done !== undefined) {
-      localStorage.setItem('mstudio_task_done', data.tasks_done);
-      const el = document.getElementById('col-done');
-      if (el) el.innerHTML = data.tasks_done;
+    if (data.tasks_json) {
+      localStorage.setItem('mstudio_tasks', data.tasks_json);
+      try { tasks = JSON.parse(data.tasks_json); } catch(e) {}
+      renderAllTaskCols();
     }
     if (data.deadlines) {
       localStorage.setItem('mstudio_deadlines', data.deadlines);
@@ -2085,20 +2178,10 @@ function importData(event) {
       if (!data.version) { alert('Invalid backup file.'); return; }
 
       // Restore tasks
-      if (data.tasks_todo !== undefined) {
-        localStorage.setItem('mstudio_task_todo', data.tasks_todo);
-        const el = document.getElementById('col-todo');
-        if (el) el.innerHTML = data.tasks_todo;
-      }
-      if (data.tasks_inprogress !== undefined) {
-        localStorage.setItem('mstudio_task_progress', data.tasks_inprogress);
-        const el = document.getElementById('col-inprogress');
-        if (el) el.innerHTML = data.tasks_inprogress;
-      }
-      if (data.tasks_done !== undefined) {
-        localStorage.setItem('mstudio_task_done', data.tasks_done);
-        const el = document.getElementById('col-done');
-        if (el) el.innerHTML = data.tasks_done;
+      if (data.tasks_json) {
+        localStorage.setItem('mstudio_tasks', data.tasks_json);
+        try { tasks = JSON.parse(data.tasks_json); } catch(e) {}
+        renderAllTaskCols();
       }
 
       // Restore deadlines
@@ -2159,21 +2242,26 @@ function importData(event) {
   event.target.value = '';
 }
 
+function updateGreeting() {
+  const h = new Date().getHours();
+  const greeting = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  const el = document.getElementById('dash-greeting');
+  if (el) el.textContent = greeting + ', Mo.';
+}
+
 function init() {
   const now = new Date();
   const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
   const dateStr = now.toLocaleDateString('en-GB', opts);
   document.getElementById('topbar-date').textContent = dateStr;
   document.getElementById('dash-date').textContent = dateStr;
-  const h = now.getHours();
-  document.getElementById('dash-greeting').textContent = (h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening') + ', Mo.';
+  updateGreeting();
+  setInterval(updateGreeting, 60000); // update every minute
   document.getElementById('dl-date').valueAsDate = now;
   document.getElementById('min-date').valueAsDate = now;
   document.getElementById('quick-notes').value = localStorage.getItem('mstudio_quicknotes') || '';
   loadEmail();
-  document.getElementById('col-todo').innerHTML = localStorage.getItem('mstudio_task_todo') || '';
-  document.getElementById('col-inprogress').innerHTML = localStorage.getItem('mstudio_task_progress') || '';
-  document.getElementById('col-done').innerHTML = localStorage.getItem('mstudio_task_done') || '';
+  loadTasksFromStorage();
   initQuotes();
   renderDeadlines(); renderDashboard();
   if (minutesDocs.length === 0) newMinutes(true);
@@ -2194,15 +2282,106 @@ function saveQuickNotes() {
   scheduleDriveSync();
 }
 
+// ===== CHECKLIST TASK SYSTEM =====
+let tasks = { todo: [], inprogress: [], done: [] };
+
 function saveTasks() {
-  const todo = document.getElementById('col-todo');
-  const prog = document.getElementById('col-inprogress');
-  const done = document.getElementById('col-done');
-  if (todo) localStorage.setItem('mstudio_task_todo', todo.innerHTML);
-  if (prog) localStorage.setItem('mstudio_task_progress', prog.innerHTML);
-  if (done) localStorage.setItem('mstudio_task_done', done.innerHTML);
+  localStorage.setItem('mstudio_tasks', JSON.stringify(tasks));
   renderDashboard();
   scheduleDriveSync();
+}
+
+function loadTasksFromStorage() {
+  const saved = localStorage.getItem('mstudio_tasks');
+  if (saved) {
+    try { tasks = JSON.parse(saved); } catch(e) { tasks = { todo:[], inprogress:[], done:[] }; }
+  }
+  // Migrate old innerHTML-based tasks if they exist
+  ['todo','inprogress','done'].forEach(col => {
+    if (!tasks[col]) tasks[col] = [];
+    const oldKey = col === 'todo' ? 'mstudio_task_todo' : col === 'inprogress' ? 'mstudio_task_progress' : 'mstudio_task_done';
+    const oldData = localStorage.getItem(oldKey);
+    if (oldData && tasks[col].length === 0 && oldData.trim()) {
+      // Parse old text into tasks
+      const div = document.createElement('div');
+      div.innerHTML = oldData;
+      const text = div.innerText || '';
+      const lines = text.split('\n').filter(l => l.trim() && !l.trim().match(/^(Write anything|•|✓)/));
+      lines.forEach(l => {
+        const clean = l.replace(/^[•✓□✗-]\s*/, '').trim();
+        if (clean) tasks[col].push({ id: Date.now() + Math.random(), text: clean, done: col === 'done' });
+      });
+      localStorage.removeItem(oldKey);
+    }
+  });
+  renderAllTaskCols();
+}
+
+function renderAllTaskCols() {
+  ['todo','inprogress','done'].forEach(col => renderTaskCol(col));
+  renderDashboard();
+}
+
+function renderTaskCol(col) {
+  const el = document.getElementById('list-' + col);
+  if (!el) return;
+  const colTasks = tasks[col] || [];
+  if (colTasks.length === 0) { el.innerHTML = ''; return; }
+  el.innerHTML = colTasks.map(t => `
+    <div class="task-check-item${t.done ? ' done-item' : ''}" id="task-${t.id}">
+      <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask('${col}',${t.id})">
+      <span class="task-check-text">${escapeHtml(t.text)}</span>
+      <button class="task-check-del" onclick="deleteTask('${col}',${t.id})">✕</button>
+    </div>`).join('');
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function addCheckTask(col) {
+  const input = document.getElementById('add-' + col);
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+  if (!tasks[col]) tasks[col] = [];
+  tasks[col].push({ id: Date.now(), text, done: col === 'done' });
+  input.value = '';
+  saveTasks();
+  renderTaskCol(col);
+}
+
+function toggleTask(col, id) {
+  const t = tasks[col] && tasks[col].find(x => x.id === id);
+  if (!t) return;
+  t.done = !t.done;
+  if (t.done && col !== 'done') {
+    // Move to Done
+    tasks[col] = tasks[col].filter(x => x.id !== id);
+    t.done = true;
+    if (!tasks.done) tasks.done = [];
+    tasks.done.unshift(t);
+    renderTaskCol(col);
+    renderTaskCol('done');
+  } else if (!t.done && col === 'done') {
+    // Move back to Todo
+    tasks.done = tasks.done.filter(x => x.id !== id);
+    t.done = false;
+    if (!tasks.todo) tasks.todo = [];
+    tasks.todo.unshift(t);
+    renderTaskCol('done');
+    renderTaskCol('todo');
+  } else {
+    renderTaskCol(col);
+  }
+  saveTasks();
+}
+
+function deleteTask(col, id) {
+  if (!tasks[col]) return;
+  tasks[col] = tasks[col].filter(x => x.id !== id);
+  saveTasks();
+  renderTaskCol(col);
 }
 
 // TABS
@@ -2218,14 +2397,21 @@ function switchTab(tab, event) {
   });
   aiContext = tab === 'email' ? 'email' : tab === 'minutes' ? 'minutes' : 'general';
   if (tab === 'dashboard') renderDashboard();
+  // Ensure calendar view does not bleed into other panels
+  if (tab !== 'calendar') {
+    const cv = document.getElementById('cal-view');
+    const ca = document.getElementById('cal-auth-box');
+    // We don't hide them — we just make sure the panel itself is hidden via CSS
+    // The panel not having .active class is enough since it's position:absolute
+    // But force pointer-events:none on calendar panel when not active
+  }
 }
 
 // DASHBOARD
 function renderDashboard() {
-  const getTextCount = id => { const el = document.getElementById(id); return el ? (el.innerText || '').split('\n').filter(l => l.trim()).length : 0; };
-  const todo = getTextCount('col-todo');
-  const prog = getTextCount('col-inprogress');
-  const done = getTextCount('col-done');
+  const todo = (tasks.todo || []).filter(t => !t.done).length;
+  const prog = (tasks.inprogress || []).length;
+  const done = (tasks.done || []).length;
   document.getElementById('stat-urgent').textContent = todo;
   document.getElementById('stat-open').textContent = prog;
   document.getElementById('stat-done').textContent = done;
@@ -2383,10 +2569,10 @@ function attachEditorBehavior(el, saveCallback) {
 }
 
 // TASK FORMATTING
-let activeTaskCol = 'col-todo';
+let activeTaskCol = 'todo';
 let taskNumberedCounter = 1;
 
-function setActiveTaskCol(id) { activeTaskCol = id; }
+function setActiveTaskCol(id) { activeTaskCol = id.replace('col-',''); }
 
 function taskFmt(type) {
   const el = document.getElementById(activeTaskCol);
