@@ -601,7 +601,7 @@
     flex: 1;
     overflow: hidden;
     min-height: 0;
-    height: 0;
+    height: 100%;
   }
 
   .minutes-sidebar {
@@ -659,6 +659,8 @@
     flex-direction: column;
     overflow: hidden;
     box-shadow: 0 1px 4px var(--shadow);
+    height: 100%;
+    min-height: 0;
   }
 
   .minutes-editor-header {
@@ -745,7 +747,7 @@
 
   .minutes-body [contenteditable] {
     width: 100%;
-    min-height: 200px;
+    min-height: 100%;
     height: auto;
     border: none;
     background: none;
@@ -1677,7 +1679,7 @@
 
   <!-- MINUTES -->
   <div id="minutes" class="panel">
-    <div class="panel-inner" style="height:100%;overflow:hidden;padding:0;display:flex;flex-direction:column;min-height:0;">
+    <div class="panel-inner" style="height:100%;overflow:hidden;padding:0;">
       <div class="panel-header">
         <div class="panel-title">Meeting Minutes</div>
         <button class="btn btn-ghost" onclick="newMinutes()" style="margin-left:auto;">+ New Document</button>
@@ -1832,6 +1834,108 @@ NEXT MEETING
 </div>
 
 <script>
+
+// ===== INDEXEDDB PERMANENT STORAGE =====
+// IndexedDB persists across browser cache clears and is much more reliable than localStorage
+let idb = null;
+
+function openIDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('MoStudioDB', 1);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('data')) {
+        db.createObjectStore('data', { keyPath: 'key' });
+      }
+    };
+    req.onsuccess = e => { idb = e.target.result; resolve(idb); };
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbSet(key, value) {
+  if (!idb) await openIDB();
+  return new Promise((resolve) => {
+    const tx = idb.transaction('data', 'readwrite');
+    tx.objectStore('data').put({ key, value, ts: Date.now() });
+    tx.oncomplete = resolve;
+    tx.onerror = resolve; // fail silently
+  });
+}
+
+async function idbGet(key) {
+  if (!idb) await openIDB();
+  return new Promise((resolve) => {
+    const tx = idb.transaction('data', 'readonly');
+    const req = tx.objectStore('data').get(key);
+    req.onsuccess = () => resolve(req.result ? req.result.value : null);
+    req.onerror = () => resolve(null);
+  });
+}
+
+async function idbGetAll() {
+  if (!idb) await openIDB();
+  return new Promise((resolve) => {
+    const tx = idb.transaction('data', 'readonly');
+    const req = tx.objectStore('data').getAll();
+    req.onsuccess = () => {
+      const result = {};
+      (req.result || []).forEach(item => { result[item.key] = item.value; });
+      resolve(result);
+    };
+    req.onerror = () => resolve({});
+  });
+}
+
+// Save ALL data to IndexedDB at once
+async function idbSaveAll() {
+  const data = {
+    tasks: JSON.stringify(tasks),
+    deadlines: JSON.stringify(deadlines),
+    minutes: JSON.stringify(minutesDocs),
+    quicknotes: (document.getElementById('quick-notes') || {}).value || localStorage.getItem('mstudio_quicknotes') || '',
+    email_to: localStorage.getItem('mstudio_email_to') || '',
+    email_cc: localStorage.getItem('mstudio_email_cc') || '',
+    email_subject: localStorage.getItem('mstudio_email_subject') || '',
+    email_body: localStorage.getItem('mstudio_email_body') || '',
+    saved_at: new Date().toISOString()
+  };
+  await Promise.all(Object.entries(data).map(([k,v]) => idbSet(k, v)));
+}
+
+// Restore from IndexedDB on load
+async function idbRestoreIfNeeded() {
+  try {
+    await openIDB();
+    const all = await idbGetAll();
+    if (!all || !all.saved_at) return; // nothing saved yet
+
+    // Check if localStorage is empty (was cleared)
+    const lsTasks = localStorage.getItem('mstudio_tasks');
+    const idbTasks = all.tasks;
+
+    // Restore from IDB if localStorage is empty or IDB is newer
+    if (!lsTasks && idbTasks) {
+      console.log('Restoring from IndexedDB...');
+      if (idbTasks) { localStorage.setItem('mstudio_tasks', idbTasks); try { tasks = JSON.parse(idbTasks); } catch(e){} }
+      if (all.deadlines) { localStorage.setItem('mstudio_deadlines', all.deadlines); try { deadlines = JSON.parse(all.deadlines); } catch(e){} }
+      if (all.minutes) { localStorage.setItem('mstudio_minutes', all.minutes); try { minutesDocs = JSON.parse(all.minutes); } catch(e){} }
+      if (all.quicknotes) { localStorage.setItem('mstudio_quicknotes', all.quicknotes); const el = document.getElementById('quick-notes'); if(el) el.value = all.quicknotes; }
+      if (all.email_to) { localStorage.setItem('mstudio_email_to', all.email_to); }
+      if (all.email_cc) { localStorage.setItem('mstudio_email_cc', all.email_cc); }
+      if (all.email_subject) { localStorage.setItem('mstudio_email_subject', all.email_subject); }
+      if (all.email_body) { localStorage.setItem('mstudio_email_body', all.email_body); }
+      renderAllTaskCols();
+      renderDeadlines();
+      renderMinutesList();
+      if (minutesDocs.length > 0) { currentMinutesId = minutesDocs[0].id; loadMinutesDoc(currentMinutesId); }
+      renderDashboard();
+      showSyncStatus('✓ Data restored from local backup');
+    }
+  } catch(e) { console.error('IDB restore error:', e); }
+}
+
+
 // ===== QUOTES =====
 const quotes = [
   // On work and progress
@@ -2105,7 +2209,7 @@ function scheduleDriveSync() {
   if (!calAccessToken) return;
   clearTimeout(driveSyncTimer);
   updateDriveBadge('saving');
-  driveSyncTimer = setTimeout(driveSaveData, 3000);
+  driveSyncTimer = setTimeout(driveSaveData, 800);
 }
 
 function updateDriveBadge(state) {
@@ -2120,7 +2224,7 @@ function updateDriveBadge(state) {
     saving:       { color: '#fbbf24', text: 'Drive: saving...',  bg: 'rgba(251,191,36,0.12)',  border: 'rgba(251,191,36,0.3)',  textColor: '#fbbf24' },
     saved:        { color: '#34d399', text: 'Drive: saved ✓',    bg: 'rgba(52,211,153,0.12)', border: 'rgba(52,211,153,0.3)', textColor: '#34d399' },
     error:        { color: '#f87171', text: 'Drive: sync error', bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.3)', textColor: '#f87171' },
-    disconnected: { color: '#666',    text: 'Drive: not connected', bg: 'rgba(255,255,255,0.05)', border: 'rgba(255,255,255,0.1)', textColor: 'rgba(255,255,255,0.4)' }
+    disconnected: { color: '#f87171', text: '⚠ Sign in to save data', bg: 'rgba(248,113,113,0.1)', border: 'rgba(248,113,113,0.3)', textColor: '#f87171' }
   };
 
   const s = states[state] || states.disconnected;
@@ -2253,6 +2357,11 @@ function updateGreeting() {
 }
 
 function init() {
+  // Show dashboard, hide others
+  ['deadlines','email','minutes','calendar'].forEach(id=>{const p=document.getElementById(id);if(p)p.style.display='none';});
+  const p=document.getElementById('dashboard');if(p)p.style.display='flex';
+  // Restore from IndexedDB if localStorage was cleared
+  idbRestoreIfNeeded();
   const now = new Date();
   const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
   const dateStr = now.toLocaleDateString('en-GB', opts);
@@ -2283,6 +2392,7 @@ function saveQuickNotes() {
   localStorage.setItem('mstudio_quicknotes', document.getElementById('quick-notes').value);
   renderDashboard();
   scheduleDriveSync();
+  idbSaveAll();
 }
 
 // ===== CHECKLIST TASK SYSTEM =====
@@ -2292,6 +2402,7 @@ function saveTasks() {
   localStorage.setItem('mstudio_tasks', JSON.stringify(tasks));
   renderDashboard();
   scheduleDriveSync();
+  idbSaveAll();
 }
 
 function loadTasksFromStorage() {
@@ -2390,24 +2501,20 @@ function deleteTask(col, id) {
 // TABS
 function switchTab(tab, event) {
   if (event) event.preventDefault();
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  ['dashboard','deadlines','email','minutes','calendar'].forEach(id => {
+    const p = document.getElementById(id);
+    if (p) { p.classList.remove('active'); p.style.display = 'none'; }
+  });
   const panel = document.getElementById(tab);
   if (!panel) return;
   panel.classList.add('active');
+  panel.style.display = 'flex';
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   ['dashboard','deadlines','email','minutes','calendar'].forEach((t,i) => {
     if (t === tab) document.querySelectorAll('.nav-tab')[i].classList.add('active');
   });
   aiContext = tab === 'email' ? 'email' : tab === 'minutes' ? 'minutes' : 'general';
   if (tab === 'dashboard') renderDashboard();
-  // Ensure calendar view does not bleed into other panels
-  if (tab !== 'calendar') {
-    const cv = document.getElementById('cal-view');
-    const ca = document.getElementById('cal-auth-box');
-    // We don't hide them — we just make sure the panel itself is hidden via CSS
-    // The panel not having .active class is enough since it's position:absolute
-    // But force pointer-events:none on calendar panel when not active
-  }
 }
 
 // DASHBOARD
@@ -2453,7 +2560,7 @@ function toggleDeadlineDone(id) {
   if (d) { d.status = d.status === 'done' ? 'upcoming' : 'done'; saveDeadlines(); renderDeadlines(); renderDashboard(); }
 }
 
-function saveDeadlines() { localStorage.setItem('mstudio_deadlines', JSON.stringify(deadlines)); scheduleDriveSync(); }
+function saveDeadlines() { localStorage.setItem('mstudio_deadlines', JSON.stringify(deadlines)); if (calAccessToken) { clearTimeout(driveSyncTimer); driveSaveData(); } idbSaveAll(); }
 
 function getDLStatus(d) {
   if (d.status === 'done') return { cls:'status-done', label:'Done' };
@@ -2660,6 +2767,7 @@ const templates = {
 
 function saveEmail() {
   scheduleDriveSync();
+  idbSaveAll();
   localStorage.setItem('mstudio_email_to', document.getElementById('email-to').value);
   localStorage.setItem('mstudio_email_cc', document.getElementById('email-cc').value);
   localStorage.setItem('mstudio_email_subject', document.getElementById('email-subject').value);
@@ -2801,7 +2909,7 @@ function copyMinutes() {
   navigator.clipboard.writeText(`${d.title}\nDate: ${d.date} | Location: ${d.location} | Attendees: ${d.attendees}\n\n${d.body}`).then(() => alert('Minutes copied!'));
 }
 
-function saveMinutesDocs() { localStorage.setItem('mstudio_minutes', JSON.stringify(minutesDocs)); scheduleDriveSync(); }
+function saveMinutesDocs() { localStorage.setItem('mstudio_minutes', JSON.stringify(minutesDocs)); scheduleDriveSync(); idbSaveAll(); }
 
 // AI
 function toggleAI() {
@@ -2858,6 +2966,20 @@ function appendAIMsg(role, text, isLoading) {
   msgs.scrollTop = msgs.scrollHeight;
   return div;
 }
+
+// Save immediately when tab is closed or navigated away
+window.addEventListener('beforeunload', () => {
+  clearTimeout(driveSyncTimer);
+  idbSaveAll(); // Always save to IndexedDB
+  if (calAccessToken) { driveSaveData(); }
+});
+
+// Also save every 30 seconds as a heartbeat
+setInterval(() => {
+  if (calAccessToken) {
+    driveSaveData();
+  }
+}, 30000);
 
 init();
 </script>
