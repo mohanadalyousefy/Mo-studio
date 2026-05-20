@@ -126,15 +126,14 @@
     top: 0; left: 0;
     overflow-y: auto;
     overflow-x: hidden;
+    flex-direction: column;
+    box-sizing: border-box;
   }
 
   .panel.active { display: flex; }
   .panel:not(.active) { pointer-events: none; }
 
-  /* Non-dashboard panels manage their own internal scroll */
-  #tasks.panel, #deadlines.panel, #email.panel, #minutes.panel, #calendar.panel {
-    overflow: hidden;
-  }
+
 
 
   /* ===== SHARED PANEL STYLES ===== */
@@ -144,7 +143,6 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    min-height: min-content;
   }
 
   .panel-header {
@@ -402,11 +400,10 @@
     border: 1px solid var(--border);
     border-radius: 12px;
     overflow: hidden;
-    flex: 1;
     display: flex;
     flex-direction: column;
     box-shadow: 0 1px 4px var(--shadow);
-    min-height: 0;
+    min-height: 200px;
   }
 
   .dl-table-head {
@@ -423,7 +420,7 @@
     flex-shrink: 0;
   }
 
-  .dl-rows { overflow-y: auto; flex: 1; }
+  .dl-rows { overflow-y: visible; }
 
   .dl-row {
     display: grid;
@@ -561,7 +558,7 @@
     color: var(--ink);
     line-height: 1.8;
     resize: none;
-    min-height: 200px;
+    min-height: 400px;
     outline: none;
   }
 
@@ -601,7 +598,6 @@
     flex: 1;
     overflow: hidden;
     min-height: 0;
-    height: 100%;
   }
 
   .minutes-sidebar {
@@ -659,7 +655,6 @@
     flex-direction: column;
     overflow: hidden;
     box-shadow: 0 1px 4px var(--shadow);
-    height: 100%;
     min-height: 0;
   }
 
@@ -1634,7 +1629,7 @@
 
   <!-- EMAIL -->
   <div id="email" class="panel">
-    <div class="panel-inner" style="height:100%;overflow:hidden;padding:0;">
+    <div class="panel-inner">
       <div class="panel-header">
         <div class="panel-title">Email</div>
         <div class="panel-sub">Draft your message — use AI Assist for tone, translation, or rewrites</div>
@@ -1679,12 +1674,12 @@
 
   <!-- MINUTES -->
   <div id="minutes" class="panel">
-    <div class="panel-inner" style="height:100%;overflow:hidden;padding:0;display:flex;flex-direction:column;">
-      <div class="panel-header" style="flex-shrink:0;">
+    <div style="display:flex;flex-direction:column;height:100%;padding:20px 28px 0;gap:16px;flex-shrink:0;">
+      <div style="display:flex;align-items:center;flex-shrink:0;">
         <div class="panel-title">Meeting Minutes</div>
         <button class="btn btn-ghost" onclick="newMinutes()" style="margin-left:auto;">+ New Document</button>
       </div>
-      <div class="minutes-layout" style="flex:1;min-height:0;overflow:hidden;">
+      <div class="minutes-layout" style="flex:1;min-height:0;overflow:hidden;margin-bottom:24px;">
         <div class="minutes-sidebar">
           <div class="minutes-sidebar-label">Documents</div>
           <div id="minutes-list"></div>
@@ -2509,6 +2504,7 @@ function switchTab(tab, event) {
   if (!panel) return;
   panel.classList.add('active');
   panel.style.display = 'flex';
+  panel.style.flexDirection = 'column';
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   ['dashboard','deadlines','email','minutes','calendar'].forEach((t,i) => {
     if (t === tab) document.querySelectorAll('.nav-tab')[i].classList.add('active');
