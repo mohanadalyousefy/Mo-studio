@@ -1679,12 +1679,12 @@
 
   <!-- MINUTES -->
   <div id="minutes" class="panel">
-    <div class="panel-inner" style="height:100%;overflow:hidden;padding:0;">
-      <div class="panel-header">
+    <div class="panel-inner" style="height:100%;overflow:hidden;padding:0;display:flex;flex-direction:column;">
+      <div class="panel-header" style="flex-shrink:0;">
         <div class="panel-title">Meeting Minutes</div>
         <button class="btn btn-ghost" onclick="newMinutes()" style="margin-left:auto;">+ New Document</button>
       </div>
-      <div class="minutes-layout">
+      <div class="minutes-layout" style="flex:1;min-height:0;overflow:hidden;">
         <div class="minutes-sidebar">
           <div class="minutes-sidebar-label">Documents</div>
           <div id="minutes-list"></div>
