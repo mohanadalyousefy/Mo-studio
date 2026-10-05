@@ -1483,7 +1483,7 @@
 <div class="main">
 
   <!-- DASHBOARD -->
-  <div id="dashboard" class="panel">
+  <div id="dashboard" class="panel active">
     <div class="panel-inner">
       <div class="panel-header">
         <div>
@@ -1738,8 +1738,6 @@ NEXT MEETING
     </div>
   </div>
 
-</div>
-
 
   <!-- CALENDAR -->
   <div id="calendar" class="panel">
@@ -1809,6 +1807,8 @@ NEXT MEETING
       </div>
     </div>
   </div>
+
+</div><!-- /.main -->
 
 <!-- AI PANEL -->
 <div class="ai-panel" id="ai-panel">
@@ -1884,6 +1884,7 @@ async function idbGetAll() {
 
 // Save ALL data to IndexedDB at once
 async function idbSaveAll() {
+  if (idbRestorePromise) { try { await idbRestorePromise; } catch(e) {} }
   const data = {
     tasks: JSON.stringify(tasks),
     deadlines: JSON.stringify(deadlines),
@@ -1893,7 +1894,8 @@ async function idbSaveAll() {
     email_cc: localStorage.getItem('mstudio_email_cc') || '',
     email_subject: localStorage.getItem('mstudio_email_subject') || '',
     email_body: localStorage.getItem('mstudio_email_body') || '',
-    saved_at: new Date().toISOString()
+    saved_at: new Date().toISOString(),
+    modified: localStorage.getItem('mstudio_last_modified') || ''
   };
   await Promise.all(Object.entries(data).map(([k,v]) => idbSet(k, v)));
 }
@@ -1909,8 +1911,12 @@ async function idbRestoreIfNeeded() {
     const lsTasks = localStorage.getItem('mstudio_tasks');
     const idbTasks = all.tasks;
 
-    // Restore from IDB if localStorage is empty or IDB is newer
-    if (!lsTasks && idbTasks) {
+    // Restore only if IDB is newer than what localStorage held at boot,
+    // or (no stamps yet) localStorage was empty at boot
+    const idbNewer = all.modified && (!BOOT_LOCAL_STAMP || all.modified > BOOT_LOCAL_STAMP);
+    const legacyWiped = !all.modified && !BOOT_LOCAL_STAMP && !BOOT_LOCAL_HAD_TASKS;
+    if ((idbNewer || legacyWiped) && idbTasks) {
+      if (all.modified) localStorage.setItem('mstudio_last_modified', all.modified);
       console.log('Restoring from IndexedDB...');
       if (idbTasks) { localStorage.setItem('mstudio_tasks', idbTasks); try { tasks = JSON.parse(idbTasks); } catch(e){} }
       if (all.deadlines) { localStorage.setItem('mstudio_deadlines', all.deadlines); try { deadlines = JSON.parse(all.deadlines); } catch(e){} }
@@ -2068,6 +2074,11 @@ let deadlines = JSON.parse(localStorage.getItem('mstudio_deadlines') || '[]');
 let minutesDocs = JSON.parse(localStorage.getItem('mstudio_minutes') || '[]');
 let currentMinutesId = null;
 let saveTimer = null;
+let calAccessToken = null; // Google token (declared here so it exists before init runs)
+let idbRestorePromise = null;
+const BOOT_LOCAL_STAMP = localStorage.getItem('mstudio_last_modified');
+const BOOT_LOCAL_HAD_TASKS = !!localStorage.getItem('mstudio_tasks');
+function markModified() { localStorage.setItem('mstudio_last_modified', new Date().toISOString()); }
 let aiContext = 'general';
 
 
@@ -2114,6 +2125,7 @@ async function driveSaveData() {
   const data = {
     version: 2,
     saved: new Date().toISOString(),
+    modified: localStorage.getItem('mstudio_last_modified') || new Date().toISOString(),
     tasks_json: localStorage.getItem('mstudio_tasks') || '{}',
     deadlines: localStorage.getItem('mstudio_deadlines') || '[]',
     minutes: localStorage.getItem('mstudio_minutes') || '[]',
@@ -2125,11 +2137,15 @@ async function driveSaveData() {
   };
 
   try {
-    await fetch('https://www.googleapis.com/upload/drive/v3/files/' + fileId + '?uploadType=media', {
+    const bodyStr = JSON.stringify(data);
+    const resp = await fetch('https://www.googleapis.com/upload/drive/v3/files/' + fileId + '?uploadType=media', {
       method: 'PATCH',
       headers: { Authorization: 'Bearer ' + calAccessToken, 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      body: bodyStr,
+      keepalive: bodyStr.length < 60000
     });
+    if (resp.status === 401) { calSignOut(true); updateDriveBadge('disconnected'); return; }
+    if (!resp.ok) { updateDriveBadge('error'); return; }
     updateDriveBadge('saved');
   } catch(e) { console.error('Drive save error:', e); updateDriveBadge('error'); }
 }
@@ -2146,6 +2162,14 @@ async function driveLoadData() {
     if (!resp.ok) return false;
     const data = await resp.json();
     if (!data.version) return false;
+
+    // Never overwrite newer local work with an older Drive copy
+    const localStamp = localStorage.getItem('mstudio_last_modified');
+    const localHasData = (tasks.todo||[]).length + (tasks.inprogress||[]).length + (tasks.done||[]).length > 0
+      || (deadlines||[]).length > 0 || !!localStorage.getItem('mstudio_quicknotes');
+    const driveNewer = data.modified ? (!localStamp || data.modified > localStamp) : !localHasData;
+    if (!driveNewer) { updateDriveBadge('connected'); driveSaveData(); return true; }
+    if (data.modified) localStorage.setItem('mstudio_last_modified', data.modified);
 
     // Restore all data
     if (data.tasks_json) {
@@ -2354,9 +2378,9 @@ function updateGreeting() {
 function init() {
   // Show dashboard, hide others
   ['deadlines','email','minutes','calendar'].forEach(id=>{const p=document.getElementById(id);if(p)p.style.display='none';});
-  const p=document.getElementById('dashboard');if(p)p.style.display='flex';
+  const p=document.getElementById('dashboard');if(p){p.style.display='flex';p.classList.add('active');}
   // Restore from IndexedDB if localStorage was cleared
-  idbRestoreIfNeeded();
+  idbRestorePromise = idbRestoreIfNeeded();
   const now = new Date();
   const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
   const dateStr = now.toLocaleDateString('en-GB', opts);
@@ -2385,6 +2409,7 @@ function init() {
 
 function saveQuickNotes() {
   localStorage.setItem('mstudio_quicknotes', document.getElementById('quick-notes').value);
+  markModified();
   renderDashboard();
   scheduleDriveSync();
   idbSaveAll();
@@ -2395,6 +2420,7 @@ let tasks = { todo: [], inprogress: [], done: [] };
 
 function saveTasks() {
   localStorage.setItem('mstudio_tasks', JSON.stringify(tasks));
+  markModified();
   renderDashboard();
   scheduleDriveSync();
   idbSaveAll();
@@ -2556,7 +2582,7 @@ function toggleDeadlineDone(id) {
   if (d) { d.status = d.status === 'done' ? 'upcoming' : 'done'; saveDeadlines(); renderDeadlines(); renderDashboard(); }
 }
 
-function saveDeadlines() { localStorage.setItem('mstudio_deadlines', JSON.stringify(deadlines)); if (calAccessToken) { clearTimeout(driveSyncTimer); driveSaveData(); } idbSaveAll(); }
+function saveDeadlines() { localStorage.setItem('mstudio_deadlines', JSON.stringify(deadlines)); markModified(); if (calAccessToken) { clearTimeout(driveSyncTimer); driveSaveData(); } idbSaveAll(); }
 
 function getDLStatus(d) {
   if (d.status === 'done') return { cls:'status-done', label:'Done' };
@@ -2762,12 +2788,13 @@ const templates = {
 };
 
 function saveEmail() {
-  scheduleDriveSync();
-  idbSaveAll();
   localStorage.setItem('mstudio_email_to', document.getElementById('email-to').value);
   localStorage.setItem('mstudio_email_cc', document.getElementById('email-cc').value);
   localStorage.setItem('mstudio_email_subject', document.getElementById('email-subject').value);
   localStorage.setItem('mstudio_email_body', document.getElementById('email-body').value);
+  markModified();
+  scheduleDriveSync();
+  idbSaveAll();
 }
 
 function loadEmail() {
@@ -2781,7 +2808,7 @@ function loadEmail() {
   if (body) document.getElementById('email-body').value = body;
 }
 
-function loadTemplate(t) { const tpl = templates[t]; document.getElementById('email-to').value = tpl.to; document.getElementById('email-subject').value = tpl.subject; document.getElementById('email-body').value = tpl.body; }
+function loadTemplate(t) { const tpl = templates[t]; document.getElementById('email-to').value = tpl.to; document.getElementById('email-subject').value = tpl.subject; document.getElementById('email-body').value = tpl.body; saveEmail(); }
 
 function emailWrap(before, after) {
   const ta = document.getElementById('email-body');
@@ -2798,7 +2825,7 @@ function emailBullet() {
   ta.focus();
 }
 
-function clearEmail() { ['email-to','email-cc','email-subject','email-body'].forEach(id => document.getElementById(id).value = ''); ['mstudio_email_to','mstudio_email_cc','mstudio_email_subject','mstudio_email_body'].forEach(k => localStorage.removeItem(k)); }
+function clearEmail() { ['email-to','email-cc','email-subject','email-body'].forEach(id => document.getElementById(id).value = ''); saveEmail(); }
 
 function copyEmail() {
   const full = `To: ${document.getElementById('email-to').value}\nSubject: ${document.getElementById('email-subject').value}\n\n${document.getElementById('email-body').value}`;
@@ -2840,6 +2867,7 @@ function minNumbered() {
 
 // MINUTES DOCS
 function newMinutes(silent) {
+  flushMinutesSave();
   numberedCounter = 1; taskNumberedCounter = 1;
   const id = Date.now();
   const doc = { id, title:'New Meeting', date: new Date().toISOString().slice(0,10), location:'', attendees:'', body:'AGENDA\n1. \n2. \n\nDISCUSSION\n\n\nACTION ITEMS\n□ \n□ \n\nNEXT MEETING\n' };
@@ -2861,7 +2889,7 @@ function renderMinutesList() {
     </div>`).join('');
 }
 
-function selectMinutes(id) { autoSaveMinutes(); currentMinutesId = id; loadMinutesDoc(id); renderMinutesList(); }
+function selectMinutes(id) { flushMinutesSave(); currentMinutesId = id; loadMinutesDoc(id); renderMinutesList(); }
 
 function loadMinutesDoc(id) {
   const d = minutesDocs.find(x => x.id === id);
@@ -2874,9 +2902,23 @@ function loadMinutesDoc(id) {
   numberedCounter = 1;
 }
 
+function flushMinutesSave() {
+  if (!saveTimer) return;
+  clearTimeout(saveTimer); saveTimer = null;
+  const d = minutesDocs.find(x => x.id === currentMinutesId);
+  if (!d) return;
+  d.title = document.getElementById('min-title').value;
+  d.date = document.getElementById('min-date').value;
+  d.location = document.getElementById('min-location').value;
+  d.attendees = document.getElementById('min-attendees').value;
+  d.body = document.getElementById('min-body').innerHTML;
+  saveMinutesDocs();
+}
+
 function autoSaveMinutes() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
+    saveTimer = null;
     const d = minutesDocs.find(x => x.id === currentMinutesId);
     if (!d) return;
     d.title = document.getElementById('min-title').value;
@@ -2905,7 +2947,7 @@ function copyMinutes() {
   navigator.clipboard.writeText(`${d.title}\nDate: ${d.date} | Location: ${d.location} | Attendees: ${d.attendees}\n\n${d.body}`).then(() => alert('Minutes copied!'));
 }
 
-function saveMinutesDocs() { localStorage.setItem('mstudio_minutes', JSON.stringify(minutesDocs)); scheduleDriveSync(); idbSaveAll(); }
+function saveMinutesDocs() { localStorage.setItem('mstudio_minutes', JSON.stringify(minutesDocs)); markModified(); scheduleDriveSync(); idbSaveAll(); }
 
 // AI
 function toggleAI() {
@@ -2963,12 +3005,19 @@ function appendAIMsg(role, text, isLoading) {
   return div;
 }
 
-// Save immediately when tab is closed or navigated away
-window.addEventListener('beforeunload', () => {
+// Save immediately when tab is closed, refreshed, or hidden
+function flushAllSaves(e) {
+  // On real page exit, commit any field still being edited (e.g. a deadline cell) via its blur handler
+  const exiting = e && (e.type === 'beforeunload' || e.type === 'pagehide');
+  if (exiting && document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
+  flushMinutesSave();
   clearTimeout(driveSyncTimer);
-  idbSaveAll(); // Always save to IndexedDB
+  idbSaveAll();
   if (calAccessToken) { driveSaveData(); }
-});
+}
+window.addEventListener('beforeunload', flushAllSaves);
+window.addEventListener('pagehide', flushAllSaves);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushAllSaves(); });
 
 // Also save every 30 seconds as a heartbeat
 setInterval(() => {
@@ -2986,7 +3035,7 @@ const CAL_CLIENT_ID = '676542278417-bb048oic0ejdjc13emrpu9i33qunnh9t.apps.google
 const CAL_REDIRECT_URI = 'https://mohanadalyousefy.github.io/Mo-studio/MoStudio.html';
 const CAL_SCOPE = 'https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/drive.appdata';
 
-let calAccessToken = null;
+// calAccessToken is declared in the first script block so init() can use it
 let calCurrentDate = new Date();
 let calEvents = [];
 
@@ -3004,44 +3053,90 @@ function calSignIn() {
     state: state,
     include_granted_scopes: 'true'
   });
-
+  const hint = localStorage.getItem('cal_login_hint');
+  if (hint) params.set('login_hint', hint);
+  flushAllSaves();
   window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
+}
+
+// Silent re-authentication: no UI if the user is still signed in to Google. Tried once per browser session.
+function calSilentReauth() {
+  sessionStorage.setItem('cal_silent_tried', '1');
+  const params = new URLSearchParams({
+    client_id: CAL_CLIENT_ID, redirect_uri: CAL_REDIRECT_URI, response_type: 'token',
+    scope: CAL_SCOPE, state: 'silent', include_granted_scopes: 'true', prompt: 'none'
+  });
+  const hint = localStorage.getItem('cal_login_hint');
+  if (hint) params.set('login_hint', hint);
+  flushAllSaves();
+  window.location.replace('https://accounts.google.com/o/oauth2/v2/auth?' + params.toString());
+}
+
+function calRememberAccount() {
+  fetch('https://www.googleapis.com/calendar/v3/calendars/primary?fields=id', { headers: { Authorization: 'Bearer ' + calAccessToken } })
+    .then(r => r.ok ? r.json() : null).then(d => { if (d && d.id) localStorage.setItem('cal_login_hint', d.id); }).catch(() => {});
 }
 
 function calHandleRedirect() {
   const hash = window.location.hash.substring(1);
-  if (!hash || !hash.includes('access_token')) return;
+  if (hash && hash.includes('error=') && !hash.includes('access_token')) {
+    // Silent re-auth declined (e.g. signed out of Google): clean URL, show the sign-in button
+    history.replaceState(null, document.title, window.location.pathname + window.location.search);
+    return true;
+  }
+  if (!hash || !hash.includes('access_token')) return false;
   const params = new URLSearchParams(hash);
   const token = params.get('access_token');
-  if (!token) return;
+  if (!token) return false;
+  const isSilent = params.get('state') === 'silent';
+  const expiresIn = parseInt(params.get('expires_in') || '3600', 10);
   localStorage.removeItem('cal_oauth_state');
   calAccessToken = token;
   localStorage.setItem('cal_token', token);
+  localStorage.setItem('cal_token_expiry', String(Date.now() + expiresIn * 1000));
+  localStorage.setItem('cal_was_signed_in', '1');
+  sessionStorage.removeItem('cal_silent_tried');
+  calRememberAccount();
   // Remove hash completely and permanently before doing anything else
   history.replaceState(null, document.title, window.location.pathname + window.location.search);
   // Small delay to ensure hash is gone before any rendering
   setTimeout(() => {
     calOnSignedIn();
-    switchTab('calendar');
+    if (!isSilent) switchTab('calendar');
   }, 50);
+  return true;
 }
 
 function calTryRestore() {
   const saved = localStorage.getItem('cal_token');
-  if (saved) {
+  const expiry = parseInt(localStorage.getItem('cal_token_expiry') || '0', 10);
+  const wasSignedIn = localStorage.getItem('cal_was_signed_in') === '1' || !!saved;
+  const stillValid = saved && (!expiry || expiry > Date.now() + 60000);
+  if (stillValid) {
     calAccessToken = saved;
     fetch('https://www.googleapis.com/calendar/v3/calendars/primary?fields=id', {
       headers: { Authorization: 'Bearer ' + calAccessToken }
     }).then(r => {
-      if (r.ok) calOnSignedIn();
-      else { localStorage.removeItem('cal_token'); calAccessToken = null; }
-    }).catch(() => { localStorage.removeItem('cal_token'); calAccessToken = null; });
+      if (r.ok) { calOnSignedIn(); r.json().then(d => { if (d && d.id) localStorage.setItem('cal_login_hint', d.id); }).catch(() => {}); }
+      else calTokenExpired(wasSignedIn);
+    }).catch(() => { calOnSignedIn(); }); // offline: keep token, retry later
+    return;
   }
+  calTokenExpired(wasSignedIn);
 }
 
-function calSignOut() {
+function calTokenExpired(tryReauth) {
   calAccessToken = null;
   localStorage.removeItem('cal_token');
+  localStorage.removeItem('cal_token_expiry');
+  if (tryReauth && !sessionStorage.getItem('cal_silent_tried')) calSilentReauth();
+}
+
+function calSignOut(keepAccount) {
+  calAccessToken = null;
+  localStorage.removeItem('cal_token');
+  localStorage.removeItem('cal_token_expiry');
+  if (!keepAccount) { localStorage.removeItem('cal_was_signed_in'); localStorage.removeItem('cal_login_hint'); }
   calEvents = [];
   document.getElementById('cal-auth-box').style.display = 'block';
   const v = document.getElementById('cal-view');
@@ -3083,7 +3178,7 @@ async function calFetchEvents() {
       { headers: { Authorization: 'Bearer ' + calAccessToken } }
     );
     if (!resp.ok) {
-      if (resp.status === 401) { calSignOut(); return; }
+      if (resp.status === 401) { calSignOut(true); return; }
       throw new Error('Calendar fetch failed');
     }
     const data = await resp.json();
@@ -3324,8 +3419,8 @@ async function calAddEvent() {
 
 // Init
 window.addEventListener('load', () => {
-  calHandleRedirect();
-  setTimeout(calTryRestore, 300);
+  const handled = calHandleRedirect();
+  if (!handled) setTimeout(calTryRestore, 300);
 });
 </script>
 
