@@ -1598,6 +1598,71 @@
   .cal-header .cal-nav-btn { width:auto; min-width:30px; padding:0 10px; font-family:'Plus Jakarta Sans',sans-serif; font-size:12px; font-weight:600; }
   #btn-month-view, #btn-week-view { padding:0 12px !important; }
   .cw-now::before { content:''; position:absolute; left:-5px; top:-4px; width:10px; height:10px; border-radius:50%; background:var(--red); }
+
+  /* ===== RICH TEXT EDITOR (Notion-style) ===== */
+  .rt-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:2px; padding:6px 10px; border-bottom:1px solid var(--border2); background:var(--surface2); }
+  .rt-btn { font-family:'Plus Jakarta Sans',sans-serif; font-size:12.5px; font-weight:600; min-width:28px; height:28px; padding:0 8px; border:1px solid transparent; border-radius:6px; background:none; color:var(--ink2); cursor:pointer; white-space:nowrap; }
+  .rt-btn:hover { background:var(--surface3); }
+  .rt-btn.on { background:var(--navy); color:#fff; }
+  .rt-sep { width:1px; height:18px; background:var(--border); margin:0 4px; flex-shrink:0; }
+  .rt-hint { margin-left:auto; font-size:11px; color:var(--ink3); }
+  .rt-editor { position:relative; outline:none; white-space:pre-wrap; overflow-wrap:anywhere; line-height:1.65; color:var(--ink); font-size:15px; }
+  div.rt-editor.rt-editor.is-empty::before { content:attr(data-placeholder); position:absolute; left:0; top:0; right:0; color:var(--ink3); pointer-events:none; white-space:pre-wrap; display:block; }
+  .rt-editor p { margin:0; }
+  .rt-editor h1 { font-family:'Syne',sans-serif; font-size:1.55em; font-weight:700; line-height:1.3; margin:0.6em 0 0.2em; }
+  .rt-editor h2 { font-family:'Syne',sans-serif; font-size:1.28em; font-weight:700; line-height:1.3; margin:0.55em 0 0.15em; }
+  .rt-editor h3 { font-size:1.08em; font-weight:700; margin:0.5em 0 0.1em; }
+  .rt-editor > :first-child { margin-top:0; }
+  .rt-editor ul, .rt-editor ol { margin:0.15em 0; padding-left:1.6em; }
+  .rt-editor li { margin:0.1em 0; }
+  .rt-editor li > p { margin:0; }
+  .rt-editor ul.rt-check { list-style:none; padding-left:0.1em; }
+  .rt-editor ul.rt-check > li { position:relative; padding-left:28px; }
+  .rt-editor ul.rt-check > li::before { content:''; position:absolute; left:2px; top:0.32em; width:16px; height:16px; box-sizing:border-box; border:1.5px solid #9aa3b2; border-radius:4px; background:#fff; cursor:pointer; }
+  .rt-editor ul.rt-check > li.done::before { border-color:var(--accent3); background:var(--accent3) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M3.5 8.5l3 3 6-7' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/></svg>") center/12px no-repeat; }
+  .rt-editor ul.rt-check > li.done { color:var(--ink3); }
+  .rt-editor blockquote { border-left:3px solid var(--border); margin:0.4em 0; padding:0.1em 0 0.1em 12px; color:var(--ink2); }
+  .rt-editor a { color:var(--accent); text-decoration:underline; text-underline-offset:2px; }
+  .rt-editor hr { border:none; border-top:1px solid var(--border); margin:0.8em 0; }
+  .rt-editor table { border-collapse:collapse; margin:0.4em 0; white-space:normal; }
+  .rt-editor td, .rt-editor th { border:1px solid var(--border); padding:4px 8px; vertical-align:top; }
+  .rt-editor th { background:var(--surface2); }
+  .rt-editor img { max-width:100%; height:auto; border-radius:6px; }
+  .rt-editor code { font-family:ui-monospace,Consolas,monospace; background:var(--surface3); padding:0 4px; border-radius:4px; font-size:0.9em; }
+  .rt-editor pre { background:var(--surface2); padding:8px 10px; border-radius:6px; font-family:ui-monospace,Consolas,monospace; }
+  #email-body.rt-editor { min-height:380px; }
+  .quick-note .rt-editor { flex:1; min-height:180px; max-height:420px; overflow-y:auto; font-size:14px; }
+  .email-body { position:relative; }
+
+  /* ===== NOTEPAD ===== */
+  #notepad.panel { overflow:hidden; }
+  .np-wrap { display:flex; flex-direction:column; height:100%; width:100%; padding:22px 28px 24px; gap:14px; }
+  .np-head { display:flex; align-items:baseline; gap:14px; flex-shrink:0; }
+  .np-card { flex:1; min-height:0; display:flex; flex-direction:column; background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; box-shadow:0 1px 4px var(--shadow); }
+  .np-tabs { display:flex; align-items:flex-end; gap:2px; padding:8px 8px 0; background:var(--surface2); border-bottom:1px solid var(--border); overflow-x:auto; flex-shrink:0; }
+  .np-tab { display:flex; align-items:center; gap:6px; max-width:210px; padding:6px 6px 7px 12px; border:1px solid transparent; border-bottom:none; border-radius:8px 8px 0 0; font-size:12.5px; color:var(--ink3); cursor:pointer; white-space:nowrap; user-select:none; }
+  .np-tab:hover { color:var(--ink2); background:var(--surface3); }
+  .np-tab span { overflow:hidden; text-overflow:ellipsis; }
+  .np-tab.on { background:var(--surface); border-color:var(--border); color:var(--ink); font-weight:600; margin-bottom:-1px; padding-bottom:8px; }
+  .np-tab .x { border:none; background:none; color:var(--ink3); cursor:pointer; border-radius:4px; width:18px; height:18px; font-size:11px; flex-shrink:0; }
+  .np-tab .x:hover { background:#fef2f2; color:var(--red); }
+  .np-newtab { border:none; background:none; font-size:18px; line-height:1; color:var(--ink3); width:30px; height:30px; cursor:pointer; border-radius:6px; margin-bottom:3px; flex-shrink:0; }
+  .np-newtab:hover { background:var(--surface3); color:var(--ink); }
+  .np-bar { display:flex; flex-wrap:wrap; align-items:center; gap:2px; padding:6px 10px; border-bottom:1px solid var(--border2); flex-shrink:0; }
+  .np-find { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:8px 12px; border-bottom:1px solid var(--border2); background:#fffdf3; flex-shrink:0; }
+  .np-find[hidden] { display:none; }
+  .np-find input[type="text"] { width:190px; font-size:13px; padding:5px 9px; }
+  .np-find label { font-size:12px; color:var(--ink2); display:flex; align-items:center; gap:4px; cursor:pointer; }
+  .np-find-count { font-size:12px; color:var(--ink3); font-variant-numeric:tabular-nums; }
+  textarea.np-text { flex:1; min-height:0; width:100%; border:none !important; border-radius:0 !important; resize:none; outline:none; padding:16px 20px !important; font-family:Consolas,'Cascadia Mono','Courier New',ui-monospace,monospace; font-size:15px; line-height:1.6; color:var(--ink); background:var(--surface) !important; tab-size:4; }
+  .np-status { display:flex; gap:20px; padding:5px 14px; border-top:1px solid var(--border2); background:var(--surface2); font-size:11.5px; color:var(--ink3); font-variant-numeric:tabular-nums; flex-shrink:0; }
+  .np-status #np-saved { margin-left:auto; }
+
+  /* Generic toast + clickable Drive badge */
+  .app-toast { position:fixed; left:50%; bottom:24px; transform:translate(-50%, 20px); background:var(--navy); color:#fff; padding:10px 18px; border-radius:10px; font-size:13.5px; box-shadow:0 8px 24px rgba(0,0,0,0.2); opacity:0; pointer-events:none; transition:opacity 0.2s, transform 0.2s; z-index:10001; }
+  .app-toast.show { opacity:1; transform:translate(-50%, 0); }
+  #drive-sync-badge.clickable { cursor:pointer; }
+  #drive-sync-badge.clickable:hover { filter:brightness(1.25); }
 </style>
 </head>
 <body>
@@ -1612,13 +1677,14 @@
     <button class="nav-tab" onclick="switchTab('deadlines',event)">Deadlines</button>
     <button class="nav-tab" onclick="switchTab('email',event)">Email</button>
     <button class="nav-tab" onclick="switchTab('minutes',event)">Minutes</button>
+    <button class="nav-tab" onclick="switchTab('notepad',event)">Notepad</button>
     <button class="nav-tab" onclick="switchTab('calendar',event)">Calendar</button>
   </div>
   <div style="display:flex;align-items:center;gap:8px;margin-right:16px;">
     <button onclick="exportData()" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:600;padding:5px 12px;border:1px solid rgba(255,255,255,0.25);border-radius:6px;background:none;color:rgba(255,255,255,0.7);cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'">⬇ Backup</button>
     <label style="font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:600;padding:5px 12px;border:1px solid rgba(255,255,255,0.25);border-radius:6px;background:none;color:rgba(255,255,255,0.7);cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'">⬆ Restore<input type="file" accept=".json" onchange="importData(event)" style="display:none;"></label>
   </div>
-  <div id="drive-sync-badge" style="display:flex;align-items:center;gap:6px;font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:600;padding:4px 11px;border-radius:20px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.45);margin-right:4px;transition:all 0.4s;">
+  <div id="drive-sync-badge" onclick="driveBadgeClick()" style="display:flex;align-items:center;gap:6px;font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:600;padding:4px 11px;border-radius:20px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.45);margin-right:4px;transition:all 0.4s;">
     <span id="drive-sync-dot" style="width:7px;height:7px;border-radius:50%;background:#666;flex-shrink:0;transition:background 0.4s;"></span>
     <span id="drive-sync-label">Drive: not connected</span>
   </div>
@@ -1667,7 +1733,7 @@
         <!-- Quick notes -->
         <div class="card quick-note" id="dash-notes-card">
           <div class="card-label">Quick Notes</div>
-          <textarea placeholder="Jot something down..." id="quick-notes" oninput="saveQuickNotes()"></textarea>
+          <div id="quick-notes" class="rt-compact" contenteditable="true" data-placeholder="Jot something down… Pasted text keeps its formatting and links." oninput="saveQuickNotes()"></div>
         </div>
       </div>
 
@@ -1791,14 +1857,9 @@
             <input type="text" id="email-subject" placeholder="Subject line..." oninput="saveEmail()">
           </div>
         </div>
-        <div class="email-toolbar">
-          <button class="fmt-btn" onclick="emailWrap('**','**')" title="Bold"><b>B</b></button>
-          <button class="fmt-btn" onclick="emailWrap('_','_')" title="Italic"><i>I</i></button>
-          <button class="fmt-btn" onclick="emailBullet()" title="Bullet">•</button>
-          <button class="fmt-btn" onclick="clearEmail()" title="Clear" style="font-family:monospace;margin-left:4px;">✕</button>
-        </div>
+        <div class="rt-toolbar" data-for="email-body"></div>
         <div class="email-body">
-          <textarea id="email-body" placeholder="Write your email here..." oninput="saveEmail()"></textarea>
+          <div id="email-body" contenteditable="true" data-placeholder="Write your email here… Paste from Word, Outlook or the web and the formatting stays." oninput="saveEmail()"></div>
         </div>
         <div class="email-footer">
           <div class="email-templates">
@@ -1807,7 +1868,10 @@
             <button class="tpl-btn" onclick="loadTemplate('thankyou')">Thank you</button>
             <button class="tpl-btn" onclick="loadTemplate('submittal')">Submittal</button>
           </div>
-          <button class="btn btn-primary" onclick="copyEmail()">Copy to Clipboard</button>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-ghost" onclick="if(confirm('Clear the whole draft?'))clearEmail()">Clear</button>
+            <button class="btn btn-primary" onclick="copyEmail()" title="Copies the message with its formatting and links, ready to paste into Outlook or Gmail">Copy email</button>
+          </div>
         </div>
       </div>
     </div>
@@ -1834,37 +1898,9 @@
             <div class="minutes-meta-field">📍 <input type="text" id="min-location" placeholder="Location / link" style="width:140px;" oninput="autoSaveMinutes()"></div>
             <div class="minutes-meta-field">👥 <input type="text" id="min-attendees" placeholder="Attendees" style="width:180px;" oninput="autoSaveMinutes()"></div>
           </div>
-          <!-- Formatting toolbar -->
-          <div class="minutes-toolbar">
-            <button class="min-fmt-btn" onclick="minFmt('bold')" title="Bold"><b>B</b></button>
-            <button class="min-fmt-btn" onclick="minFmt('italic')" title="Italic"><i>I</i></button>
-            <button class="min-fmt-btn" onclick="minFmt('underline')" title="Underline" style="text-decoration:underline;">U</button>
-            <div class="min-fmt-sep"></div>
-            <button class="min-fmt-btn" onclick="minH(1)" title="Heading 1">H1</button>
-            <button class="min-fmt-btn" onclick="minH(2)" title="Heading 2">H2</button>
-            <div class="min-fmt-sep"></div>
-            <button class="min-fmt-btn" onclick="minInsert('• ', '')" title="Bullet">• List</button>
-            <button class="min-fmt-btn" onclick="minNumbered()" title="Numbered">1. List</button>
-            <div class="min-fmt-sep"></div>
-            <button class="min-fmt-btn" onclick="minInsert('□ ', '')" title="Action item">□ Action</button>
-            <button class="min-fmt-btn" onclick="minInsert('✓ ', '')" title="Done item">✓ Done</button>
-            <div class="min-fmt-sep"></div>
-            <button class="min-fmt-btn" onclick="minInsert('\n---\n', '')" title="Divider">—</button>
-          </div>
+          <div class="minutes-toolbar rt-toolbar" data-for="min-body"></div>
           <div class="minutes-body">
-            <div id="min-body" contenteditable="true" data-placeholder="AGENDA
-1. 
-2. 
-
-DISCUSSION
-
-
-ACTION ITEMS
-□ 
-□ 
-
-NEXT MEETING
-" oninput="autoSaveMinutes()"></div>
+            <div id="min-body" contenteditable="true" data-placeholder="Start writing… Type - for bullets, 1. for numbers, [] for to-dos, # for a heading." oninput="autoSaveMinutes()"></div>
           </div>
           <div class="minutes-footer">
             <span class="saved-badge" id="saved-badge">✓ Saved</span>
@@ -1878,6 +1914,60 @@ NEXT MEETING
     </div>
   </div>
 
+
+  <!-- NOTEPAD -->
+  <div id="notepad" class="panel">
+    <div class="np-wrap">
+      <div class="np-head">
+        <div class="panel-title">Notepad</div>
+        <div class="panel-sub">Plain text for quick drafts; every note saves automatically</div>
+      </div>
+      <div class="np-card">
+        <div class="np-tabs" id="np-tabs"></div>
+        <div class="np-bar">
+          <button class="rt-btn" onclick="npNew()" title="New note">New</button>
+          <button class="rt-btn" onclick="document.getElementById('np-file').click()" title="Open a text file from your computer">Open…</button>
+          <button class="rt-btn" onclick="npDownload()" title="Save as .txt (Ctrl+S)">Save as .txt</button>
+          <button class="rt-btn" onclick="npPrint()" title="Print">Print</button>
+          <span class="rt-sep"></span>
+          <button class="rt-btn" onclick="npCmd('undo')" title="Undo (Ctrl+Z)">↶</button>
+          <button class="rt-btn" onclick="npCmd('redo')" title="Redo (Ctrl+Y)">↷</button>
+          <button class="rt-btn" onclick="npShowFind(false)" title="Find (Ctrl+F)">Find</button>
+          <button class="rt-btn" onclick="npShowFind(true)" title="Replace (Ctrl+H)">Replace</button>
+          <button class="rt-btn" onclick="npGoTo()" title="Go to line (Ctrl+G)">Go to</button>
+          <button class="rt-btn" onclick="npSelectAll()" title="Select all (Ctrl+A)">Select all</button>
+          <button class="rt-btn" onclick="npTimeDate()" title="Insert time and date (F5)">Time/Date</button>
+          <span class="rt-sep"></span>
+          <button class="rt-btn" id="np-wrap-btn" onclick="npToggleWrap()" title="Word wrap">Word wrap</button>
+          <button class="rt-btn" id="np-font-btn" onclick="npToggleFont()" title="Switch between monospace and normal font">Font: Mono</button>
+          <button class="rt-btn" onclick="npZoom(-10)" title="Zoom out">A−</button>
+          <button class="rt-btn" onclick="npZoom(0)" title="Reset zoom" id="np-zoom-btn">100%</button>
+          <button class="rt-btn" onclick="npZoom(10)" title="Zoom in">A+</button>
+          <input type="file" id="np-file" accept=".txt,.md,.csv,.log,.json,.xml,.html,text/plain" style="display:none" onchange="npOpenFile(event)">
+        </div>
+        <div class="np-find" id="np-find" hidden>
+          <input type="text" id="np-find-q" placeholder="Find" onkeydown="if(event.key==='Enter'){event.preventDefault();npFind(event.shiftKey?-1:1);}else if(event.key==='Escape'){npHideFind();}" oninput="npCountMatches()">
+          <span id="np-repl-wrap" style="display:contents;">
+            <input type="text" id="np-find-r" placeholder="Replace with" onkeydown="if(event.key==='Enter'){event.preventDefault();npReplace();}else if(event.key==='Escape'){npHideFind();}">
+          </span>
+          <label><input type="checkbox" id="np-find-case" onchange="npCountMatches()"> Match case</label>
+          <label><input type="checkbox" id="np-find-word" onchange="npCountMatches()"> Whole word</label>
+          <button class="rt-btn" onclick="npFind(-1)" title="Previous (Shift+F3)">↑</button>
+          <button class="rt-btn" onclick="npFind(1)" title="Next (F3)">↓</button>
+          <span id="np-repl-btns" style="display:contents;">
+            <button class="rt-btn" onclick="npReplace()">Replace</button>
+            <button class="rt-btn" onclick="npReplaceAll()">Replace all</button>
+          </span>
+          <span class="np-find-count" id="np-find-count"></span>
+          <button class="rt-btn" onclick="npHideFind()" title="Close (Esc)" style="margin-left:auto;">✕</button>
+        </div>
+        <textarea id="np-text" class="np-text" spellcheck="true" placeholder="Start typing…" oninput="npOnInput()" onkeydown="npKey(event)" onkeyup="npStatus()" onclick="npStatus()" onselect="npStatus()"></textarea>
+        <div class="np-status">
+          <span id="np-pos">Ln 1, Col 1</span><span id="np-count">0 words · 0 characters</span><span>UTF-8</span><span id="np-saved">Saved</span>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- CALENDAR -->
   <div id="calendar" class="panel">
@@ -1950,6 +2040,7 @@ NEXT MEETING
 
 </div><!-- /.main -->
 
+<div class="app-toast" id="app-toast"></div>
 <div class="tk-toast" id="tk-toast"><span id="tk-toast-msg">Task deleted</span><button onclick="undoDelete()">Undo</button></div>
 
 <script>
@@ -2018,6 +2109,7 @@ async function idbSaveAll() {
     email_cc: localStorage.getItem('mstudio_email_cc') || '',
     email_subject: localStorage.getItem('mstudio_email_subject') || '',
     email_body: localStorage.getItem('mstudio_email_body') || '',
+    notepad: localStorage.getItem('mstudio_notepad') || '',
     saved_at: new Date().toISOString(),
     modified: localStorage.getItem('mstudio_last_modified') || ''
   };
@@ -2050,6 +2142,8 @@ async function idbRestoreIfNeeded() {
       if (all.email_cc) { localStorage.setItem('mstudio_email_cc', all.email_cc); }
       if (all.email_subject) { localStorage.setItem('mstudio_email_subject', all.email_subject); }
       if (all.email_body) { localStorage.setItem('mstudio_email_body', all.email_body); }
+      loadEmail();
+      if (all.notepad) { localStorage.setItem('mstudio_notepad', all.notepad); npLoad(); }
       renderAllTaskCols();
       renderDeadlines();
       renderMinutesList();
@@ -2241,8 +2335,10 @@ async function driveFindOrCreateFile() {
   } catch(e) { console.error('Drive find/create error:', e); return null; }
 }
 
-async function driveSaveData() {
+async function driveSaveData(opts) {
+  opts = opts || {};
   if (!calAccessToken) return;
+  if (!calTokenUsable()) { driveMarkExpired(); return; }
   const fileId = driveFileId || await driveFindOrCreateFile();
   if (!fileId) return;
 
@@ -2257,7 +2353,8 @@ async function driveSaveData() {
     email_to: localStorage.getItem('mstudio_email_to') || '',
     email_cc: localStorage.getItem('mstudio_email_cc') || '',
     email_subject: localStorage.getItem('mstudio_email_subject') || '',
-    email_body: localStorage.getItem('mstudio_email_body') || ''
+    email_body: localStorage.getItem('mstudio_email_body') || '',
+    notepad: localStorage.getItem('mstudio_notepad') || ''
   };
 
   try {
@@ -2266,13 +2363,59 @@ async function driveSaveData() {
       method: 'PATCH',
       headers: { Authorization: 'Bearer ' + calAccessToken, 'Content-Type': 'application/json' },
       body: bodyStr,
-      keepalive: bodyStr.length < 60000
+      keepalive: !!opts.exit && bodyStr.length < 60000   // only when the page is closing: Chrome caps these at 64 KB in flight
     });
-    if (resp.status === 401) { calSignOut(true); updateDriveBadge('disconnected'); return; }
-    if (!resp.ok) { updateDriveBadge('error'); return; }
+    if (resp.status === 401) { driveMarkExpired(); return; }
+    if (!resp.ok) { driveRetryLater(); return; }
+    driveRetryCount = 0;
     updateDriveBadge('saved');
-  } catch(e) { console.error('Drive save error:', e); updateDriveBadge('error'); }
+  } catch(e) {
+    if (opts.exit) return;
+    if (!navigator.onLine) { updateDriveBadge('offline'); return; }
+    driveRetryLater();
+  }
 }
+
+// ---- Drive connection health ----
+let driveExpired = false, driveRetryCount = 0, driveRetryTimer = null, driveBadgeState = '', lastUserActivity = Date.now();
+function calTokenExpiryMs() { return parseInt(localStorage.getItem('cal_token_expiry') || '0', 10); }
+function calTokenUsable() { if (!calAccessToken) return false; const x = calTokenExpiryMs(); return !x || x > Date.now() + 30000; }
+function driveMarkExpired() {
+  // Google's pass lasts about an hour. Keep working locally and reconnect quietly at the next pause.
+  driveExpired = true;
+  calAccessToken = null;
+  updateDriveBadge('expired');
+}
+function driveRetryLater() {
+  driveRetryCount++;
+  clearTimeout(driveRetryTimer);
+  if (driveRetryCount <= 3) { updateDriveBadge('saving'); driveRetryTimer = setTimeout(() => driveSaveData(), 5000 * driveRetryCount); }
+  else updateDriveBadge('error');
+}
+function driveReconnect() {
+  const active = document.querySelector('.panel.active');
+  if (active) sessionStorage.setItem('ms_return_tab', active.id);
+  sessionStorage.removeItem('cal_silent_tried');
+  calSilentReauth();
+}
+function driveBadgeClick() {
+  if (driveBadgeState === 'expired') driveReconnect();
+  else if (driveBadgeState === 'error' || driveBadgeState === 'offline') { driveRetryCount = 0; driveSaveData(); }
+  else if (driveBadgeState === 'disconnected') switchTab('calendar');
+}
+function driveShouldReconnect() {
+  if (localStorage.getItem('cal_was_signed_in') !== '1' || sessionStorage.getItem('cal_silent_tried')) return false;
+  const x = calTokenExpiryMs();
+  return driveExpired || (!!calAccessToken && !!x && x - Date.now() < 5 * 60000);
+}
+['keydown', 'mousedown', 'input', 'wheel', 'touchstart'].forEach(ev => document.addEventListener(ev, () => { lastUserActivity = Date.now(); }, true));
+// Reconnect when you have paused for 90 seconds, so it never interrupts typing
+setInterval(() => {
+  if (document.visibilityState === 'visible' && Date.now() - lastUserActivity > 90000 && driveShouldReconnect()) driveReconnect();
+}, 30000);
+// ...or as soon as you come back to the tab
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && driveShouldReconnect()) driveReconnect(); });
+window.addEventListener('online', () => { if (calAccessToken) { driveRetryCount = 0; driveSaveData(); } });
 
 async function driveLoadData() {
   if (!calAccessToken) return false;
@@ -2341,6 +2484,7 @@ async function driveLoadData() {
       if (el) el.value = data.email_body;
     }
 
+    if (data.notepad) { localStorage.setItem('mstudio_notepad', data.notepad); npLoad(); }
     renderDashboard();
     updateDriveBadge('connected');
     return true;
@@ -2366,9 +2510,15 @@ function updateDriveBadge(state) {
     connected:    { color: '#34d399', text: 'Drive: connected',  bg: 'rgba(52,211,153,0.12)', border: 'rgba(52,211,153,0.3)', textColor: '#34d399' },
     saving:       { color: '#fbbf24', text: 'Drive: saving...',  bg: 'rgba(251,191,36,0.12)',  border: 'rgba(251,191,36,0.3)',  textColor: '#fbbf24' },
     saved:        { color: '#34d399', text: 'Drive: saved ✓',    bg: 'rgba(52,211,153,0.12)', border: 'rgba(52,211,153,0.3)', textColor: '#34d399' },
-    error:        { color: '#f87171', text: 'Drive: sync error', bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.3)', textColor: '#f87171' },
-    disconnected: { color: '#f87171', text: '⚠ Sign in to save data', bg: 'rgba(248,113,113,0.1)', border: 'rgba(248,113,113,0.3)', textColor: '#f87171' }
+    error:        { color: '#f87171', text: 'Drive: sync error · click to retry', bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.3)', textColor: '#f87171' },
+    disconnected: { color: '#f87171', text: '⚠ Sign in to save data', bg: 'rgba(248,113,113,0.1)', border: 'rgba(248,113,113,0.3)', textColor: '#f87171' },
+    expired:      { color: '#fbbf24', text: 'Drive: paused · click to reconnect', bg: 'rgba(251,191,36,0.12)', border: 'rgba(251,191,36,0.35)', textColor: '#fbbf24' },
+    offline:      { color: '#fbbf24', text: 'Offline · saved on this computer', bg: 'rgba(251,191,36,0.12)', border: 'rgba(251,191,36,0.35)', textColor: '#fbbf24' }
   };
+  driveBadgeState = state;
+  if (state === 'connected' || state === 'saved') driveExpired = false;
+  badge.classList.toggle('clickable', ['expired','error','offline','disconnected'].includes(state));
+  badge.title = state === 'expired' ? 'Google sign-in expired after about an hour. Your work is saved on this computer. Click to reconnect now, or it reconnects by itself at your next pause.' : state === 'error' ? 'Click to retry' : '';
 
   const s = states[state] || states.disconnected;
   dot.style.background = s.color;
@@ -2396,16 +2546,15 @@ function exportData() {
   const data = {
     version: 1,
     exported: new Date().toISOString(),
-    tasks_todo: document.getElementById('col-todo') ? document.getElementById('col-todo').innerHTML : '',
-    tasks_inprogress: document.getElementById('col-inprogress') ? document.getElementById('col-inprogress').innerHTML : '',
-    tasks_done: document.getElementById('col-done') ? document.getElementById('col-done').innerHTML : '',
+    tasks_json: localStorage.getItem('mstudio_tasks') || '{}',
     deadlines: localStorage.getItem('mstudio_deadlines') || '[]',
     minutes: localStorage.getItem('mstudio_minutes') || '[]',
     quicknotes: localStorage.getItem('mstudio_quicknotes') || '',
     email_to: localStorage.getItem('mstudio_email_to') || '',
     email_cc: localStorage.getItem('mstudio_email_cc') || '',
     email_subject: localStorage.getItem('mstudio_email_subject') || '',
-    email_body: localStorage.getItem('mstudio_email_body') || ''
+    email_body: localStorage.getItem('mstudio_email_body') || '',
+    notepad: localStorage.getItem('mstudio_notepad') || ''
   };
 
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -2459,6 +2608,8 @@ function importData(event) {
         if (el) el.value = data.quicknotes;
       }
 
+      if (data.notepad) { localStorage.setItem('mstudio_notepad', data.notepad); npLoad(); }
+
       // Restore email
       if (data.email_to !== undefined) {
         localStorage.setItem('mstudio_email_to', data.email_to);
@@ -2499,9 +2650,609 @@ function updateGreeting() {
   if (el) el.textContent = greeting + ', Mo.';
 }
 
+// ===== RICH TEXT EDITORS (Notion-style) =====
+try { document.execCommand('defaultParagraphSeparator', false, 'p'); } catch(e) {}
+const RT_KEEP = new Set(['B','I','U','S','A','P','BR','DIV','UL','OL','LI','H1','H2','H3','BLOCKQUOTE','CODE','PRE','TABLE','THEAD','TBODY','TFOOT','TR','TD','TH','HR','SUB','SUP','IMG','MARK','CAPTION']);
+const RT_DROP = new Set(['SCRIPT','STYLE','META','LINK','TITLE','HEAD','IFRAME','OBJECT','EMBED','SVG','CANVAS','NOSCRIPT','TEMPLATE','INPUT','BUTTON','SELECT','TEXTAREA','FORM','VIDEO','AUDIO','COLGROUP','COL']);
+const RT_BLOCKISH = new Set(['SECTION','ARTICLE','HEADER','FOOTER','MAIN','NAV','ASIDE','FIGURE','FIGCAPTION','ADDRESS','DL','DT','DD','CENTER','DETAILS','SUMMARY','BODY']);
+
+function rtEsc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function rtLinkify(esc) { return esc.replace(/\b((?:https?:\/\/|www\.)[^\s<]+[^\s<.,;:!?)\]'"])/g, m => `<a href="${m.startsWith('www.') ? 'https://' + m : m}" target="_blank" rel="noopener">${m}</a>`); }
+
+// Plain text -> paragraphs and real lists (used for typed templates, old notes and plain pastes)
+function rtTextToHtml(text) {
+  const lines = String(text == null ? '' : text).replace(/\r\n?/g, '\n').split('\n');
+  let html = '', list = null;
+  const close = () => { if (list) { html += `</${list === 'check' ? 'ul' : list}>`; list = null; } };
+  const open = t => { if (list !== t) { close(); html += t === 'check' ? '<ul class="rt-check">' : `<${t}>`; list = t; } };
+  for (const raw of lines) {
+    let m;
+    if ((m = raw.match(/^\s*[□☐]\s?(.*)$/)) || (m = raw.match(/^\s*\[ ?\]\s+(.*)$/))) { open('check'); html += `<li>${rtLinkify(rtEsc(m[1])) || '<br>'}</li>`; continue; }
+    if ((m = raw.match(/^\s*[✓☑]\s?(.*)$/)) || (m = raw.match(/^\s*\[x\]\s+(.*)$/i))) { open('check'); html += `<li class="done">${rtLinkify(rtEsc(m[1])) || '<br>'}</li>`; continue; }
+    if ((m = raw.match(/^\s*[-*•]\s+(.*)$/)) || (m = raw.match(/^\s*[-*•]$/))) { open('ul'); html += `<li>${rtLinkify(rtEsc(m[1] || '')) || '<br>'}</li>`; continue; }
+    if ((m = raw.match(/^\s*\d+[.)]\s+(.*)$/))) { open('ol'); html += `<li>${rtLinkify(rtEsc(m[1])) || '<br>'}</li>`; continue; }
+    close();
+    html += `<p>${raw.trim() ? rtLinkify(rtEsc(raw)) : '<br>'}</p>`;
+  }
+  close();
+  return html;
+}
+
+function rtLooksHtml(v) { return /<\/?(p|div|br|b|i|u|s|ul|ol|li|h[1-6]|a|span|strong|em|blockquote|table|hr)\b/i.test(v); }
+
+// Keep structure (bold, italic, underline, links, headings, lists, quotes, tables); drop fonts, colours, scripts
+function rtSanitize(html) {
+  const src = new DOMParser().parseFromString(String(html), 'text/html');
+  // Word / Outlook lists arrive as paragraphs with hidden bullet markers
+  src.querySelectorAll('p[class^="MsoListParagraph"], p[style*="mso-list"]').forEach(p => {
+    const marker = p.querySelector('[style*="mso-list:Ignore"],[style*="mso-list: Ignore"]');
+    const isOl = !!(marker && /^\s*[\da-z]+[.)]/i.test(marker.textContent));
+    if (marker) marker.remove();
+    const tag = isOl ? 'OL' : 'UL';
+    const li = src.createElement('li');
+    while (p.firstChild) li.appendChild(p.firstChild);
+    const prev = p.previousElementSibling;
+    if (prev && prev.tagName === tag && prev.getAttribute('data-mso')) { prev.appendChild(li); p.remove(); }
+    else { const l = src.createElement(tag); l.setAttribute('data-mso', '1'); l.appendChild(li); p.replaceWith(l); }
+  });
+  const out = document.createElement('div');
+  rtCleanInto(src.body, out, false);
+  out.querySelectorAll('b,i,u,s,mark,code,sub,sup').forEach(n => { if (!n.textContent && !n.querySelector('br,img')) n.remove(); });
+  return out.innerHTML.replace(/^(\s|&nbsp;)+|(\s|&nbsp;)+$/g, '');
+}
+
+function rtCleanInto(node, out, inPre) {
+  node.childNodes.forEach(ch => {
+    if (ch.nodeType === 3) {
+      let t = ch.nodeValue;
+      if (!inPre) t = t.replace(/[\t\n\r ]+/g, ' ');
+      if (t && !(t === ' ' && (!out.lastChild && /^(UL|OL|TABLE|TBODY|THEAD|TR)$/.test(out.nodeName)))) out.appendChild(document.createTextNode(t));
+      return;
+    }
+    if (ch.nodeType !== 1) return;
+    let tag = ch.tagName.toUpperCase();
+    if (RT_DROP.has(tag) || tag.includes(':')) return;
+    const st = (ch.getAttribute('style') || '').toLowerCase();
+    if (/display\s*:\s*none|mso-hide\s*:\s*all/.test(st)) return;
+    if (/^H[4-6]$/.test(tag)) tag = 'H3';
+    if (tag === 'STRONG') tag = 'B';
+    if (tag === 'EM' || tag === 'CITE') tag = 'I';
+    if (tag === 'STRIKE' || tag === 'DEL') tag = 'S';
+    if (tag === 'INS') tag = 'U';
+    if (tag === 'B' && /font-weight\s*:\s*(normal|[1-4]00)\b/.test(st)) tag = 'SPAN';   // Google Docs wrapper
+    if (!RT_KEEP.has(tag)) tag = RT_BLOCKISH.has(tag) ? 'DIV' : 'SPAN';
+    const inLink = out.closest && out.closest('a');
+    const wrap = [];
+    if (/font-weight\s*:\s*(bold|bolder|[6-9]00)\b/.test(st) && tag !== 'B' && !/^H[1-3]$/.test(tag) && tag !== 'TH') wrap.push('B');
+    if (/font-style\s*:\s*italic/.test(st) && tag !== 'I') wrap.push('I');
+    if (/text-decoration[^;]*underline/.test(st) && tag !== 'U' && tag !== 'A' && !inLink) wrap.push('U');
+    if (/text-decoration[^;]*line-through/.test(st) && tag !== 'S') wrap.push('S');
+    let target = out;
+    if (tag !== 'SPAN') {
+      if (tag === 'A') {
+        const href = (ch.getAttribute('href') || '').trim();
+        if (!/^(https?:|mailto:|tel:)/i.test(href) || inLink) { rtCleanInto(ch, out, inPre); return; }
+      }
+      if (tag === 'IMG') {
+        const s = ch.getAttribute('src') || '';
+        if (!/^https:\/\//i.test(s)) return;   // embedded image data would bloat storage
+        const img = document.createElement('img'); img.setAttribute('src', s); img.setAttribute('alt', ch.getAttribute('alt') || '');
+        out.appendChild(img); return;
+      }
+      if (tag === 'U' && inLink) { rtCleanInto(ch, out, inPre); return; }
+      const el = document.createElement(tag);
+      if (tag === 'A') { el.setAttribute('href', ch.getAttribute('href').trim()); el.setAttribute('target', '_blank'); el.setAttribute('rel', 'noopener'); }
+      if (tag === 'TD' || tag === 'TH') ['colspan','rowspan'].forEach(a => { if (ch.getAttribute(a)) el.setAttribute(a, ch.getAttribute(a)); });
+      if (tag === 'OL' && ch.getAttribute('start')) el.setAttribute('start', ch.getAttribute('start'));
+      if (tag === 'UL' && ch.classList && ch.classList.contains('rt-check')) el.className = 'rt-check';
+      if (tag === 'LI' && ch.classList && ch.classList.contains('done')) el.className = 'done';
+      out.appendChild(el);
+      target = el;
+      if (tag === 'BR' || tag === 'HR') return;
+    }
+    let inner = target;
+    wrap.forEach(w => { const x = document.createElement(w); inner.appendChild(x); inner = x; });
+    rtCleanInto(ch, inner, inPre || tag === 'PRE');
+  });
+}
+
+function rtIsEmpty(el) { return !el.textContent.replace(/​/g, '').trim() && !el.querySelector('li,hr,img,table'); }
+function rtUpdateEmpty(el) { el.classList.toggle('is-empty', rtIsEmpty(el)); }
+function rtFixLinks(el) { el.querySelectorAll('a[href]').forEach(a => { a.setAttribute('target', '_blank'); a.setAttribute('rel', 'noopener'); a.title = a.getAttribute('href') + '  (Ctrl+click to open)'; }); }
+
+// Let existing code keep using .value on the rich editors
+function rtMakeValueProp(el) {
+  Object.defineProperty(el, 'value', {
+    configurable: true,
+    get() { return rtIsEmpty(el) ? '' : el.innerHTML; },
+    set(v) { v = v == null ? '' : String(v); el.innerHTML = !v ? '' : (rtLooksHtml(v) ? rtSanitize(v) : rtTextToHtml(v)); rtFixLinks(el); rtUpdateEmpty(el); }
+  });
+}
+
+function rtSel(el) { const s = window.getSelection(); return s && s.rangeCount && el.contains(s.anchorNode) ? s : null; }
+function rtClosest(tag, el) { const s = rtSel(el); if (!s) return null; let n = s.anchorNode; while (n && n !== el) { if (n.nodeName === tag) return n; n = n.parentNode; } return null; }
+
+// Chrome builds a new list inside the paragraph it came from (<p><ul>…</ul></p>); lift it out, keeping the cursor
+function rtUnwrapLists(el) {
+  const s = window.getSelection();
+  const node = s && s.rangeCount ? s.anchorNode : null, off = s && s.rangeCount ? s.anchorOffset : 0;
+  let moved = false;
+  el.querySelectorAll('p > ul, p > ol, div > ul, div > ol').forEach(list => {
+    const p = list.parentNode;
+    if (p === el || !el.contains(p)) return;
+    if (![...p.childNodes].every(n => n === list || n.nodeName === 'BR' || (n.nodeType === 3 && !n.textContent.trim()))) return;
+    p.replaceWith(list);
+    moved = true;
+  });
+  if (moved && node && el.contains(node)) {
+    const r = document.createRange();
+    r.setStart(node, Math.min(off, node.nodeType === 3 ? node.length : node.childNodes.length));
+    r.collapse(true); s.removeAllRanges(); s.addRange(r);
+  }
+}
+
+function rtApply(el, cmd) {
+  el.focus();
+  switch (cmd) {
+    case 'bold': case 'italic': case 'underline': case 'strikeThrough': case 'undo': case 'redo':
+      document.execCommand(cmd); break;
+    case 'h1': case 'h2': case 'h3': case 'quote': {
+      const tag = cmd === 'quote' ? 'BLOCKQUOTE' : cmd.toUpperCase();
+      document.execCommand('formatBlock', false, rtClosest(tag, el) ? 'p' : (cmd === 'quote' ? 'blockquote' : cmd)); break; }
+    case 'ul': {
+      const ul = rtClosest('UL', el);
+      if (ul && ul.classList.contains('rt-check')) { ul.classList.remove('rt-check'); ul.querySelectorAll(':scope > li.done').forEach(li => li.classList.remove('done')); break; }
+      document.execCommand('insertUnorderedList'); break; }
+    case 'ol': document.execCommand('insertOrderedList'); break;
+    case 'check': {
+      let ul = rtClosest('UL', el);
+      if (ul && ul.classList.contains('rt-check')) { document.execCommand('insertUnorderedList'); break; }
+      if (!ul) { document.execCommand('insertUnorderedList'); ul = rtClosest('UL', el); }
+      if (ul) ul.classList.add('rt-check');
+      break; }
+    case 'hr': document.execCommand('insertHorizontalRule'); break;
+    case 'link': rtLink(el); return;
+    case 'clear': {
+      document.execCommand('removeFormat');
+      const s = rtSel(el);
+      if (s && s.isCollapsed === false) document.execCommand('unlink');
+      if (rtClosest('H1', el) || rtClosest('H2', el) || rtClosest('H3', el) || rtClosest('BLOCKQUOTE', el)) document.execCommand('formatBlock', false, 'p');
+      break; }
+  }
+  if (cmd === 'ul' || cmd === 'ol' || cmd === 'check') rtUnwrapLists(el);
+  el.dispatchEvent(new Event('input', { bubbles: true }));
+  rtUpdateToolbar();
+}
+
+function rtLink(el) {
+  const s = rtSel(el);
+  const range = s ? s.getRangeAt(0).cloneRange() : null;
+  const existing = rtClosest('A', el);
+  let url = prompt(existing ? 'Edit the link address (leave empty to remove the link):' : 'Link address:', existing ? existing.getAttribute('href') : 'https://');
+  if (url === null) return;
+  url = url.trim();
+  el.focus();
+  if (range) { const s2 = window.getSelection(); s2.removeAllRanges(); s2.addRange(range); }
+  if (existing) {
+    const r = document.createRange(); r.selectNodeContents(existing);
+    const s3 = window.getSelection(); s3.removeAllRanges(); s3.addRange(r);
+    if (!url || url === 'https://') { document.execCommand('unlink'); el.dispatchEvent(new Event('input', { bubbles: true })); return; }
+  }
+  if (!url || url === 'https://') return;
+  if (!/^(https?:|mailto:|tel:)/i.test(url)) url = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(url) ? 'mailto:' + url : 'https://' + url;
+  const sel = window.getSelection();
+  if (sel.isCollapsed) document.execCommand('insertHTML', false, `<a href="${rtEsc(url)}" target="_blank" rel="noopener">${rtEsc(url.replace(/^mailto:/, ''))}</a>&nbsp;`);
+  else document.execCommand('createLink', false, url);
+  rtFixLinks(el);
+  el.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+// Notion-style shortcuts typed at the start of a line, followed by a space
+function rtMarkdown(el) {
+  const sel = window.getSelection();
+  if (!sel || !sel.rangeCount || !sel.isCollapsed) return false;
+  const node = sel.anchorNode, off = sel.anchorOffset;
+  if (!node || node.nodeType !== 3 || !el.contains(node)) return false;
+  if (node.previousSibling && node.previousSibling.nodeName !== 'BR') return false;
+  const before = node.nodeValue.slice(0, off);
+  const map = { '-':'ul', '*':'ul', '•':'ul', '1.':'ol', '1)':'ol', '#':'h1', '##':'h2', '###':'h3', '>':'quote', '[]':'check', '[ ]':'check' };
+  const cmd = map[before];
+  if (!cmd) return false;
+  const parent = node.parentNode;
+  if (parent !== el && !/^(P|DIV|LI|H1|H2|H3|BLOCKQUOTE)$/.test(parent.nodeName)) return false;
+  if (parent.nodeName === 'LI' && cmd !== 'check') return false;
+  const r = document.createRange(); r.setStart(node, 0); r.setEnd(node, off);
+  sel.removeAllRanges(); sel.addRange(r);
+  document.execCommand('delete');
+  rtApply(el, cmd);
+  return true;
+}
+
+function rtEnsureParagraph(el) {
+  // An empty editor always starts inside a paragraph, so lists and headings never end up nested in bare text
+  if (el.firstElementChild || el.textContent) return;
+  el.innerHTML = '<p><br></p>';
+  const r = document.createRange(); r.setStart(el.firstChild, 0); r.collapse(true);
+  const s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+}
+
+function rtOnKeydown(e) {
+  const el = e.currentTarget;
+  const mod = e.ctrlKey || e.metaKey;
+  if (!mod && (e.key.length === 1 || e.key === 'Enter')) rtEnsureParagraph(el);
+  if (mod && e.shiftKey && e.key.toLowerCase() === 'v') { el._rtPlainNext = true; return; }
+  if (mod && !e.shiftKey && e.key.toLowerCase() === 'k') { e.preventDefault(); rtLink(el); return; }
+  if (mod && e.shiftKey && e.key.toLowerCase() === 'x') { e.preventDefault(); rtApply(el, 'strikeThrough'); return; }
+  if (e.key === 'Tab' && rtClosest('LI', el)) { e.preventDefault(); document.execCommand(e.shiftKey ? 'outdent' : 'indent'); return; }
+  if (e.key === ' ' && !mod && !e.altKey && rtMarkdown(el)) { e.preventDefault(); }
+}
+
+function rtOnPaste(e) {
+  const el = e.currentTarget, cd = e.clipboardData;
+  if (!cd) return;
+  const html = cd.getData('text/html'), text = cd.getData('text/plain');
+  if (!html && !text) {
+    if (cd.files && cd.files.length) { e.preventDefault(); appToast('Images cannot be pasted here; paste a link to the image instead'); }
+    return;
+  }
+  e.preventDefault();
+  const plainOnly = !!el._rtPlainNext; el._rtPlainNext = false;
+  const sel = window.getSelection();
+  const oneUrl = text && /^(https?:\/\/|mailto:)\S+$/i.test(text.trim());
+  if (oneUrl && sel && !sel.isCollapsed) { document.execCommand('createLink', false, text.trim()); rtFixLinks(el); return; }
+  let out;
+  if (html && !plainOnly) out = rtSanitize(html);
+  else if (!/\n/.test(text)) out = rtLinkify(rtEsc(text));
+  else out = rtTextToHtml(text);
+  if (!out) return;
+  document.execCommand('insertHTML', false, out);
+  rtFixLinks(el);
+  rtUpdateEmpty(el);
+}
+
+function rtOnInput(e) {
+  const el = e.currentTarget;
+  el.querySelectorAll('ul.rt-check > li.done').forEach(li => { if (!li.textContent.trim()) li.classList.remove('done'); });
+  rtUpdateEmpty(el);
+}
+
+const RT_BTNS = [
+  ['bold','<b>B</b>','Bold (Ctrl+B)'], ['italic','<i>I</i>','Italic (Ctrl+I)'], ['underline','<u>U</u>','Underline (Ctrl+U)'], ['strikeThrough','<s>S</s>','Strikethrough (Ctrl+Shift+X)'], '|',
+  ['h1','H1','Heading 1 (type # and a space)'], ['h2','H2','Heading 2 (type ## and a space)'], ['h3','H3','Heading 3 (type ### and a space)'], '|',
+  ['ul','• List','Bulleted list (type - and a space)'], ['ol','1. List','Numbered list (type 1. and a space)'], ['check','☐ To-do','Checklist (type [] and a space)'],
+  ['quote','❝ Quote','Quote (type > and a space)'], ['hr','Divider','Horizontal line'], '|',
+  ['link','🔗 Link','Insert or edit link (Ctrl+K)'], ['clear','Clear format','Remove formatting from the selection'], '|',
+  ['undo','↶','Undo (Ctrl+Z)'], ['redo','↷','Redo (Ctrl+Y)']
+];
+
+function rtBuildToolbar(bar) {
+  bar.innerHTML = RT_BTNS.map(b => b === '|' ? '<span class="rt-sep"></span>' : `<button type="button" class="rt-btn" data-cmd="${b[0]}" title="${b[2]}">${b[1]}</button>`).join('')
+    + '<span class="rt-hint">Ctrl+click a link to open it</span>';
+  const el = document.getElementById(bar.dataset.for);
+  bar.addEventListener('mousedown', e => { if (e.target.closest('.rt-btn')) e.preventDefault(); });
+  bar.addEventListener('click', e => { const b = e.target.closest('.rt-btn'); if (b && el) rtApply(el, b.dataset.cmd); });
+  if (el) el._rtToolbar = bar;
+}
+
+function rtUpdateToolbar() {
+  const el = document.activeElement && document.activeElement.closest ? document.activeElement.closest('.rt-editor') : null;
+  if (!el || !el._rtToolbar) return;
+  const st = c => { try { return document.queryCommandState(c); } catch(e) { return false; } };
+  const ul = rtClosest('UL', el);
+  const on = {
+    bold: st('bold'), italic: st('italic'), underline: st('underline'), strikeThrough: st('strikeThrough'),
+    h1: !!rtClosest('H1', el), h2: !!rtClosest('H2', el), h3: !!rtClosest('H3', el),
+    ul: !!ul && !ul.classList.contains('rt-check'), ol: !!rtClosest('OL', el), check: !!ul && ul.classList.contains('rt-check'),
+    quote: !!rtClosest('BLOCKQUOTE', el), link: !!rtClosest('A', el)
+  };
+  el._rtToolbar.querySelectorAll('.rt-btn').forEach(b => b.classList.toggle('on', !!on[b.dataset.cmd]));
+}
+
+function initRichEditors() {
+  ['quick-notes', 'email-body', 'min-body'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el || el._rtReady) return;
+    el._rtReady = true;
+    el.classList.add('rt-editor');
+    if (id !== 'min-body') rtMakeValueProp(el);
+    el.addEventListener('keydown', rtOnKeydown);
+    el.addEventListener('paste', rtOnPaste);
+    el.addEventListener('input', rtOnInput);
+    el.addEventListener('focus', () => {
+      if (!el.innerHTML.trim()) { el.innerHTML = '<p><br></p>'; const r = document.createRange(); r.setStart(el.firstChild, 0); r.collapse(true); const s = window.getSelection(); s.removeAllRanges(); s.addRange(r); }
+      rtUpdateEmpty(el);
+    });
+    el.addEventListener('blur', () => rtUpdateEmpty(el));
+    el.addEventListener('mousedown', e => {   // tick a to-do box
+      const li = e.target.closest && e.target.closest('ul.rt-check > li');
+      if (!li || !el.contains(li)) return;
+      if (e.clientX - li.getBoundingClientRect().left < 24) { e.preventDefault(); li.classList.toggle('done'); el.dispatchEvent(new Event('input', { bubbles: true })); }
+    });
+    el.addEventListener('click', e => {
+      const a = e.target.closest && e.target.closest('a[href]');
+      if (a && (e.ctrlKey || e.metaKey)) { e.preventDefault(); window.open(a.href, '_blank', 'noopener'); }
+    });
+    rtUpdateEmpty(el);
+  });
+  document.querySelectorAll('.rt-toolbar[data-for]').forEach(rtBuildToolbar);
+  document.addEventListener('selectionchange', rtUpdateToolbar);
+}
+
+// Copy with formatting (HTML for Outlook/Gmail/Word, plain text as fallback)
+function rtExportHtml(html) {
+  const box = document.createElement('div');
+  box.innerHTML = html;
+  box.querySelectorAll('ul.rt-check > li').forEach(li => li.insertBefore(document.createTextNode(li.classList.contains('done') ? '☑ ' : '☐ '), li.firstChild));
+  box.querySelectorAll('ul.rt-check').forEach(u => u.setAttribute('style', 'list-style:none;padding-left:0;margin:0 0 4px'));
+  box.querySelectorAll('p').forEach(p => p.setAttribute('style', 'margin:0'));
+  box.querySelectorAll('h1').forEach(h => h.setAttribute('style', 'font-size:18pt;margin:10px 0 4px'));
+  box.querySelectorAll('h2').forEach(h => h.setAttribute('style', 'font-size:14pt;margin:8px 0 3px'));
+  box.querySelectorAll('h3').forEach(h => h.setAttribute('style', 'font-size:12pt;margin:6px 0 2px'));
+  box.querySelectorAll('blockquote').forEach(b => b.setAttribute('style', 'border-left:3px solid #cbd5e1;margin:4px 0;padding-left:10px;color:#475569'));
+  box.querySelectorAll('td,th').forEach(t => t.setAttribute('style', 'border:1px solid #cbd5e1;padding:4px 8px'));
+  box.querySelectorAll('table').forEach(t => t.setAttribute('style', 'border-collapse:collapse'));
+  box.querySelectorAll('[class]').forEach(n => n.removeAttribute('class'));
+  box.querySelectorAll('a').forEach(a => { a.removeAttribute('title'); a.removeAttribute('target'); a.removeAttribute('rel'); });
+  return `<div style="font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#111111;white-space:pre-wrap">${box.innerHTML}</div>`;
+}
+function rtPlainText(html) {
+  const tmp = document.createElement('div');
+  tmp.style.cssText = 'position:fixed;left:-10000px;top:0;width:800px;white-space:pre-wrap;';
+  tmp.innerHTML = html;
+  document.body.appendChild(tmp);
+  const t = tmp.innerText;
+  tmp.remove();
+  return t.replace(/\n{3,}/g, '\n\n').trim();
+}
+async function rtCopy(html, text, msg) {
+  try {
+    if (navigator.clipboard && window.ClipboardItem && window.isSecureContext) {
+      await navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }), 'text/plain': new Blob([text], { type: 'text/plain' }) })]);
+      appToast(msg); return;
+    }
+  } catch(e) {}
+  const tmp = document.createElement('div');
+  tmp.contentEditable = 'true';
+  tmp.style.cssText = 'position:fixed;left:-10000px;top:0;';
+  tmp.innerHTML = html;
+  document.body.appendChild(tmp);
+  const r = document.createRange(); r.selectNodeContents(tmp);
+  const s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+  let ok = false; try { ok = document.execCommand('copy'); } catch(e) {}
+  s.removeAllRanges(); tmp.remove();
+  appToast(ok ? msg : 'Copy failed: select the text and press Ctrl+C');
+}
+
+let appToastTimer = null;
+function appToast(msg) {
+  const t = document.getElementById('app-toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(appToastTimer);
+  appToastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+// ===== NOTEPAD =====
+let npState = { notes: [], active: null, wrap: true, zoom: 100, font: 'mono' };
+let npTimer = null;
+function npText() { return document.getElementById('np-text'); }
+function npCur() { return npState.notes.find(n => n.id === npState.active); }
+function npAutoTitle(t) { const line = (t || '').split('\n').find(l => l.trim()); return line ? line.trim().slice(0, 32) : 'Untitled'; }
+
+function npLoad() {
+  try {
+    const s = JSON.parse(localStorage.getItem('mstudio_notepad') || 'null');
+    if (s && Array.isArray(s.notes)) npState = Object.assign({ notes: [], active: null, wrap: true, zoom: 100, font: 'mono' }, s);
+  } catch(e) {}
+  if (!npState.notes.length) npState.notes.push({ id: Date.now(), title: 'Untitled', text: '', named: false, updated: Date.now() });
+  if (!npCur()) npState.active = npState.notes[0].id;
+  npRender();
+}
+function npPersist() {
+  localStorage.setItem('mstudio_notepad', JSON.stringify(npState));
+  markModified();
+  scheduleDriveSync();
+  idbSaveAll();
+  const s = document.getElementById('np-saved'); if (s) s.textContent = 'Saved';
+}
+function flushNotepadSave() { if (npTimer) { clearTimeout(npTimer); npTimer = null; npPersist(); } }
+
+function npRender() {
+  npRenderTabs();
+  const ta = npText(), n = npCur();
+  if (ta && n && ta.value !== n.text) ta.value = n.text;
+  npApplyView();
+  npStatus();
+}
+function npRenderTabs() {
+  const el = document.getElementById('np-tabs');
+  if (!el) return;
+  el.innerHTML = npState.notes.map(n => `<div class="np-tab${n.id === npState.active ? ' on' : ''}" onclick="npSwitch(${n.id})" ondblclick="npRename(${n.id})" title="${rtEsc(n.title)} (double-click to rename)">
+      <span>${rtEsc(n.title || 'Untitled')}</span><button class="x" onclick="event.stopPropagation();npClose(${n.id})" title="Close note">✕</button></div>`).join('')
+    + '<button class="np-newtab" onclick="npNew()" title="New note">+</button>';
+}
+function npApplyView() {
+  const ta = npText(); if (!ta) return;
+  ta.setAttribute('wrap', npState.wrap ? 'soft' : 'off');
+  ta.style.whiteSpace = npState.wrap ? 'pre-wrap' : 'pre';
+  ta.style.overflowX = npState.wrap ? 'hidden' : 'auto';
+  ta.style.fontSize = (15 * npState.zoom / 100) + 'px';
+  ta.style.fontFamily = npState.font === 'mono' ? "Consolas,'Cascadia Mono','Courier New',ui-monospace,monospace" : "'Plus Jakarta Sans',sans-serif";
+  const wb = document.getElementById('np-wrap-btn'); if (wb) wb.classList.toggle('on', !!npState.wrap);
+  const fb = document.getElementById('np-font-btn'); if (fb) fb.textContent = 'Font: ' + (npState.font === 'mono' ? 'Mono' : 'Sans');
+  const zb = document.getElementById('np-zoom-btn'); if (zb) zb.textContent = npState.zoom + '%';
+}
+function npStatus() {
+  const ta = npText(); if (!ta) return;
+  const v = ta.value, pos = ta.selectionStart || 0;
+  const before = v.slice(0, pos), line = before.split('\n').length, col = pos - before.lastIndexOf('\n');
+  document.getElementById('np-pos').textContent = `Ln ${line}, Col ${col}`;
+  const words = (v.match(/\S+/g) || []).length;
+  const selLen = Math.abs((ta.selectionEnd || 0) - pos);
+  document.getElementById('np-count').textContent = `${words} words · ${v.length} characters` + (selLen ? ` · ${selLen} selected` : '');
+}
+function npOnInput() {
+  const n = npCur(); if (!n) return;
+  n.text = npText().value;
+  n.updated = Date.now();
+  if (!n.named) { const t = npAutoTitle(n.text); if (t !== n.title) { n.title = t; npRenderTabs(); } }
+  npStatus();
+  const s = document.getElementById('np-saved'); if (s) s.textContent = 'Saving…';
+  clearTimeout(npTimer);
+  npTimer = setTimeout(() => { npTimer = null; npPersist(); }, 400);
+}
+function npSwitch(id) { flushNotepadSave(); npState.active = id; npRender(); npPersist(); npText().focus(); }
+function npNew(silent) {
+  flushNotepadSave();
+  const n = { id: Date.now(), title: 'Untitled', text: '', named: false, updated: Date.now() };
+  npState.notes.push(n); npState.active = n.id;
+  npRender(); npPersist();
+  if (!silent) npText().focus();
+  return n;
+}
+function npRename(id) {
+  const n = npState.notes.find(x => x.id === id); if (!n) return;
+  const t = prompt('Name this note:', n.title);
+  if (t === null) return;
+  n.title = t.trim() || npAutoTitle(n.text); n.named = !!t.trim();
+  npRenderTabs(); npPersist();
+}
+function npClose(id) {
+  const n = npState.notes.find(x => x.id === id); if (!n) return;
+  if (n.text.trim() && !confirm(`Delete the note "${n.title}"? This cannot be undone. Use "Save as .txt" first if you want a copy.`)) return;
+  flushNotepadSave();
+  const i = npState.notes.indexOf(n);
+  npState.notes.splice(i, 1);
+  if (!npState.notes.length) npState.notes.push({ id: Date.now(), title: 'Untitled', text: '', named: false, updated: Date.now() });
+  if (npState.active === id) npState.active = npState.notes[Math.max(0, i - 1)].id;
+  npRender(); npPersist();
+}
+function npOpenFile(e) {
+  const f = e.target.files && e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    const n = npNew(true);
+    n.text = String(r.result); n.title = f.name.replace(/\.[^.]+$/, '').slice(0, 40); n.named = true;
+    npRender(); npPersist(); npText().focus();
+  };
+  r.readAsText(f);
+  e.target.value = '';
+}
+function npDownload() {
+  flushNotepadSave();
+  const n = npCur(); if (!n) return;
+  const name = (n.title || 'note').replace(/[\\/:*?"<>|]+/g, '').trim() || 'note';
+  const blob = new Blob([n.text.replace(/\n/g, '\r\n')], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name + '.txt';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+function npPrint() {
+  const n = npCur(); if (!n) return;
+  const f = document.createElement('iframe');
+  f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;';
+  document.body.appendChild(f);
+  const d = f.contentDocument;
+  d.open();
+  d.write(`<html><head><title>${rtEsc(n.title)}</title></head><body><pre style="white-space:pre-wrap;font-family:${npState.font === 'mono' ? 'Consolas,monospace' : 'Arial,sans-serif'};font-size:11pt;">${rtEsc(n.text)}</pre></body></html>`);
+  d.close();
+  setTimeout(() => { f.contentWindow.focus(); f.contentWindow.print(); setTimeout(() => f.remove(), 1000); }, 100);
+}
+function npCmd(c) { const ta = npText(); ta.focus(); document.execCommand(c); npOnInput(); }
+function npInsert(text) { const ta = npText(); ta.focus(); document.execCommand('insertText', false, text); npOnInput(); }
+function npSelectAll() { const ta = npText(); ta.focus(); ta.select(); npStatus(); }
+function npTimeDate() { const d = new Date(); npInsert(d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' }) + ' ' + d.toLocaleDateString('en-GB')); }
+function npToggleWrap() { npState.wrap = !npState.wrap; npApplyView(); npPersist(); }
+function npToggleFont() { npState.font = npState.font === 'mono' ? 'sans' : 'mono'; npApplyView(); npPersist(); }
+function npZoom(step) { npState.zoom = step === 0 ? 100 : Math.min(300, Math.max(50, npState.zoom + step)); npApplyView(); npPersist(); }
+function npSelectRange(a, b) {
+  const ta = npText();
+  ta.focus();
+  ta.setSelectionRange(a, b);
+  // scroll the selection into view
+  const lh = parseFloat(getComputedStyle(ta).lineHeight) || 24;
+  const line = ta.value.slice(0, a).split('\n').length - 1;
+  if (!npState.wrap || ta.scrollHeight <= ta.clientHeight + 2) ta.scrollTop = Math.max(0, line * lh - ta.clientHeight / 3);
+  else { ta.blur(); ta.focus(); }
+  npStatus();
+}
+function npGoTo() {
+  const ta = npText(), lines = ta.value.split('\n');
+  const cur = ta.value.slice(0, ta.selectionStart).split('\n').length;
+  const v = prompt(`Go to line (1 to ${lines.length}):`, cur);
+  if (v === null) return;
+  const ln = Math.min(lines.length, Math.max(1, parseInt(v, 10) || 1));
+  const idx = lines.slice(0, ln - 1).reduce((s, l) => s + l.length + 1, 0);
+  npSelectRange(idx, idx);
+}
+function npShowFind(replace) {
+  const box = document.getElementById('np-find');
+  box.hidden = false;
+  document.getElementById('np-repl-wrap').style.display = replace ? 'contents' : 'none';
+  document.getElementById('np-repl-btns').style.display = replace ? 'contents' : 'none';
+  const ta = npText(), sel = ta.value.slice(ta.selectionStart, ta.selectionEnd);
+  const q = document.getElementById('np-find-q');
+  if (sel && !sel.includes('\n')) q.value = sel;
+  q.focus(); q.select();
+  npCountMatches();
+}
+function npHideFind() { document.getElementById('np-find').hidden = true; npText().focus(); }
+function npRegex() {
+  const q = document.getElementById('np-find-q').value;
+  if (!q) return null;
+  let src = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  if (document.getElementById('np-find-word').checked) src = '\\b' + src + '\\b';
+  return new RegExp(src, document.getElementById('np-find-case').checked ? 'g' : 'gi');
+}
+function npMatches() { const re = npRegex(); if (!re) return []; const out = []; let m; const v = npText().value; while ((m = re.exec(v)) !== null) { out.push([m.index, m.index + m[0].length]); if (!m[0].length) re.lastIndex++; } return out; }
+function npCountMatches(curIdx) {
+  const el = document.getElementById('np-find-count'); if (!el) return;
+  const ms = npMatches(), q = document.getElementById('np-find-q').value;
+  el.textContent = !q ? '' : !ms.length ? 'No matches' : (curIdx != null ? `${curIdx + 1} of ${ms.length}` : `${ms.length} match${ms.length === 1 ? '' : 'es'}`);
+}
+function npFind(dir) {
+  const ms = npMatches();
+  if (!ms.length) { npCountMatches(); return; }
+  const ta = npText();
+  let i;
+  if (dir >= 0) { i = ms.findIndex(m => m[0] >= ta.selectionEnd); if (i < 0) i = 0; }
+  else { i = -1; ms.forEach((m, k) => { if (m[1] <= ta.selectionStart) i = k; }); if (i < 0) i = ms.length - 1; }
+  npSelectRange(ms[i][0], ms[i][1]);
+  npCountMatches(i);
+}
+function npReplace() {
+  const ta = npText(), ms = npMatches(), r = document.getElementById('np-find-r').value;
+  const hit = ms.find(m => m[0] === ta.selectionStart && m[1] === ta.selectionEnd);
+  if (hit) { ta.focus(); document.execCommand('insertText', false, r); npOnInput(); }
+  npFind(1);
+}
+function npReplaceAll() {
+  const re = npRegex(); if (!re) return;
+  const ta = npText(), n = npMatches().length;
+  if (!n) { npCountMatches(); return; }
+  const r = document.getElementById('np-find-r').value;
+  ta.focus(); ta.select();
+  document.execCommand('insertText', false, ta.value.replace(re, () => r));
+  npOnInput();
+  document.getElementById('np-find-count').textContent = `Replaced ${n}`;
+}
+function npKey(e) {
+  const mod = e.ctrlKey || e.metaKey, k = e.key.toLowerCase();
+  if (mod && k === 's') { e.preventDefault(); npDownload(); }
+  else if (mod && k === 'f') { e.preventDefault(); npShowFind(false); }
+  else if (mod && k === 'h') { e.preventDefault(); npShowFind(true); }
+  else if (mod && k === 'g') { e.preventDefault(); npGoTo(); }
+  else if (e.key === 'F3') { e.preventDefault(); npFind(e.shiftKey ? -1 : 1); }
+  else if (e.key === 'F5') { e.preventDefault(); npTimeDate(); }
+  else if (e.key === 'Tab' && !mod) { e.preventDefault(); npInsert('\t'); }
+  else if (e.key === 'Escape' && !document.getElementById('np-find').hidden) { npHideFind(); }
+}
+
 function init() {
+  initRichEditors();
   // Show dashboard, hide others
-  ['deadlines','email','minutes','calendar'].forEach(id=>{const p=document.getElementById(id);if(p)p.style.display='none';});
+  ['deadlines','email','minutes','notepad','calendar'].forEach(id=>{const p=document.getElementById(id);if(p)p.style.display='none';});
   const p=document.getElementById('dashboard');if(p){p.style.display='flex';p.classList.add('active');}
   // Restore from IndexedDB if localStorage was cleared
   idbRestorePromise = idbRestoreIfNeeded();
@@ -2528,8 +3279,9 @@ function init() {
     const ta = document.getElementById(id);
     if (ta) attachEditorBehavior(ta, saveTasks);
   });
-  const minBody = document.getElementById('min-body');
-  if (minBody) attachEditorBehavior(minBody, autoSaveMinutes);
+  npLoad();
+  const ta = document.getElementById('np-text');
+  if (ta) ta.addEventListener('wheel', e => { if (e.ctrlKey) { e.preventDefault(); npZoom(e.deltaY < 0 ? 10 : -10); } }, { passive: false });
 }
 
 function saveQuickNotes() {
@@ -3011,7 +3763,7 @@ function renderToday() {
 // TABS
 function switchTab(tab, event) {
   if (event) event.preventDefault();
-  ['dashboard','deadlines','email','minutes','calendar'].forEach(id => {
+  ['dashboard','deadlines','email','minutes','notepad','calendar'].forEach(id => {
     const p = document.getElementById(id);
     if (p) { p.classList.remove('active'); p.style.display = 'none'; }
   });
@@ -3021,7 +3773,7 @@ function switchTab(tab, event) {
   panel.style.display = 'flex';
   panel.style.flexDirection = 'column';
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  ['dashboard','deadlines','email','minutes','calendar'].forEach((t,i) => {
+  ['dashboard','deadlines','email','minutes','notepad','calendar'].forEach((t,i) => {
     if (t === tab) document.querySelectorAll('.nav-tab')[i].classList.add('active');
   });
   aiContext = tab === 'email' ? 'email' : tab === 'minutes' ? 'minutes' : 'general';
@@ -3320,8 +4072,10 @@ function emailBullet() {
 function clearEmail() { ['email-to','email-cc','email-subject','email-body'].forEach(id => document.getElementById(id).value = ''); saveEmail(); }
 
 function copyEmail() {
-  const full = `To: ${document.getElementById('email-to').value}\nSubject: ${document.getElementById('email-subject').value}\n\n${document.getElementById('email-body').value}`;
-  navigator.clipboard.writeText(full).then(() => alert('Email copied to clipboard!'));
+  const el = document.getElementById('email-body');
+  if (rtIsEmpty(el)) { appToast('The draft is empty'); return; }
+  const html = rtExportHtml(el.innerHTML);
+  rtCopy(html, rtPlainText(html), 'Email copied with formatting; paste it into Outlook or Gmail');
 }
 
 // MINUTES FORMATTING
@@ -3362,7 +4116,7 @@ function newMinutes(silent) {
   flushMinutesSave();
   numberedCounter = 1; taskNumberedCounter = 1;
   const id = Date.now();
-  const doc = { id, title:'New Meeting', date: new Date().toISOString().slice(0,10), location:'', attendees:'', body:'AGENDA\n1. \n2. \n\nDISCUSSION\n\n\nACTION ITEMS\n□ \n□ \n\nNEXT MEETING\n' };
+  const doc = { id, title:'New Meeting', date: new Date().toISOString().slice(0,10), location:'', attendees:'', body:'<h2>Agenda</h2><ol><li><br></li></ol><h2>Discussion</h2><p><br></p><h2>Action items</h2><ul class="rt-check"><li><br></li></ul><h2>Next meeting</h2><p><br></p>' };
   minutesDocs.unshift(doc);
   saveMinutesDocs();
   currentMinutesId = id;
@@ -3434,9 +4188,13 @@ function deleteMinutes() {
 }
 
 function copyMinutes() {
+  flushMinutesSave();
   const d = minutesDocs.find(x => x.id === currentMinutesId);
   if (!d) return;
-  navigator.clipboard.writeText(`${d.title}\nDate: ${d.date} | Location: ${d.location} | Attendees: ${d.attendees}\n\n${d.body}`).then(() => alert('Minutes copied!'));
+  const meta = [d.date && 'Date: ' + d.date, d.location && 'Location: ' + d.location, d.attendees && 'Attendees: ' + d.attendees].filter(Boolean).join('  |  ');
+  const body = rtLooksHtml(d.body || '') ? d.body : rtTextToHtml(d.body || '');
+  const html = rtExportHtml(`<h1>${rtEsc(d.title || 'Meeting')}</h1>${meta ? `<p><i>${rtEsc(meta)}</i></p><p><br></p>` : ''}${body}`);
+  rtCopy(html, rtPlainText(html), 'Minutes copied with formatting');
 }
 
 function saveMinutesDocs() { localStorage.setItem('mstudio_minutes', JSON.stringify(minutesDocs)); markModified(); scheduleDriveSync(); idbSaveAll(); }
@@ -3447,9 +4205,10 @@ function flushAllSaves(e) {
   const exiting = e && (e.type === 'beforeunload' || e.type === 'pagehide');
   if (exiting && document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
   flushMinutesSave();
+  flushNotepadSave();
   clearTimeout(driveSyncTimer);
   idbSaveAll();
-  if (calAccessToken) { driveSaveData(); }
+  if (calAccessToken) { driveSaveData({ exit: exiting }); }
 }
 window.addEventListener('beforeunload', flushAllSaves);
 window.addEventListener('pagehide', flushAllSaves);
@@ -3538,7 +4297,10 @@ function calHandleRedirect() {
   // Small delay to ensure hash is gone before any rendering
   setTimeout(() => {
     calOnSignedIn();
+    const returnTab = sessionStorage.getItem('ms_return_tab');
+    sessionStorage.removeItem('ms_return_tab');
     if (!isSilent) switchTab('calendar');
+    else if (returnTab && document.getElementById(returnTab)) switchTab(returnTab);
   }, 50);
   return true;
 }
@@ -3615,7 +4377,7 @@ async function calFetchEvents() {
       { headers: { Authorization: 'Bearer ' + calAccessToken } }
     );
     if (!resp.ok) {
-      if (resp.status === 401) { calSignOut(true); return; }
+      if (resp.status === 401) { driveMarkExpired(); return; }
       throw new Error('Calendar fetch failed');
     }
     const data = await resp.json();
