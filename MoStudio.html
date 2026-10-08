@@ -1648,13 +1648,10 @@
   .np-tab .x:hover { background:#fef2f2; color:var(--red); }
   .np-newtab { border:none; background:none; font-size:18px; line-height:1; color:var(--ink3); width:30px; height:30px; cursor:pointer; border-radius:6px; margin-bottom:3px; flex-shrink:0; }
   .np-newtab:hover { background:var(--surface3); color:var(--ink); }
-  .np-bar { display:flex; flex-wrap:wrap; align-items:center; gap:2px; padding:6px 10px; border-bottom:1px solid var(--border2); flex-shrink:0; }
-  .np-find { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:8px 12px; border-bottom:1px solid var(--border2); background:#fffdf3; flex-shrink:0; }
-  .np-find[hidden] { display:none; }
-  .np-find input[type="text"] { width:190px; font-size:13px; padding:5px 9px; }
-  .np-find label { font-size:12px; color:var(--ink2); display:flex; align-items:center; gap:4px; cursor:pointer; }
-  .np-find-count { font-size:12px; color:var(--ink3); font-variant-numeric:tabular-nums; }
-  textarea.np-text { flex:1; min-height:0; width:100%; border:none !important; border-radius:0 !important; resize:none; outline:none; padding:16px 20px !important; font-family:Consolas,'Cascadia Mono','Courier New',ui-monospace,monospace; font-size:15px; line-height:1.6; color:var(--ink); background:var(--surface) !important; tab-size:4; }
+  .np-bar { padding:6px 10px; border-bottom:1px solid var(--border2); flex-shrink:0; }
+  .np-page { flex:1; min-height:0; overflow-y:auto; background:var(--surface); cursor:text; }
+  .np-sheet { max-width:760px; margin:0 auto; padding:34px 40px 80px; }
+  #np-text.rt-editor { min-height:60vh; font-size:16px; line-height:1.75; }
   .np-status { display:flex; gap:20px; padding:5px 14px; border-top:1px solid var(--border2); background:var(--surface2); font-size:11.5px; color:var(--ink3); font-variant-numeric:tabular-nums; flex-shrink:0; }
   .np-status #np-saved { margin-left:auto; }
 
@@ -1920,50 +1917,18 @@
     <div class="np-wrap">
       <div class="np-head">
         <div class="panel-title">Notepad</div>
-        <div class="panel-sub">Plain text for quick drafts; every note saves automatically</div>
+        <div class="panel-sub">Free writing with formatting; every note saves automatically</div>
       </div>
       <div class="np-card">
         <div class="np-tabs" id="np-tabs"></div>
-        <div class="np-bar">
-          <button class="rt-btn" onclick="npNew()" title="New note">New</button>
-          <button class="rt-btn" onclick="document.getElementById('np-file').click()" title="Open a text file from your computer">Open…</button>
-          <button class="rt-btn" onclick="npDownload()" title="Save as .txt (Ctrl+S)">Save as .txt</button>
-          <button class="rt-btn" onclick="npPrint()" title="Print">Print</button>
-          <span class="rt-sep"></span>
-          <button class="rt-btn" onclick="npCmd('undo')" title="Undo (Ctrl+Z)">↶</button>
-          <button class="rt-btn" onclick="npCmd('redo')" title="Redo (Ctrl+Y)">↷</button>
-          <button class="rt-btn" onclick="npShowFind(false)" title="Find (Ctrl+F)">Find</button>
-          <button class="rt-btn" onclick="npShowFind(true)" title="Replace (Ctrl+H)">Replace</button>
-          <button class="rt-btn" onclick="npGoTo()" title="Go to line (Ctrl+G)">Go to</button>
-          <button class="rt-btn" onclick="npSelectAll()" title="Select all (Ctrl+A)">Select all</button>
-          <button class="rt-btn" onclick="npTimeDate()" title="Insert time and date (F5)">Time/Date</button>
-          <span class="rt-sep"></span>
-          <button class="rt-btn" id="np-wrap-btn" onclick="npToggleWrap()" title="Word wrap">Word wrap</button>
-          <button class="rt-btn" id="np-font-btn" onclick="npToggleFont()" title="Switch between monospace and normal font">Font: Mono</button>
-          <button class="rt-btn" onclick="npZoom(-10)" title="Zoom out">A−</button>
-          <button class="rt-btn" onclick="npZoom(0)" title="Reset zoom" id="np-zoom-btn">100%</button>
-          <button class="rt-btn" onclick="npZoom(10)" title="Zoom in">A+</button>
-          <input type="file" id="np-file" accept=".txt,.md,.csv,.log,.json,.xml,.html,text/plain" style="display:none" onchange="npOpenFile(event)">
+        <div class="np-bar rt-toolbar" data-for="np-text"></div>
+        <div class="np-page" onmousedown="if(event.target===this||event.target.classList.contains('np-sheet')){event.preventDefault();npFocusEnd();}">
+          <div class="np-sheet">
+            <div id="np-text" contenteditable="true" spellcheck="true" data-placeholder="Start writing… Type - for a bullet, [] for a to-do, # for a heading." oninput="npOnInput()"></div>
+          </div>
         </div>
-        <div class="np-find" id="np-find" hidden>
-          <input type="text" id="np-find-q" placeholder="Find" onkeydown="if(event.key==='Enter'){event.preventDefault();npFind(event.shiftKey?-1:1);}else if(event.key==='Escape'){npHideFind();}" oninput="npCountMatches()">
-          <span id="np-repl-wrap" style="display:contents;">
-            <input type="text" id="np-find-r" placeholder="Replace with" onkeydown="if(event.key==='Enter'){event.preventDefault();npReplace();}else if(event.key==='Escape'){npHideFind();}">
-          </span>
-          <label><input type="checkbox" id="np-find-case" onchange="npCountMatches()"> Match case</label>
-          <label><input type="checkbox" id="np-find-word" onchange="npCountMatches()"> Whole word</label>
-          <button class="rt-btn" onclick="npFind(-1)" title="Previous (Shift+F3)">↑</button>
-          <button class="rt-btn" onclick="npFind(1)" title="Next (F3)">↓</button>
-          <span id="np-repl-btns" style="display:contents;">
-            <button class="rt-btn" onclick="npReplace()">Replace</button>
-            <button class="rt-btn" onclick="npReplaceAll()">Replace all</button>
-          </span>
-          <span class="np-find-count" id="np-find-count"></span>
-          <button class="rt-btn" onclick="npHideFind()" title="Close (Esc)" style="margin-left:auto;">✕</button>
-        </div>
-        <textarea id="np-text" class="np-text" spellcheck="true" placeholder="Start typing…" oninput="npOnInput()" onkeydown="npKey(event)" onkeyup="npStatus()" onclick="npStatus()" onselect="npStatus()"></textarea>
         <div class="np-status">
-          <span id="np-pos">Ln 1, Col 1</span><span id="np-count">0 words · 0 characters</span><span>UTF-8</span><span id="np-saved">Saved</span>
+          <span id="np-count">0 words</span><span id="np-saved">Saved</span>
         </div>
       </div>
     </div>
@@ -2791,6 +2756,23 @@ function rtUnwrapLists(el) {
   }
 }
 
+// Chrome joins a freshly made list to a list directly above it; split the new item out when the list types differ
+function rtIsolateItem(el, check) {
+  const li = rtClosest('LI', el), ul = li && li.parentNode;
+  if (!ul || ul.nodeName !== 'UL') return;
+  if (ul.children.length === 1) { ul.classList.toggle('rt-check', check); return; }
+  if (ul.classList.contains('rt-check') === check) return;   // joined a list of the same kind: fine
+  const s = window.getSelection(), node = s.anchorNode, off = s.anchorOffset;
+  const items = [...ul.children], i = items.indexOf(li);
+  const mid = document.createElement('ul'); if (check) mid.className = 'rt-check';
+  mid.appendChild(li);
+  ul.after(mid);
+  const rest = items.slice(i + 1);
+  if (rest.length) { const tail = ul.cloneNode(false); rest.forEach(x => tail.appendChild(x)); mid.after(tail); }
+  if (!ul.children.length) ul.remove();
+  if (node && el.contains(node)) { const r = document.createRange(); r.setStart(node, Math.min(off, node.nodeType === 3 ? node.length : node.childNodes.length)); r.collapse(true); s.removeAllRanges(); s.addRange(r); }
+}
+
 function rtApply(el, cmd) {
   el.focus();
   switch (cmd) {
@@ -2801,14 +2783,15 @@ function rtApply(el, cmd) {
       document.execCommand('formatBlock', false, rtClosest(tag, el) ? 'p' : (cmd === 'quote' ? 'blockquote' : cmd)); break; }
     case 'ul': {
       const ul = rtClosest('UL', el);
+      if (!ul && !rtClosest('OL', el)) { document.execCommand('insertUnorderedList'); rtIsolateItem(el, false); break; }
       if (ul && ul.classList.contains('rt-check')) { ul.classList.remove('rt-check'); ul.querySelectorAll(':scope > li.done').forEach(li => li.classList.remove('done')); break; }
       document.execCommand('insertUnorderedList'); break; }
     case 'ol': document.execCommand('insertOrderedList'); break;
     case 'check': {
       let ul = rtClosest('UL', el);
       if (ul && ul.classList.contains('rt-check')) { document.execCommand('insertUnorderedList'); break; }
-      if (!ul) { document.execCommand('insertUnorderedList'); ul = rtClosest('UL', el); }
-      if (ul) ul.classList.add('rt-check');
+      if (!ul) { document.execCommand('insertUnorderedList'); rtIsolateItem(el, true); break; }
+      ul.classList.add('rt-check');
       break; }
     case 'hr': document.execCommand('insertHorizontalRule'); break;
     case 'link': rtLink(el); return;
@@ -2887,10 +2870,38 @@ function rtOnKeydown(e) {
   if (e.key === ' ' && !mod && !e.altKey && rtMarkdown(el)) { e.preventDefault(); }
 }
 
+function rtSelectionHtml(el) {
+  const s = window.getSelection();
+  if (!s || !s.rangeCount || s.isCollapsed) return null;
+  const r = s.getRangeAt(0);
+  if (!el.contains(r.commonAncestorContainer)) return null;
+  const box = document.createElement('div');
+  box.appendChild(r.cloneContents());
+  let anc = r.commonAncestorContainer; if (anc.nodeType === 3) anc = anc.parentNode;
+  const wrapTag = anc.closest && anc.closest('ul,ol,h1,h2,h3,blockquote,b,strong,i,em,u,s,a');
+  if (wrapTag && el.contains(wrapTag) && wrapTag !== el) {
+    let w = wrapTag.cloneNode(false);
+    if (/^(UL|OL)$/.test(wrapTag.nodeName) && !box.querySelector('li')) { const li = document.createElement('li'); li.append(...box.childNodes); w.appendChild(li); }
+    else w.append(...box.childNodes);
+    box.appendChild(w);
+  }
+  return box.innerHTML;
+}
+function rtOnCopy(e) {
+  const el = e.currentTarget, html = rtSelectionHtml(el);
+  if (!html || !e.clipboardData) return;
+  e.preventDefault();
+  e.clipboardData.setData('text/html', rtExportHtml(html));
+  e.clipboardData.setData('text/plain', rtPlainText(html));
+  try { e.clipboardData.setData('application/x-mostudio', html); } catch(err) {}
+  if (e.type === 'cut') { document.execCommand('delete'); }
+}
+
 function rtOnPaste(e) {
   const el = e.currentTarget, cd = e.clipboardData;
   if (!cd) return;
-  const html = cd.getData('text/html'), text = cd.getData('text/plain');
+  const own = cd.getData('application/x-mostudio');
+  const html = own || cd.getData('text/html'), text = cd.getData('text/plain');
   if (!html && !text) {
     if (cd.files && cd.files.length) { e.preventDefault(); appToast('Images cannot be pasted here; paste a link to the image instead'); }
     return;
@@ -2913,6 +2924,12 @@ function rtOnPaste(e) {
 function rtOnInput(e) {
   const el = e.currentTarget;
   el.querySelectorAll('ul.rt-check > li.done').forEach(li => { if (!li.textContent.trim()) li.classList.remove('done'); });
+  const junk = el.querySelectorAll('h1 span[style], h2 span[style], h3 span[style]');
+  if (junk.length) {
+    const s = window.getSelection(), node = s.anchorNode, off = s.anchorOffset;
+    junk.forEach(sp => sp.replaceWith(...sp.childNodes));
+    if (node && el.contains(node)) { const r = document.createRange(); r.setStart(node, Math.min(off, node.nodeType === 3 ? node.length : node.childNodes.length)); r.collapse(true); s.removeAllRanges(); s.addRange(r); }
+  }
   rtUpdateEmpty(el);
 }
 
@@ -2949,14 +2966,16 @@ function rtUpdateToolbar() {
 }
 
 function initRichEditors() {
-  ['quick-notes', 'email-body', 'min-body'].forEach(id => {
+  ['quick-notes', 'email-body', 'min-body', 'np-text'].forEach(id => {
     const el = document.getElementById(id);
     if (!el || el._rtReady) return;
     el._rtReady = true;
     el.classList.add('rt-editor');
-    if (id !== 'min-body') rtMakeValueProp(el);
+    if (id !== 'min-body' && id !== 'np-text') rtMakeValueProp(el);
     el.addEventListener('keydown', rtOnKeydown);
     el.addEventListener('paste', rtOnPaste);
+    el.addEventListener('copy', rtOnCopy);
+    el.addEventListener('cut', rtOnCopy);
     el.addEventListener('input', rtOnInput);
     el.addEventListener('focus', () => {
       if (!el.innerHTML.trim()) { el.innerHTML = '<p><br></p>'; const r = document.createRange(); r.setStart(el.firstChild, 0); r.collapse(true); const s = window.getSelection(); s.removeAllRanges(); s.addRange(r); }
@@ -3034,7 +3053,7 @@ function appToast(msg) {
 }
 
 // ===== NOTEPAD =====
-let npState = { notes: [], active: null, wrap: true, zoom: 100, font: 'mono' };
+let npState = { notes: [], active: null };
 let npTimer = null;
 function npText() { return document.getElementById('np-text'); }
 function npCur() { return npState.notes.find(n => n.id === npState.active); }
@@ -3043,9 +3062,10 @@ function npAutoTitle(t) { const line = (t || '').split('\n').find(l => l.trim())
 function npLoad() {
   try {
     const s = JSON.parse(localStorage.getItem('mstudio_notepad') || 'null');
-    if (s && Array.isArray(s.notes)) npState = Object.assign({ notes: [], active: null, wrap: true, zoom: 100, font: 'mono' }, s);
+    if (s && Array.isArray(s.notes)) npState = { notes: s.notes, active: s.active };
   } catch(e) {}
   if (!npState.notes.length) npState.notes.push({ id: Date.now(), title: 'Untitled', text: '', named: false, updated: Date.now() });
+  npState.notes.forEach(n => { if (typeof n.html !== 'string') n.html = n.text ? rtTextToHtml(n.text) : ''; });  // older plain-text notes
   if (!npCur()) npState.active = npState.notes[0].id;
   npRender();
 }
@@ -3060,10 +3080,17 @@ function flushNotepadSave() { if (npTimer) { clearTimeout(npTimer); npTimer = nu
 
 function npRender() {
   npRenderTabs();
-  const ta = npText(), n = npCur();
-  if (ta && n && ta.value !== n.text) ta.value = n.text;
-  npApplyView();
+  const ed = npText(), n = npCur();
+  if (ed && n && ed.innerHTML !== n.html) { ed.innerHTML = n.html || ''; rtFixLinks(ed); }
+  if (ed) rtUpdateEmpty(ed);
   npStatus();
+}
+function npFocusEnd() {
+  const ed = npText(); if (!ed) return;
+  ed.focus();
+  if (!ed.innerHTML.trim()) return;
+  const r = document.createRange(); r.selectNodeContents(ed); r.collapse(false);
+  const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
 }
 function npRenderTabs() {
   const el = document.getElementById('np-tabs');
@@ -3072,29 +3099,17 @@ function npRenderTabs() {
       <span>${rtEsc(n.title || 'Untitled')}</span><button class="x" onclick="event.stopPropagation();npClose(${n.id})" title="Close note">✕</button></div>`).join('')
     + '<button class="np-newtab" onclick="npNew()" title="New note">+</button>';
 }
-function npApplyView() {
-  const ta = npText(); if (!ta) return;
-  ta.setAttribute('wrap', npState.wrap ? 'soft' : 'off');
-  ta.style.whiteSpace = npState.wrap ? 'pre-wrap' : 'pre';
-  ta.style.overflowX = npState.wrap ? 'hidden' : 'auto';
-  ta.style.fontSize = (15 * npState.zoom / 100) + 'px';
-  ta.style.fontFamily = npState.font === 'mono' ? "Consolas,'Cascadia Mono','Courier New',ui-monospace,monospace" : "'Plus Jakarta Sans',sans-serif";
-  const wb = document.getElementById('np-wrap-btn'); if (wb) wb.classList.toggle('on', !!npState.wrap);
-  const fb = document.getElementById('np-font-btn'); if (fb) fb.textContent = 'Font: ' + (npState.font === 'mono' ? 'Mono' : 'Sans');
-  const zb = document.getElementById('np-zoom-btn'); if (zb) zb.textContent = npState.zoom + '%';
-}
 function npStatus() {
-  const ta = npText(); if (!ta) return;
-  const v = ta.value, pos = ta.selectionStart || 0;
-  const before = v.slice(0, pos), line = before.split('\n').length, col = pos - before.lastIndexOf('\n');
-  document.getElementById('np-pos').textContent = `Ln ${line}, Col ${col}`;
-  const words = (v.match(/\S+/g) || []).length;
-  const selLen = Math.abs((ta.selectionEnd || 0) - pos);
-  document.getElementById('np-count').textContent = `${words} words · ${v.length} characters` + (selLen ? ` · ${selLen} selected` : '');
+  const ed = npText(); if (!ed) return;
+  const parts = []; const w = document.createTreeWalker(ed, NodeFilter.SHOW_TEXT); while (w.nextNode()) parts.push(w.currentNode.nodeValue);
+  const words = (parts.join(' ').match(/\S+/g) || []).length;   // works even while the tab is hidden
+  document.getElementById('np-count').textContent = words === 1 ? '1 word' : `${words} words`;
 }
 function npOnInput() {
   const n = npCur(); if (!n) return;
-  n.text = npText().value;
+  const ed = npText();
+  n.html = rtIsEmpty(ed) ? '' : ed.innerHTML;
+  n.text = n.html ? ed.innerText : '';
   n.updated = Date.now();
   if (!n.named) { const t = npAutoTitle(n.text); if (t !== n.title) { n.title = t; npRenderTabs(); } }
   npStatus();
@@ -3105,7 +3120,7 @@ function npOnInput() {
 function npSwitch(id) { flushNotepadSave(); npState.active = id; npRender(); npPersist(); npText().focus(); }
 function npNew(silent) {
   flushNotepadSave();
-  const n = { id: Date.now(), title: 'Untitled', text: '', named: false, updated: Date.now() };
+  const n = { id: Date.now(), title: 'Untitled', text: '', html: '', named: false, updated: Date.now() };
   npState.notes.push(n); npState.active = n.id;
   npRender(); npPersist();
   if (!silent) npText().focus();
@@ -3120,133 +3135,13 @@ function npRename(id) {
 }
 function npClose(id) {
   const n = npState.notes.find(x => x.id === id); if (!n) return;
-  if (n.text.trim() && !confirm(`Delete the note "${n.title}"? This cannot be undone. Use "Save as .txt" first if you want a copy.`)) return;
+  if (n.text.trim() && !confirm(`Delete the note "${n.title}"? This cannot be undone.`)) return;
   flushNotepadSave();
   const i = npState.notes.indexOf(n);
   npState.notes.splice(i, 1);
   if (!npState.notes.length) npState.notes.push({ id: Date.now(), title: 'Untitled', text: '', named: false, updated: Date.now() });
   if (npState.active === id) npState.active = npState.notes[Math.max(0, i - 1)].id;
   npRender(); npPersist();
-}
-function npOpenFile(e) {
-  const f = e.target.files && e.target.files[0]; if (!f) return;
-  const r = new FileReader();
-  r.onload = () => {
-    const n = npNew(true);
-    n.text = String(r.result); n.title = f.name.replace(/\.[^.]+$/, '').slice(0, 40); n.named = true;
-    npRender(); npPersist(); npText().focus();
-  };
-  r.readAsText(f);
-  e.target.value = '';
-}
-function npDownload() {
-  flushNotepadSave();
-  const n = npCur(); if (!n) return;
-  const name = (n.title || 'note').replace(/[\\/:*?"<>|]+/g, '').trim() || 'note';
-  const blob = new Blob([n.text.replace(/\n/g, '\r\n')], { type: 'text/plain;charset=utf-8' });
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name + '.txt';
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-}
-function npPrint() {
-  const n = npCur(); if (!n) return;
-  const f = document.createElement('iframe');
-  f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;';
-  document.body.appendChild(f);
-  const d = f.contentDocument;
-  d.open();
-  d.write(`<html><head><title>${rtEsc(n.title)}</title></head><body><pre style="white-space:pre-wrap;font-family:${npState.font === 'mono' ? 'Consolas,monospace' : 'Arial,sans-serif'};font-size:11pt;">${rtEsc(n.text)}</pre></body></html>`);
-  d.close();
-  setTimeout(() => { f.contentWindow.focus(); f.contentWindow.print(); setTimeout(() => f.remove(), 1000); }, 100);
-}
-function npCmd(c) { const ta = npText(); ta.focus(); document.execCommand(c); npOnInput(); }
-function npInsert(text) { const ta = npText(); ta.focus(); document.execCommand('insertText', false, text); npOnInput(); }
-function npSelectAll() { const ta = npText(); ta.focus(); ta.select(); npStatus(); }
-function npTimeDate() { const d = new Date(); npInsert(d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' }) + ' ' + d.toLocaleDateString('en-GB')); }
-function npToggleWrap() { npState.wrap = !npState.wrap; npApplyView(); npPersist(); }
-function npToggleFont() { npState.font = npState.font === 'mono' ? 'sans' : 'mono'; npApplyView(); npPersist(); }
-function npZoom(step) { npState.zoom = step === 0 ? 100 : Math.min(300, Math.max(50, npState.zoom + step)); npApplyView(); npPersist(); }
-function npSelectRange(a, b) {
-  const ta = npText();
-  ta.focus();
-  ta.setSelectionRange(a, b);
-  // scroll the selection into view
-  const lh = parseFloat(getComputedStyle(ta).lineHeight) || 24;
-  const line = ta.value.slice(0, a).split('\n').length - 1;
-  if (!npState.wrap || ta.scrollHeight <= ta.clientHeight + 2) ta.scrollTop = Math.max(0, line * lh - ta.clientHeight / 3);
-  else { ta.blur(); ta.focus(); }
-  npStatus();
-}
-function npGoTo() {
-  const ta = npText(), lines = ta.value.split('\n');
-  const cur = ta.value.slice(0, ta.selectionStart).split('\n').length;
-  const v = prompt(`Go to line (1 to ${lines.length}):`, cur);
-  if (v === null) return;
-  const ln = Math.min(lines.length, Math.max(1, parseInt(v, 10) || 1));
-  const idx = lines.slice(0, ln - 1).reduce((s, l) => s + l.length + 1, 0);
-  npSelectRange(idx, idx);
-}
-function npShowFind(replace) {
-  const box = document.getElementById('np-find');
-  box.hidden = false;
-  document.getElementById('np-repl-wrap').style.display = replace ? 'contents' : 'none';
-  document.getElementById('np-repl-btns').style.display = replace ? 'contents' : 'none';
-  const ta = npText(), sel = ta.value.slice(ta.selectionStart, ta.selectionEnd);
-  const q = document.getElementById('np-find-q');
-  if (sel && !sel.includes('\n')) q.value = sel;
-  q.focus(); q.select();
-  npCountMatches();
-}
-function npHideFind() { document.getElementById('np-find').hidden = true; npText().focus(); }
-function npRegex() {
-  const q = document.getElementById('np-find-q').value;
-  if (!q) return null;
-  let src = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  if (document.getElementById('np-find-word').checked) src = '\\b' + src + '\\b';
-  return new RegExp(src, document.getElementById('np-find-case').checked ? 'g' : 'gi');
-}
-function npMatches() { const re = npRegex(); if (!re) return []; const out = []; let m; const v = npText().value; while ((m = re.exec(v)) !== null) { out.push([m.index, m.index + m[0].length]); if (!m[0].length) re.lastIndex++; } return out; }
-function npCountMatches(curIdx) {
-  const el = document.getElementById('np-find-count'); if (!el) return;
-  const ms = npMatches(), q = document.getElementById('np-find-q').value;
-  el.textContent = !q ? '' : !ms.length ? 'No matches' : (curIdx != null ? `${curIdx + 1} of ${ms.length}` : `${ms.length} match${ms.length === 1 ? '' : 'es'}`);
-}
-function npFind(dir) {
-  const ms = npMatches();
-  if (!ms.length) { npCountMatches(); return; }
-  const ta = npText();
-  let i;
-  if (dir >= 0) { i = ms.findIndex(m => m[0] >= ta.selectionEnd); if (i < 0) i = 0; }
-  else { i = -1; ms.forEach((m, k) => { if (m[1] <= ta.selectionStart) i = k; }); if (i < 0) i = ms.length - 1; }
-  npSelectRange(ms[i][0], ms[i][1]);
-  npCountMatches(i);
-}
-function npReplace() {
-  const ta = npText(), ms = npMatches(), r = document.getElementById('np-find-r').value;
-  const hit = ms.find(m => m[0] === ta.selectionStart && m[1] === ta.selectionEnd);
-  if (hit) { ta.focus(); document.execCommand('insertText', false, r); npOnInput(); }
-  npFind(1);
-}
-function npReplaceAll() {
-  const re = npRegex(); if (!re) return;
-  const ta = npText(), n = npMatches().length;
-  if (!n) { npCountMatches(); return; }
-  const r = document.getElementById('np-find-r').value;
-  ta.focus(); ta.select();
-  document.execCommand('insertText', false, ta.value.replace(re, () => r));
-  npOnInput();
-  document.getElementById('np-find-count').textContent = `Replaced ${n}`;
-}
-function npKey(e) {
-  const mod = e.ctrlKey || e.metaKey, k = e.key.toLowerCase();
-  if (mod && k === 's') { e.preventDefault(); npDownload(); }
-  else if (mod && k === 'f') { e.preventDefault(); npShowFind(false); }
-  else if (mod && k === 'h') { e.preventDefault(); npShowFind(true); }
-  else if (mod && k === 'g') { e.preventDefault(); npGoTo(); }
-  else if (e.key === 'F3') { e.preventDefault(); npFind(e.shiftKey ? -1 : 1); }
-  else if (e.key === 'F5') { e.preventDefault(); npTimeDate(); }
-  else if (e.key === 'Tab' && !mod) { e.preventDefault(); npInsert('\t'); }
-  else if (e.key === 'Escape' && !document.getElementById('np-find').hidden) { npHideFind(); }
 }
 
 function init() {
@@ -3280,8 +3175,6 @@ function init() {
     if (ta) attachEditorBehavior(ta, saveTasks);
   });
   npLoad();
-  const ta = document.getElementById('np-text');
-  if (ta) ta.addEventListener('wheel', e => { if (e.ctrlKey) { e.preventDefault(); npZoom(e.deltaY < 0 ? 10 : -10); } }, { passive: false });
 }
 
 function saveQuickNotes() {
