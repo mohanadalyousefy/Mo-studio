@@ -1526,6 +1526,78 @@
   .tk-toast.show { opacity:1; transform:translate(-50%, 0); pointer-events:auto; }
   .tk-toast button { background:none; border:1px solid rgba(255,255,255,0.45); color:#fff; font-family:'Plus Jakarta Sans',sans-serif; font-size:12px; font-weight:600; padding:4px 12px; border-radius:6px; cursor:pointer; }
   .tk-toast button:hover { background:rgba(255,255,255,0.12); }
+
+  /* ===== ADD BOX (top of column) ===== */
+  .tk-add-row { padding:10px 10px 0; }
+  .tk-add-input { font-weight:500; }
+  .tk-add-opts { display:none; flex-wrap:wrap; align-items:center; gap:6px; margin-top:7px; }
+  .tk-add-row:focus-within .tk-add-opts, .tk-add-row.has-opts .tk-add-opts { display:flex; }
+  .tk-opt { font-family:'Plus Jakarta Sans',sans-serif; font-size:11.5px; font-weight:600; padding:3px 9px; border-radius:20px; border:1px solid var(--border); background:var(--surface); color:var(--ink2); cursor:pointer; display:inline-flex; align-items:center; gap:4px; transition:all 0.12s; white-space:nowrap; }
+  .tk-opt:hover { border-color:var(--accent); }
+  .tk-opt.on { background:var(--navy); border-color:var(--navy); color:#fff; }
+  #opt-high-todo.on, #opt-high-inprogress.on { background:var(--red); border-color:var(--red); }
+  .tk-opt-date input { border:none !important; background:transparent !important; padding:0 !important; font-size:11.5px !important; width:112px; color:inherit; font-family:inherit; }
+  .tk-opt-date.on input { color:#fff; color-scheme:dark; }
+  .tk-opt-tag { font-size:11.5px !important; padding:3px 9px !important; border-radius:20px !important; width:90px; border:1px solid var(--border) !important; background:var(--surface) !important; }
+  .tk-opt-tag.on { border-color:#4338ca !important; color:#4338ca; font-weight:600; }
+  .tk-opt-hint { font-size:11px; color:var(--ink3); margin-left:auto; }
+
+  /* ===== CALENDAR v2 ===== */
+  #cal-weekdays-header { display:none !important; }
+  .cal-body { padding:0 !important; position:relative; }
+  .cal-days { display:block !important; }
+
+  /* Month */
+  .cal-days.cm-mode { display:flex !important; flex-direction:column; min-height:100%; }
+  .cm-grid { display:grid; grid-template-columns:repeat(7, minmax(0,1fr)); grid-auto-rows:minmax(104px, 1fr); flex:1; }
+  .cm-head { display:grid; grid-template-columns:repeat(7, minmax(0,1fr)); position:sticky; top:0; z-index:3; background:var(--surface); border-bottom:1px solid var(--border); }
+  .cm-head div { text-align:center; font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink3); padding:9px 0; }
+  .cm-cell { border-right:1px solid var(--border2); border-bottom:1px solid var(--border2); padding:6px 6px 4px; min-width:0; cursor:pointer; transition:background 0.1s; display:flex; flex-direction:column; gap:2px; overflow:hidden; }
+  .cm-cell:nth-child(7n) { border-right:none; }
+  .cm-cell:hover { background:#f7f9fd; }
+  .cm-cell.other { background:#fbfcfe; }
+  .cm-cell.other .cm-num { color:#b6bdc9; }
+  .cm-cell.sel { box-shadow:inset 0 0 0 2px var(--navy-light); }
+  .cm-num { font-size:12.5px; font-weight:600; color:var(--ink2); width:26px; height:26px; display:flex; align-items:center; justify-content:center; border-radius:50%; margin-bottom:2px; flex-shrink:0; }
+  .cm-cell.today .cm-num { background:var(--accent); color:#fff; }
+  .cm-ev { display:flex; align-items:center; gap:5px; font-size:11.5px; line-height:1.35; padding:1px 5px; border-radius:4px; min-width:0; color:var(--ink); cursor:pointer; }
+  .cm-ev:hover { background:var(--surface3); }
+  .cm-ev .dot { width:7px; height:7px; border-radius:50%; background:var(--accent); flex-shrink:0; }
+  .cm-ev .tm { color:var(--ink3); font-weight:600; flex-shrink:0; font-variant-numeric:tabular-nums; }
+  .cm-ev .tt { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+  .cm-ev.allday { background:var(--accent); color:#fff; }
+  .cm-ev.allday:hover { background:var(--navy-light); }
+  .cm-more { font-size:11px; font-weight:600; color:var(--ink3); padding:1px 5px; cursor:pointer; }
+  .cm-more:hover { color:var(--accent); }
+
+  /* Week */
+  .cw-head, .cw-allday, .cw-grid { display:grid; grid-template-columns:56px repeat(7, minmax(0,1fr)); }
+  .cw-top { position:sticky; top:0; z-index:4; background:var(--surface); border-bottom:1px solid var(--border); }
+  .cw-hd { text-align:center; padding:8px 2px 6px; cursor:pointer; border-left:1px solid var(--border2); }
+  .cw-hd:hover { background:var(--surface2); }
+  .cw-hd .nm { font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink3); }
+  .cw-hd .no { font-size:20px; font-weight:700; color:var(--ink2); width:36px; height:36px; margin:2px auto 0; display:flex; align-items:center; justify-content:center; border-radius:50%; }
+  .cw-hd.today .nm { color:var(--accent); }
+  .cw-hd.today .no { background:var(--accent); color:#fff; }
+  .cw-hd.sel .no { box-shadow:0 0 0 2px var(--navy-light); }
+  .cw-allday { border-top:1px solid var(--border2); min-height:26px; }
+  .cw-allday .lbl { font-size:10px; color:var(--ink3); text-align:right; padding:6px 6px 0 0; }
+  .cw-allday .cell { border-left:1px solid var(--border2); padding:3px; display:flex; flex-direction:column; gap:2px; min-width:0; }
+  .cw-gutter { position:relative; }
+  .cw-gutter div { height:48px; font-size:10.5px; color:var(--ink3); text-align:right; padding-right:8px; transform:translateY(-7px); font-variant-numeric:tabular-nums; }
+  .cw-col { position:relative; border-left:1px solid var(--border2); background-image:repeating-linear-gradient(to bottom, transparent 0, transparent 47px, var(--border2) 47px, var(--border2) 48px); cursor:pointer; }
+  .cw-col.today { background-color:#f7faff; }
+  .cw-ev { position:absolute; border-radius:6px; background:#dbeafe; border-left:3px solid var(--accent); padding:3px 6px; font-size:11.5px; line-height:1.3; color:#1e3a8a; overflow:hidden; cursor:pointer; box-shadow:0 1px 2px rgba(0,0,0,0.06); }
+  .cw-ev:hover { background:#bfdbfe; z-index:2; }
+  .cw-ev b { display:block; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .cw-ev span { color:#3b5998; font-size:10.5px; }
+  .cw-now { position:absolute; left:0; right:0; height:2px; background:var(--red); z-index:3; pointer-events:none; }
+  /* Calendar page spacing and header buttons */
+  #calendar .panel-inner { padding:22px 28px 24px !important; gap:14px; }
+  #calendar .panel-header { flex-shrink:0; }
+  .cal-header .cal-nav-btn { width:auto; min-width:30px; padding:0 10px; font-family:'Plus Jakarta Sans',sans-serif; font-size:12px; font-weight:600; }
+  #btn-month-view, #btn-week-view { padding:0 12px !important; }
+  .cw-now::before { content:''; position:absolute; left:-5px; top:-4px; width:10px; height:10px; border-radius:50%; background:var(--red); }
 </style>
 </head>
 <body>
@@ -1606,7 +1678,7 @@
         <div class="tk-board-head">
           <span class="tk-board-title">Tasks</span>
           <div class="tk-filters" id="tk-filters"></div>
-          <span class="tk-kbd-hint">Press <kbd>N</kbd> to add a task &middot; type <code>#tag</code> <code>!</code> <code>@fri</code> to tag, prioritise, date</span>
+          <span class="tk-kbd-hint">Press <kbd>N</kbd> anywhere to add a task</span>
         </div>
         <div class="tasks-freeform-grid" style="border-radius:0;gap:0;">
           <div class="freeform-col tk-col" style="border-radius:0;border:none;border-right:1px solid var(--border);">
@@ -1615,11 +1687,20 @@
               <div class="freeform-col-title">To Do</div>
               <span class="tk-count" id="count-todo">0</span>
             </div>
-            <div class="task-check-list" id="list-todo"></div>
-            <div class="tk-add-row">
-              <input class="tk-add-input" id="add-todo" placeholder="Add a task…" autocomplete="off"
+            <div class="tk-add-row" id="addrow-todo">
+              <input class="tk-add-input" id="add-todo" placeholder="+ Add a task" autocomplete="off"
                 onkeydown="if(event.key==='Enter'){event.preventDefault();addCheckTask('todo');}else if(event.key==='Escape'){this.blur();}">
+              <div class="tk-add-opts">
+                <button type="button" class="tk-opt" onmousedown="event.preventDefault()" id="opt-high-todo" onclick="toggleDraft('todo','high')" title="High priority">! High</button>
+                <button type="button" class="tk-opt" onmousedown="event.preventDefault()" id="opt-focus-todo" onclick="toggleDraft('todo','focus')" title="Show in Today">☆ Today</button>
+                <button type="button" class="tk-opt" onmousedown="event.preventDefault()" onclick="setDraftDue('todo',0)">Due today</button>
+                <button type="button" class="tk-opt" onmousedown="event.preventDefault()" onclick="setDraftDue('todo',1)">Tomorrow</button>
+                <label class="tk-opt tk-opt-date" title="Pick a due date">📅 <input type="date" id="opt-due-todo" onchange="setDraftDueValue('todo',this.value)"></label>
+                <input class="tk-opt-tag" id="opt-tag-todo" list="tk-tag-list" placeholder="# tag" onchange="setDraftTag('todo',this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();setDraftTag('todo',this.value);addCheckTask('todo');}">
+                <span class="tk-opt-hint">Enter to add</span>
+              </div>
             </div>
+            <div class="task-check-list" id="list-todo"></div>
           </div>
           <div class="freeform-col tk-col" style="border-radius:0;border:none;border-right:1px solid var(--border);">
             <div class="freeform-col-header" style="border-radius:0;">
@@ -1627,11 +1708,20 @@
               <div class="freeform-col-title">In Progress</div>
               <span class="tk-count" id="count-inprogress">0</span>
             </div>
-            <div class="task-check-list" id="list-inprogress"></div>
-            <div class="tk-add-row">
-              <input class="tk-add-input" id="add-inprogress" placeholder="Add a task…" autocomplete="off"
+            <div class="tk-add-row" id="addrow-inprogress">
+              <input class="tk-add-input" id="add-inprogress" placeholder="+ Add a task" autocomplete="off"
                 onkeydown="if(event.key==='Enter'){event.preventDefault();addCheckTask('inprogress');}else if(event.key==='Escape'){this.blur();}">
+              <div class="tk-add-opts">
+                <button type="button" class="tk-opt" onmousedown="event.preventDefault()" id="opt-high-inprogress" onclick="toggleDraft('inprogress','high')" title="High priority">! High</button>
+                <button type="button" class="tk-opt" onmousedown="event.preventDefault()" id="opt-focus-inprogress" onclick="toggleDraft('inprogress','focus')" title="Show in Today">☆ Today</button>
+                <button type="button" class="tk-opt" onmousedown="event.preventDefault()" onclick="setDraftDue('inprogress',0)">Due today</button>
+                <button type="button" class="tk-opt" onmousedown="event.preventDefault()" onclick="setDraftDue('inprogress',1)">Tomorrow</button>
+                <label class="tk-opt tk-opt-date" title="Pick a due date">📅 <input type="date" id="opt-due-inprogress" onchange="setDraftDueValue('inprogress',this.value)"></label>
+                <input class="tk-opt-tag" id="opt-tag-inprogress" list="tk-tag-list" placeholder="# tag" onchange="setDraftTag('inprogress',this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();setDraftTag('inprogress',this.value);addCheckTask('inprogress');}">
+                <span class="tk-opt-hint">Enter to add</span>
+              </div>
             </div>
+            <div class="task-check-list" id="list-inprogress"></div>
           </div>
           <div class="freeform-col tk-col" style="border-radius:0;border:none;">
             <div class="freeform-col-header" style="border-radius:0;">
@@ -1639,11 +1729,11 @@
               <div class="freeform-col-title">Done</div>
               <span class="tk-count" id="count-done">0</span>
             </div>
-            <div class="task-check-list" id="list-done"></div>
-            <div class="tk-add-row">
-              <input class="tk-add-input" id="add-done" placeholder="Add a finished task…" autocomplete="off"
+            <div class="tk-add-row" id="addrow-done">
+              <input class="tk-add-input" id="add-done" placeholder="+ Add a finished task" autocomplete="off"
                 onkeydown="if(event.key==='Enter'){event.preventDefault();addCheckTask('done');}else if(event.key==='Escape'){this.blur();}">
             </div>
+            <div class="task-check-list" id="list-done"></div>
           </div>
         </div>
         <datalist id="tk-tag-list"></datalist>
@@ -1684,7 +1774,7 @@
     <div class="panel-inner">
       <div class="panel-header">
         <div class="panel-title">Email</div>
-        <div class="panel-sub">Draft your message — use AI Assist for tone, translation, or rewrites</div>
+        <div class="panel-sub">Draft your message; it is saved automatically as you type</div>
       </div>
       <div class="email-composer">
         <div class="email-fields">
@@ -1706,7 +1796,6 @@
           <button class="fmt-btn" onclick="emailWrap('_','_')" title="Italic"><i>I</i></button>
           <button class="fmt-btn" onclick="emailBullet()" title="Bullet">•</button>
           <button class="fmt-btn" onclick="clearEmail()" title="Clear" style="font-family:monospace;margin-left:4px;">✕</button>
-          <button class="ai-assist-btn" onclick="toggleAI()">✦ AI Assist</button>
         </div>
         <div class="email-body">
           <textarea id="email-body" placeholder="Write your email here..." oninput="saveEmail()"></textarea>
@@ -1739,8 +1828,7 @@
         <div class="minutes-editor">
           <div class="minutes-editor-header">
             <input type="text" id="min-title" placeholder="Meeting title..." oninput="autoSaveMinutes()">
-            <button class="ai-assist-btn" onclick="toggleAI()">✦ AI Assist</button>
-          </div>
+            </div>
           <div class="minutes-meta">
             <div class="minutes-meta-field">📅 <input type="date" id="min-date" oninput="autoSaveMinutes()"></div>
             <div class="minutes-meta-field">📍 <input type="text" id="min-location" placeholder="Location / link" style="width:140px;" oninput="autoSaveMinutes()"></div>
@@ -1863,24 +1951,6 @@ NEXT MEETING
 </div><!-- /.main -->
 
 <div class="tk-toast" id="tk-toast"><span id="tk-toast-msg">Task deleted</span><button onclick="undoDelete()">Undo</button></div>
-
-<!-- AI PANEL -->
-<div class="ai-panel" id="ai-panel">
-  <div class="ai-panel-header">
-    <div class="ai-panel-title">✦ AI Assistant</div>
-    <button onclick="toggleAI()" style="background:none;border:none;color:rgba(255,255,255,0.6);cursor:pointer;font-size:16px;">✕</button>
-  </div>
-  <div class="ai-panel-messages" id="ai-messages">
-    <div class="ai-msg ai">
-      <span class="ai-label">Assistant</span>
-      Hello Mo! I can help you draft emails, refine tone, summarize meeting notes, create action item lists, or improve any writing. What would you like help with?
-    </div>
-  </div>
-  <div class="ai-panel-input">
-    <input type="text" id="ai-input" placeholder="Ask me anything..." onkeydown="if(event.key==='Enter')sendAI()">
-    <button class="btn btn-primary" onclick="sendAI()">Send</button>
-  </div>
-</div>
 
 <script>
 
@@ -2586,7 +2656,7 @@ function renderTaskCol(col) {
   if (cnt) cnt.textContent = (tasks[col] || []).length;
   const list = viewList(col);
   if (list.length === 0) {
-    el.innerHTML = `<div class="tk-empty">${col === 'done' ? 'Ticked tasks land here' : 'Drag a task here or type below'}</div>`;
+    el.innerHTML = `<div class="tk-empty">${col === 'done' ? 'Ticked tasks land here' : 'Drag a task here or type above'}</div>`;
     return;
   }
   el.innerHTML = list.map(t => taskItemHtml(t, col)).join('');
@@ -2651,17 +2721,47 @@ function parseQuickAdd(raw) {
   return { text: text.replace(/\s+/g, ' ').trim(), due, priority, tag };
 }
 
+let taskDrafts = { todo:{}, inprogress:{}, done:{} };
+
+function renderDraftOpts(col) {
+  const d = taskDrafts[col] || {};
+  const row = document.getElementById('addrow-' + col);
+  if (row) row.classList.toggle('has-opts', !!(d.high || d.focus || d.due || d.tag));
+  const hi = document.getElementById('opt-high-' + col); if (hi) hi.classList.toggle('on', !!d.high);
+  const fo = document.getElementById('opt-focus-' + col); if (fo) { fo.classList.toggle('on', !!d.focus); fo.textContent = d.focus ? '★ Today' : '☆ Today'; }
+  const du = document.getElementById('opt-due-' + col); if (du) { du.value = d.due || ''; du.parentElement.classList.toggle('on', !!d.due); }
+  const tg = document.getElementById('opt-tag-' + col); if (tg) { tg.value = d.tag || ''; tg.classList.toggle('on', !!d.tag); }
+}
+function toggleDraft(col, key) { const d = taskDrafts[col]; d[key] = !d[key]; renderDraftOpts(col); focusAdd(col); }
+function setDraftDue(col, offset) {
+  const dt = new Date(); dt.setDate(dt.getDate() + offset);
+  const v = todayStr(dt);
+  taskDrafts[col].due = taskDrafts[col].due === v ? '' : v;
+  renderDraftOpts(col); focusAdd(col);
+}
+function setDraftDueValue(col, v) { taskDrafts[col].due = v || ''; renderDraftOpts(col); focusAdd(col); }
+function setDraftTag(col, v) { taskDrafts[col].tag = normTag(v); renderDraftOpts(col); }
+function focusAdd(col) { const i = document.getElementById('add-' + col); if (i) i.focus(); }
+
 function addCheckTask(col) {
   const input = document.getElementById('add-' + col);
   if (!input) return;
   const raw = input.value.trim();
-  if (!raw) return;
-  const p = parseQuickAdd(raw);
+  if (!raw) { input.focus(); return; }
+  const p = parseQuickAdd(raw);            // typed #tag ! @fri still work, but are optional
   if (!p.text) return;
-  if (!p.tag && taskFilter !== 'all') p.tag = taskFilter;   // keep new task visible under the active filter
+  const d = taskDrafts[col] || {};
+  const tagEl = document.getElementById('opt-tag-' + col);
+  const tag = p.tag || d.tag || normTag(tagEl ? tagEl.value : '') || (taskFilter !== 'all' ? taskFilter : '');
   if (!tasks[col]) tasks[col] = [];
-  tasks[col].push({ id: Date.now() + Math.random(), text: p.text, done: col === 'done', due: p.due, priority: p.priority, tag: p.tag, focus: '' });
+  tasks[col].unshift({
+    id: Date.now() + Math.random(), text: p.text, done: col === 'done',
+    due: p.due || d.due || '', priority: (p.priority === 'high' || d.high) ? 'high' : 'normal',
+    tag, focus: d.focus && col !== 'done' ? todayStr() : ''
+  });
   input.value = '';
+  taskDrafts[col] = {};
+  renderDraftOpts(col);
   saveTasks();
   renderAllTaskCols();
   input.focus();
@@ -3341,62 +3441,6 @@ function copyMinutes() {
 
 function saveMinutesDocs() { localStorage.setItem('mstudio_minutes', JSON.stringify(minutesDocs)); markModified(); scheduleDriveSync(); idbSaveAll(); }
 
-// AI
-function toggleAI() {
-  const panel = document.getElementById('ai-panel');
-  panel.classList.toggle('open');
-  if (panel.classList.contains('open')) document.getElementById('ai-input').focus();
-}
-
-async function sendAI() {
-  const input = document.getElementById('ai-input');
-  const msg = input.value.trim();
-  if (!msg) return;
-  input.value = '';
-  let ctx = '';
-  if (aiContext === 'email') {
-    const body = document.getElementById('email-body').value;
-    const subj = document.getElementById('email-subject').value;
-    if (body || subj) ctx = `\n\n[Current email — Subject: "${subj}" Body: "${body.slice(0,400)}"]`;
-  } else if (aiContext === 'minutes') {
-    const body = document.getElementById('min-body').innerText || '';
-    const title = document.getElementById('min-title').value;
-    if (body || title) ctx = `\n\n[Current minutes — Title: "${title}" Content: "${body.slice(0,400)}"]`;
-  }
-  appendAIMsg('user', msg);
-  const loading = appendAIMsg('ai', 'Thinking...', true);
-  try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: 'You are a concise professional writing assistant for Mo, a researcher at the WHO Collaborating Centre for Health Literacy at TU Munich. Help with emails, meeting minutes, professional writing, research summaries, and action items. Keep responses practical and well-structured. Do not use em dashes.',
-        messages: [{ role: 'user', content: msg + ctx }]
-      })
-    });
-    const data = await resp.json();
-    const text = data.content?.map(b => b.text || '').join('') || 'Sorry, no response received.';
-    loading.remove();
-    appendAIMsg('ai', text);
-  } catch(e) {
-    loading.remove();
-    appendAIMsg('ai', 'Could not reach the assistant. Please try again.');
-  }
-}
-
-function appendAIMsg(role, text, isLoading) {
-  const msgs = document.getElementById('ai-messages');
-  const div = document.createElement('div');
-  div.className = `ai-msg ${role}${isLoading ? ' loading' : ''}`;
-  if (role === 'ai') { div.innerHTML = `<span class="ai-label">Assistant</span>${text.replace(/\n/g,'<br>')}`; }
-  else { div.textContent = text; }
-  msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
-  return div;
-}
-
 // Save immediately when tab is closed, refreshed, or hidden
 function flushAllSaves(e) {
   // On real page exit, commit any field still being edited (e.g. a deadline cell) via its blur handler
@@ -3562,11 +3606,12 @@ function calOnSignedIn() {
 // ===== FETCH EVENTS =====
 async function calFetchEvents() {
   if (!calAccessToken) return;
-  const start = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth(), 1).toISOString();
-  const end = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth() + 2, 0).toISOString();
+  const range = calVisibleRange();
+  const start = range.start.toISOString();
+  const end = range.end.toISOString();
   try {
     const resp = await fetch(
-      `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${encodeURIComponent(start)}&timeMax=${encodeURIComponent(end)}&singleEvents=true&orderBy=startTime&maxResults=100`,
+      `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${encodeURIComponent(start)}&timeMax=${encodeURIComponent(end)}&singleEvents=true&orderBy=startTime&maxResults=250`,
       { headers: { Authorization: 'Bearer ' + calAccessToken } }
     );
     if (!resp.ok) {
@@ -3581,42 +3626,56 @@ async function calFetchEvents() {
   } catch(e) { console.error('Calendar error:', e); }
 }
 
+// ===== CALENDAR HELPERS =====
+function calMonday(d) { const m = new Date(d); m.setHours(0,0,0,0); const k = (m.getDay() + 6) % 7; m.setDate(m.getDate() - k); return m; }
+function calVisibleRange() {
+  if (calView === 'week') { const s = calMonday(calCurrentDate); const e = new Date(s); e.setDate(s.getDate() + 7); return { start: s, end: e }; }
+  const first = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth(), 1);
+  const s = calMonday(first); const e = new Date(s); e.setDate(s.getDate() + 42);
+  return { start: s, end: e };
+}
+function calParseDay(str) { const [y,m,d] = str.split('-').map(Number); return new Date(y, m-1, d); }   // all-day dates are local, not UTC
+function calEvStart(ev) { return ev.start.dateTime ? new Date(ev.start.dateTime) : calParseDay(ev.start.date); }
+function calEvEnd(ev) { return ev.end && ev.end.dateTime ? new Date(ev.end.dateTime) : (ev.end && ev.end.date ? calParseDay(ev.end.date) : new Date(calEvStart(ev).getTime() + 3600000)); }
+function calSameDay(a, b) { return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); }
+function calEventsOn(day) {   // events touching this local day; all-day first, then by time
+  const ds = new Date(day); ds.setHours(0,0,0,0);
+  const de = new Date(ds); de.setDate(ds.getDate() + 1);
+  return calEvents.filter(ev => calEvStart(ev) < de && calEvEnd(ev) > ds)
+    .sort((a,b) => (!!b.start.date - !!a.start.date) || (calEvStart(a) - calEvStart(b)));
+}
+function calHm(d) { return d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' }); }
+function calOpenEvent(i, ev) { if (ev) ev.stopPropagation(); const e = calEvents[i]; if (e && e.htmlLink) window.open(e.htmlLink, '_blank', 'noopener'); }
+function calOpenWeekOf(y, m, d, ev) { if (ev) ev.stopPropagation(); calCurrentDate = new Date(y, m, d); calSelectedDay = { d, m, y }; calSetView('week'); calFetchEvents(); }
+function calEsc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
 // ===== RENDER MONTH =====
 function calRenderMonth() {
   const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   document.getElementById('cal-month-title').textContent = months[calCurrentDate.getMonth()] + ' ' + calCurrentDate.getFullYear();
-  const firstDay = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth(), 1);
-  const lastDay = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth() + 1, 0);
-  let startOffset = firstDay.getDay() - 1;
-  if (startOffset < 0) startOffset = 6;
-  const today = new Date(); today.setHours(0,0,0,0);
-  const grid = document.getElementById('cal-days');
-  let html = '';
-  for (let i = startOffset - 1; i >= 0; i--) {
-    const d = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth(), -i);
-    html += `<div class="cal-day other-month"><div class="cal-day-num">${d.getDate()}</div></div>`;
-  }
-  for (let d = 1; d <= lastDay.getDate(); d++) {
-    const date = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth(), d);
-    const isToday = date.getTime() === today.getTime();
-    const dayEvents = calEvents.filter(e => {
-      const eDate = new Date((e.start.dateTime || e.start.date));
-      return eDate.getDate() === d && eDate.getMonth() === calCurrentDate.getMonth() && eDate.getFullYear() === calCurrentDate.getFullYear();
-    });
-    const chips = dayEvents.slice(0,3).map((e,i) => {
-      const colors = ['','green','red','orange'];
-      return `<div class="cal-event-chip ${colors[i%colors.length]}" title="${e.summary||'Event'}">${e.summary||'Event'}</div>`;
+  const first = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth(), 1);
+  const lastDay = new Date(calCurrentDate.getFullYear(), calCurrentDate.getMonth() + 1, 0).getDate();
+  const start = calMonday(first);
+  const weeks = Math.ceil(((first.getDay() + 6) % 7 + lastDay) / 7);
+  const today = new Date();
+  const names = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  let html = '<div class="cm-head">' + names.map(n => `<div>${n}</div>`).join('') + '</div><div class="cm-grid">';
+  for (let i = 0; i < weeks * 7; i++) {
+    const day = new Date(start); day.setDate(start.getDate() + i);
+    const y = day.getFullYear(), m = day.getMonth(), d = day.getDate();
+    const other = m !== calCurrentDate.getMonth();
+    const sel = calSelectedDay && calSelectedDay.d === d && calSelectedDay.m === m && calSelectedDay.y === y;
+    const evs = calEventsOn(day);
+    const shown = evs.slice(0, 3).map(ev => {
+      const idx = calEvents.indexOf(ev);
+      const title = calEsc(ev.summary || '(No title)');
+      if (ev.start.date) return `<div class="cm-ev allday" title="${title}" onclick="calOpenEvent(${idx},event)"><span class="tt">${title}</span></div>`;
+      return `<div class="cm-ev" title="${calHm(calEvStart(ev))} ${title}" onclick="calOpenEvent(${idx},event)"><span class="dot"></span><span class="tm">${calHm(calEvStart(ev))}</span><span class="tt">${title}</span></div>`;
     }).join('');
-    const more = dayEvents.length > 3 ? `<div style="font-size:10px;color:var(--ink3);">+${dayEvents.length-3} more</div>` : '';
-    const isSel = calSelectedDay && calSelectedDay.d===d && calSelectedDay.m===calCurrentDate.getMonth() && calSelectedDay.y===calCurrentDate.getFullYear();
-    html += `<div class="cal-day${isToday?' today':''}${isSel?' selected':''}" onclick="calSelectDay(${d},${calCurrentDate.getMonth()},${calCurrentDate.getFullYear()})"><div class="cal-day-num">${d}</div>${chips}${more}</div>`;
+    const more = evs.length > 3 ? `<div class="cm-more" onclick="calOpenWeekOf(${y},${m},${d},event)">+${evs.length - 3} more</div>` : '';
+    html += `<div class="cm-cell${other ? ' other' : ''}${calSameDay(day, today) ? ' today' : ''}${sel ? ' sel' : ''}" onclick="calSelectDay(${d},${m},${y})" ondblclick="calOpenWeekOf(${y},${m},${d},event)"><div class="cm-num">${d}</div>${shown}${more}</div>`;
   }
-  const totalCells = Math.ceil((startOffset + lastDay.getDate()) / 7) * 7;
-  const remaining = totalCells - startOffset - lastDay.getDate();
-  for (let d = 1; d <= remaining; d++) {
-    html += `<div class="cal-day other-month"><div class="cal-day-num">${d}</div></div>`;
-  }
-  grid.innerHTML = html;
+  const box = document.getElementById('cal-days'); box.className = 'cal-days cm-mode'; box.innerHTML = html + '</div>';
 }
 
 // ===== RENDER UPCOMING =====
@@ -3722,63 +3781,70 @@ function calSelectDay(d, m, y) {
 }
 
 function calRenderWeek() {
-  const d = new Date(calCurrentDate);
-  const day = d.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  const monday = new Date(d);
-  monday.setDate(d.getDate() + diff);
-  monday.setHours(0,0,0,0);
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
-
+  const HOUR = 48;
+  const monday = calMonday(calCurrentDate);
+  const days = Array.from({ length: 7 }, (_, i) => { const d = new Date(monday); d.setDate(monday.getDate() + i); return d; });
+  const sunday = days[6];
   document.getElementById('cal-month-title').textContent =
-    monday.toLocaleDateString('en-GB',{day:'numeric',month:'short'}) + ' – ' +
-    sunday.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+    monday.toLocaleDateString('en-GB', { day:'numeric', month:'short' }) + ' – ' +
+    sunday.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+  const today = new Date();
 
-  const today = new Date(); today.setHours(0,0,0,0);
-  const hours = Array.from({length:24},(_,i)=>i);
-  const days = Array.from({length:7},(_,i)=>{ const d2=new Date(monday); d2.setDate(monday.getDate()+i); return d2; });
-
-  // Build header row
-  let headerHtml = '<div class="cal-week-header-row"><div class="cal-week-corner"></div>';
-  days.forEach(d2 => {
-    const isToday = d2.getTime() === today.getTime();
-    const isSel = calSelectedDay && d2.getDate()===calSelectedDay.d && d2.getMonth()===calSelectedDay.m && d2.getFullYear()===calSelectedDay.y;
-    const dayName = d2.toLocaleDateString('en-GB',{weekday:'short'}).toUpperCase();
-    const dayNum = d2.getDate();
-    headerHtml += `<div class="cal-week-day-header${isToday?' today':''}${isSel?' selected':''}" onclick="calSelectDay(${d2.getDate()},${d2.getMonth()},${d2.getFullYear()})">
-      <div class="cal-week-day-name">${dayName}</div>
-      <div class="cal-week-day-num">${dayNum}</div>
-    </div>`;
+  // Header + all-day row (sticky)
+  let head = '<div class="cw-top"><div class="cw-head"><div></div>';
+  let allday = '<div class="cw-allday"><div class="lbl">all-day</div>';
+  days.forEach(d => {
+    const sel = calSelectedDay && calSameDay(d, new Date(calSelectedDay.y, calSelectedDay.m, calSelectedDay.d));
+    head += `<div class="cw-hd${calSameDay(d, today) ? ' today' : ''}${sel ? ' sel' : ''}" onclick="calSelectDay(${d.getDate()},${d.getMonth()},${d.getFullYear()})">
+      <div class="nm">${d.toLocaleDateString('en-GB', { weekday:'short' })}</div><div class="no">${d.getDate()}</div></div>`;
+    const ad = calEventsOn(d).filter(ev => ev.start.date);
+    allday += '<div class="cell">' + ad.map(ev => `<div class="cm-ev allday" title="${calEsc(ev.summary)}" onclick="calOpenEvent(${calEvents.indexOf(ev)},event)"><span class="tt">${calEsc(ev.summary || '(No title)')}</span></div>`).join('') + '</div>';
   });
-  headerHtml += '</div>';
+  head += '</div>' + allday + '</div></div>';
 
-  // Build time grid
-  let gridHtml = '<div class="cal-week-scroll"><div class="cal-week-grid">';
-  hours.forEach(h => {
-    const timeLabel = h === 0 ? '' : h < 12 ? h+' AM' : h === 12 ? '12 PM' : (h-12)+' PM';
-    gridHtml += `<div class="cal-week-time">${timeLabel}</div>`;
-    days.forEach(d2 => {
-      const isToday = d2.getTime() === today.getTime();
-      const cellEvents = calEvents.filter(e => {
-        if (!e.start.dateTime) return false;
-        const eStart = new Date(e.start.dateTime);
-        return eStart.getDate()===d2.getDate() && eStart.getMonth()===d2.getMonth() &&
-               eStart.getFullYear()===d2.getFullYear() && eStart.getHours()===h;
-      });
-      const evHtml = cellEvents.map(e => {
-        const eStart = new Date(e.start.dateTime);
-        const eEnd = new Date(e.end.dateTime);
-        const dur = Math.max(1, Math.round((eEnd - eStart) / 60000));
-        const height = Math.max(20, Math.round(dur * 48/60));
-        return `<div class="cal-week-event" style="height:${height}px;" title="${e.summary||''}">${e.summary||'Event'}</div>`;
-      }).join('');
-      gridHtml += `<div class="cal-week-cell${isToday?' today-col':''}" onclick="calSelectDay(${d2.getDate()},${d2.getMonth()},${d2.getFullYear()})">${evHtml}</div>`;
+  // Time grid
+  let grid = '<div class="cw-grid"><div class="cw-gutter">';
+  for (let h = 0; h < 24; h++) grid += `<div>${h === 0 ? '' : String(h).padStart(2, '0') + ':00'}</div>`;
+  grid += '</div>';
+  days.forEach(d => {
+    const ds = new Date(d); ds.setHours(0,0,0,0);
+    const de = new Date(ds); de.setDate(ds.getDate() + 1);
+    const evs = calEventsOn(d).filter(ev => ev.start.dateTime)
+      .map(ev => {
+        const s = Math.max(calEvStart(ev), ds), e = Math.min(calEvEnd(ev), de);
+        return { ev, s: (s - ds) / 60000, e: Math.max((e - ds) / 60000, (s - ds) / 60000 + 20) };
+      }).sort((a,b) => a.s - b.s || b.e - a.e);
+    // Overlap layout: lanes within clusters of overlapping events
+    let cluster = [], clusterEnd = -1;
+    const flush = () => { const lanes = Math.max(...cluster.map(x => x.lane)) + 1; cluster.forEach(x => x.lanes = lanes); cluster = []; };
+    const laneEnds = [];
+    evs.forEach(x => {
+      if (x.s >= clusterEnd && cluster.length) { flush(); laneEnds.length = 0; }
+      let lane = laneEnds.findIndex(end => end <= x.s);
+      if (lane < 0) { lane = laneEnds.length; laneEnds.push(x.e); } else laneEnds[lane] = x.e;
+      x.lane = lane; cluster.push(x); clusterEnd = Math.max(clusterEnd, x.e);
     });
+    if (cluster.length) flush();
+    const blocks = evs.map(x => {
+      const top = x.s / 60 * HOUR, height = Math.max((x.e - x.s) / 60 * HOUR - 2, 18);
+      const w = 100 / x.lanes, left = x.lane * w;
+      const st = calEvStart(x.ev), en = calEvEnd(x.ev);
+      return `<div class="cw-ev" style="top:${top}px;height:${height}px;left:calc(${left}% + 2px);width:calc(${w}% - 4px);" title="${calEsc(x.ev.summary)} (${calHm(st)} to ${calHm(en)})" onclick="calOpenEvent(${calEvents.indexOf(x.ev)},event)">
+        <b>${calEsc(x.ev.summary || '(No title)')}</b><span>${calHm(st)} to ${calHm(en)}</span></div>`;
+    }).join('');
+    const isToday = calSameDay(d, today);
+    const now = isToday ? `<div class="cw-now" style="top:${(today.getHours() * 60 + today.getMinutes()) / 60 * HOUR}px"></div>` : '';
+    grid += `<div class="cw-col${isToday ? ' today' : ''}" style="height:${24 * HOUR}px" onclick="calSelectDay(${d.getDate()},${d.getMonth()},${d.getFullYear()})">${blocks}${now}</div>`;
   });
-  gridHtml += '</div></div>';
+  grid += '</div>';
 
-  document.getElementById('cal-days').innerHTML = '<div class="cal-week-wrapper">' + headerHtml + gridHtml + '</div>';
+  const box = document.getElementById('cal-days'); box.className = 'cal-days cw-mode'; box.innerHTML = head + grid;
+  // Scroll to working hours (or one hour before now)
+  const body = document.querySelector('#calendar .cal-body');
+  if (body) {
+    const startHour = days.some(d => calSameDay(d, today)) ? Math.max(0, Math.min(today.getHours() - 1, 15)) : 7;
+    body.scrollTop = startHour * HOUR;
+  }
 }
 
 // ===== ADD EVENT =====
