@@ -3003,7 +3003,15 @@ function rtExportHtml(html) {
   box.innerHTML = html;
   box.querySelectorAll('ul.rt-check > li').forEach(li => li.insertBefore(document.createTextNode(li.classList.contains('done') ? '☑ ' : '☐ '), li.firstChild));
   box.querySelectorAll('ul.rt-check').forEach(u => u.setAttribute('style', 'list-style:none;padding-left:0;margin:0 0 4px'));
-  box.querySelectorAll('p').forEach(p => p.setAttribute('style', 'margin:0'));
+  // Mail clients disagree on paragraph spacing: Outlook desktop honours margin:0 on <p>, but web mail
+  // (Outlook on the web, TUM webmail) strips it and adds a blank line under every paragraph.
+  // Plain <div> lines have no spacing anywhere, which is also what Outlook and Gmail produce themselves.
+  box.querySelectorAll('li > p').forEach(p => p.replaceWith(...p.childNodes));
+  box.querySelectorAll('p').forEach(p => { const d = document.createElement('div'); d.append(...p.childNodes); if (!d.textContent.trim() && !d.querySelector('br,img')) d.innerHTML = '<br>'; p.replaceWith(d); });
+  box.querySelectorAll('ul:not(.rt-check), ol').forEach(l => l.setAttribute('style', 'margin-top:0;margin-bottom:0'));
+  // keep runs of spaces without relying on white-space:pre-wrap, which some clients turn into extra lines
+  const tw = document.createTreeWalker(box, NodeFilter.SHOW_TEXT); const tn = []; while (tw.nextNode()) tn.push(tw.currentNode);
+  tn.forEach(t => { if (/\n/.test(t.nodeValue) && !t.nodeValue.trim()) t.nodeValue = ''; else t.nodeValue = t.nodeValue.replace(/\n/g, ' ').replace(/ {2}/g, ' \u00a0'); });
   box.querySelectorAll('h1').forEach(h => h.setAttribute('style', 'font-size:18pt;margin:10px 0 4px'));
   box.querySelectorAll('h2').forEach(h => h.setAttribute('style', 'font-size:14pt;margin:8px 0 3px'));
   box.querySelectorAll('h3').forEach(h => h.setAttribute('style', 'font-size:12pt;margin:6px 0 2px'));
@@ -3012,12 +3020,16 @@ function rtExportHtml(html) {
   box.querySelectorAll('table').forEach(t => t.setAttribute('style', 'border-collapse:collapse'));
   box.querySelectorAll('[class]').forEach(n => n.removeAttribute('class'));
   box.querySelectorAll('a').forEach(a => { a.removeAttribute('title'); a.removeAttribute('target'); a.removeAttribute('rel'); });
-  return `<div style="font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#111111;white-space:pre-wrap">${box.innerHTML}</div>`;
+  return `<div style="font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#111111">${box.innerHTML}</div>`;
 }
 function rtPlainText(html) {
   const tmp = document.createElement('div');
   tmp.style.cssText = 'position:fixed;left:-10000px;top:0;width:800px;white-space:pre-wrap;';
   tmp.innerHTML = html;
+  // innerText drops list markers, so write them in for plain-text pastes
+  tmp.querySelectorAll('ul > li').forEach(li => li.insertBefore(document.createTextNode(li.parentNode.classList.contains('rt-check') ? (li.classList.contains('done') ? '☑ ' : '☐ ') : '• '), li.firstChild));
+  tmp.querySelectorAll('ol').forEach(ol => [...ol.children].forEach((li, i) => li.insertBefore(document.createTextNode((i + 1) + '. '), li.firstChild)));
+  tmp.querySelectorAll('ul, ol').forEach(l => { l.style.listStyle = 'none'; l.style.paddingLeft = '0'; });
   document.body.appendChild(tmp);
   const t = tmp.innerText;
   tmp.remove();
