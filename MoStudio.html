@@ -1758,7 +1758,7 @@
                 <button type="button" class="tk-opt" onmousedown="event.preventDefault()" id="opt-focus-todo" onclick="toggleDraft('todo','focus')" title="Show in Today">☆ Today</button>
                 <button type="button" class="tk-opt" onmousedown="event.preventDefault()" onclick="setDraftDue('todo',0)">Due today</button>
                 <button type="button" class="tk-opt" onmousedown="event.preventDefault()" onclick="setDraftDue('todo',1)">Tomorrow</button>
-                <label class="tk-opt tk-opt-date" title="Pick a due date">📅 <input type="date" id="opt-due-todo" onchange="setDraftDueValue('todo',this.value)"></label>
+                <label class="tk-opt tk-opt-date" title="Pick a due date">📅 <input type="date" id="opt-due-todo" onchange="setDraftDueValue('todo',this.value)" onblur="setDraftDueValue('todo',this.value,true)" onkeydown="if(event.key==='Enter'){event.preventDefault();setDraftDueValue('todo',this.value,true);focusAdd('todo');}"></label>
                 <input class="tk-opt-tag" id="opt-tag-todo" list="tk-tag-list" placeholder="# tag" onchange="setDraftTag('todo',this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();setDraftTag('todo',this.value);addCheckTask('todo');}">
                 <span class="tk-opt-hint">Enter to add</span>
               </div>
@@ -1779,7 +1779,7 @@
                 <button type="button" class="tk-opt" onmousedown="event.preventDefault()" id="opt-focus-inprogress" onclick="toggleDraft('inprogress','focus')" title="Show in Today">☆ Today</button>
                 <button type="button" class="tk-opt" onmousedown="event.preventDefault()" onclick="setDraftDue('inprogress',0)">Due today</button>
                 <button type="button" class="tk-opt" onmousedown="event.preventDefault()" onclick="setDraftDue('inprogress',1)">Tomorrow</button>
-                <label class="tk-opt tk-opt-date" title="Pick a due date">📅 <input type="date" id="opt-due-inprogress" onchange="setDraftDueValue('inprogress',this.value)"></label>
+                <label class="tk-opt tk-opt-date" title="Pick a due date">📅 <input type="date" id="opt-due-inprogress" onchange="setDraftDueValue('inprogress',this.value)" onblur="setDraftDueValue('inprogress',this.value,true)" onkeydown="if(event.key==='Enter'){event.preventDefault();setDraftDueValue('inprogress',this.value,true);focusAdd('inprogress');}"></label>
                 <input class="tk-opt-tag" id="opt-tag-inprogress" list="tk-tag-list" placeholder="# tag" onchange="setDraftTag('inprogress',this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();setDraftTag('inprogress',this.value);addCheckTask('inprogress');}">
                 <span class="tk-opt-hint">Enter to add</span>
               </div>
@@ -3384,7 +3384,13 @@ function setDraftDue(col, offset) {
   taskDrafts[col].due = taskDrafts[col].due === v ? '' : v;
   renderDraftOpts(col); focusAdd(col);
 }
-function setDraftDueValue(col, v) { taskDrafts[col].due = v || ''; renderDraftOpts(col); focusAdd(col); }
+// A date box fires "change" after every digit of the year (2 -> year 0002), so typed dates are only
+// accepted once the year is complete, and nothing re-renders or moves the cursor until you leave the box.
+function dateComplete(v) { return !v || /^\d{4}-\d{2}-\d{2}$/.test(v) && +v.slice(0, 4) >= 1900; }
+function setDraftDueValue(col, v, done) {
+  if (dateComplete(v)) { taskDrafts[col].due = v || ''; const du = document.getElementById('opt-due-' + col); if (du) du.parentElement.classList.toggle('on', !!v); const row = document.getElementById('addrow-' + col); if (row && v) row.classList.add('has-opts'); }
+  if (done) renderDraftOpts(col);
+}
 function setDraftTag(col, v) { taskDrafts[col].tag = normTag(v); renderDraftOpts(col); }
 function focusAdd(col) { const i = document.getElementById('add-' + col); if (i) i.focus(); }
 
@@ -3512,7 +3518,7 @@ function openTaskEditor(id) {
   const ed = document.createElement('div');
   ed.className = 'tk-editor';
   ed.innerHTML = `
-    <label>Due date<input type="date" value="${f.task.due || ''}" onchange="setTaskField(${id},'due',this.value)"></label>
+    <label>Due date<input type="date" value="${f.task.due || ''}" onchange="setTaskDue(${id},this.value)" onblur="setTaskDue(${id},this.value,true)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"></label>
     <label>Priority<select onchange="setTaskField(${id},'priority',this.value)">
       <option value="normal"${f.task.priority !== 'high' ? ' selected' : ''}>Normal</option>
       <option value="high"${f.task.priority === 'high' ? ' selected' : ''}>High</option></select></label>
@@ -3522,6 +3528,12 @@ function openTaskEditor(id) {
   item.querySelector('.tk-body').appendChild(ed);
 }
 
+function setTaskDue(id, v, done) {
+  const f = findTask(id); if (!f) return;
+  if (dateComplete(v) && (f.task.due || '') !== (v || '')) { f.task.due = v || ''; saveTasks(); }
+  // re-draw once you leave the box, unless you moved to another field of the same task editor
+  if (done) setTimeout(() => { const a = document.activeElement; if (!(a && a.closest && a.closest('.tk-editor'))) renderAllTaskCols(); }, 0);
+}
 function setTaskField(id, field, value) {
   const f = findTask(id);
   if (!f) return;
@@ -3753,7 +3765,8 @@ function renderDeadlines() {
         onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"
       >${d.assigned||''}</span>
       <input class="dl-date-input" type="date" value="${d.date}"
-        onchange="updateDeadline(${d.id},'date',this.value)"
+        onchange="setDeadlineDate(${d.id},this.value)" onblur="setDeadlineDate(${d.id},this.value,true)"
+        onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"
       >
       <span style="display:flex;align-items:center;gap:6px;">
         <span class="dl-status ${s.cls}">${s.label}</span>
@@ -3764,6 +3777,11 @@ function renderDeadlines() {
   }).join('');
 }
 
+function setDeadlineDate(id, v, done) {
+  const d = deadlines.find(x => x.id === id); if (!d) return;
+  if (v && dateComplete(v) && d.date !== v) { d.date = v; saveDeadlines(); }
+  if (done) { renderDeadlines(); renderDashboard(); }
+}
 function updateDeadline(id, field, value) {
   const d = deadlines.find(x => x.id === id);
   if (!d || d[field] === value) return;
